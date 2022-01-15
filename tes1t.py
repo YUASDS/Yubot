@@ -16,36 +16,36 @@ def very_simple_example():
 very_simple_example()
 
 
-async def very_simple_example():
-    ero_url = "https://api.ixiaowai.cn/api/api.php?return=json"
-    async with aiohttp.ClientSession() as session:
-        async with session.get(ero_url) as r:
-            ret = await r.json()
-        async with session.get(ret["imgurl"]) as r:
-            pic = await r.read()
+# async def very_simple_example():
+#     ero_url = "https://api.ixiaowai.cn/api/api.php?return=json"
+#     async with aiohttp.ClientSession() as session:
+#         async with session.get(ero_url) as r:
+#             ret = await r.json()
+#         async with session.get(ret["imgurl"]) as r:
+#             pic = await r.read()
 
-    # 将二进制数据储存在这里面
-    Path("bugmaker\\eropic.jpg").read_bytes(pic)
-
-
-asyncio.run(very_simple_example())
+#     # 将二进制数据储存在这里面
+#     Path("bugmaker\\eropic.jpg").read_bytes(pic)
 
 
-async def func1(arg1, arg2):
-    return arg1 + arg2
+# asyncio.run(very_simple_example())
 
 
-async def func2():
-    func1_return = await func1(1, 2)
-    return func1_return
+# async def func1(arg1, arg2):
+#     return arg1 + arg2
 
 
-class Example:
-    async def method1(self, arg1):
-        return self.var1 + arg1 + 1
-
-    async def method2(self):
-        return await self.method1(2)
+# async def func2():
+#     func1_return = await func1(1, 2)
+#     return func1_return
 
 
-print("中文")
+# class Example:
+#     async def method1(self, arg1):
+#         return self.var1 + arg1 + 1
+
+#     async def method2(self):
+#         return await self.method1(2)
+
+
+# print("中文")

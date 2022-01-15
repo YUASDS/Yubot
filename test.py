@@ -11,7 +11,7 @@ from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.model import Friend, Group, MiraiSession
 # from graia.ariadne.event.message import GroupMessage
 from graia.ariadne.event.mirai import NudgeEvent
-
+from txt import opens
 ...
 loop = asyncio.new_event_loop()
 
@@ -37,16 +37,17 @@ async def getup(app: Ariadne, event: NudgeEvent):
         else:
             await app.sendFriendMessage(
                 event.friend_id,
-                MessageChain.create("别戳我，好痒", event.origin_subject_info,
+                MessageChain.create("别戳我，好痒", 
                                     Image(path="D:\\img\\preview.jpg")))
 
 
-'''
-@bcc.receiver(GroupMessage)
-async def setu(app: Ariadne, group: Group, message: MessageChain):
-    await app.sendGroupMessage(
-        group, MessageChain.create(f"不要说{message.asDisplay()}，来点涩图"))
-'''
+
+@bcc.receiver(FriendMessage)
+async def setu(friend: Friend, Message: MessageChain):
+    s=await opens(Message.asDisplay())
+    await app.sendFriendMessage(
+        friend, MessageChain.create(f"不要说{Message.asDisplay()}，{s}"))
+
 
 
 @bcc.receiver(GroupMessage,
@@ -63,5 +64,11 @@ async def test(app: Ariadne, friend: Friend, Message: MessageChain):
         friend, Message.create(Image(path="D:\\img\\preview.jpg")))
 
 
+@bcc.receiver(FriendMessage,
+              dispatchers=[Twilight(Sparkle([FullMatch("涩图来")]))])
+async def test(app: Ariadne, friend: Friend, Message: MessageChain):
+    await app.sendFriendMessage(
+        friend, Message.create(Image(path="D:\\img\\preview.jpg")))
 # app.launch_blocking()
+
 loop.run_until_complete(app.lifecycle())
