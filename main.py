@@ -1,4 +1,5 @@
 import asyncio
+from cgitb import text
 from graia.ariadne.message.element import Image
 
 from graia.broadcast import Broadcast
@@ -11,7 +12,7 @@ from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.model import Friend, Group, MiraiSession
 # from graia.ariadne.event.message import GroupMessage
 from graia.ariadne.event.mirai import NudgeEvent
-from txt import opens
+from yinlish import opens,chs2yin
 ...
 loop = asyncio.new_event_loop()
 
@@ -70,5 +71,16 @@ async def test(app: Ariadne, friend: Friend, Message: MessageChain):
     await app.sendFriendMessage(
         friend, Message.create(Image(path="D:\\img\\preview.jpg")))
 # app.launch_blocking()
+
+
+@bcc.receiver(GroupMessage)
+async def setu(app: Ariadne, group: Group, message: MessageChain,event: GroupMessage):
+    print("触发")
+    if event.sender.id==1787569211:
+        print("触发2")
+        tx=await chs2yin(message.asDisplay())
+        await app.sendGroupMessage(group, MessageChain.create(
+            f"{tx}，hso"
+        ))
 
 loop.run_until_complete(app.lifecycle())
