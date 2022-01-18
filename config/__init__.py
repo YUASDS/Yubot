@@ -30,7 +30,10 @@ else:
     with CONFIG_PATH.joinpath("config.yaml").open("r", encoding="utf-8") as f:
         file_data = f.read()
     yaml_data = yaml.load(file_data, Loader=yaml.FullLoader)
-
+    
+    with CONFIG_PATH.joinpath("group_key.yaml").open("r", encoding="utf-8") as f:
+        key_data = f.read()
+    group_key = yaml.load(key_data, Loader=yaml.FullLoader)
 
 if CONFIG_PATH.joinpath("groupdata.json").exists():
     with CONFIG_PATH.joinpath("groupdata.json").open("r", encoding="utf-8") as f:
