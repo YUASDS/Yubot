@@ -11,6 +11,9 @@ requests = "^2.27.1"
 aiohttp = {extras = ["speedups"], version = "^3.8.1"}
 Pillow = "^9.0.0"
 jieba = "^0.42.1"
+graia-saya = "^0.0.13"
+PyYAML = "^6.0"
+graia-scheduler = "^0.0.6"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

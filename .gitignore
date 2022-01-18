@@ -4,3 +4,8 @@ img
 tests
 setting.yml
 study
+logs
+config.yaml
+userlist.json
+grouplist.json
+groupdata.json

@@ -29,7 +29,6 @@ async def chs2yin(s, 淫乱度=0.5):
 if __name__ == '__main__':
     print(chs2yin('不行，那里不行。'))
     
-    
 async def opens (contain):# a test for read and write
     with open ("new.txt",mode="a",encoding="utf-8") as new:
         new.write(contain)
