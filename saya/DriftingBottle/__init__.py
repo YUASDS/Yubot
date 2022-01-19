@@ -29,8 +29,8 @@ from database.db import reduce_gold
 from util.text2image import create_image
 from util.control import Permission, Interval
 from util.sendMessage import safeSendGroupMessage
-from util.TextModeration import text_moderation_async
-from util.ImageModeration import image_moderation_async
+# from util.TextModeration import text_moderation_async
+# from util.ImageModeration import image_moderation_async
 from config import yaml_data, group_data, user_black_list, save_config, COIN_NAME
 
 from .db import (
@@ -59,7 +59,7 @@ IMAGE_PATH.mkdir(exist_ok=True)
         inline_dispatchers=[
             Twilight(
                 {
-                    "prefix": RegexMatch(r"^(扔|丢)(漂流瓶|瓶子)"),
+                    "prefix": RegexMatch(r"^(扔|丢|写)(漂流瓶|瓶子)"),
                     "enter": FullMatch("\n", optional=True),
                     "arg_pic": ArgumentMatch("-P", action="store_true", optional=True),
                     "anythings1": WildcardMatch(optional=True),
@@ -115,9 +115,10 @@ async def throw_bottle_handler(
                 for i in ["magnet:", "http"]:
                     if i in text:
                         return await safeSendGroupMessage(
-                            group, MessageChain.create("您？"), quote=source
+                            group, MessageChain.create("链接和种子是不被允许的哦~"), quote=source
                         )
-                moderation = await text_moderation_async(text)
+                # moderation = await text_moderation_async(text)
+                moderation={"status": False, "message": None}
                 if moderation["status"] == "error":
                     return await safeSendGroupMessage(
                         group,
@@ -171,7 +172,8 @@ async def throw_bottle_handler(
             )
 
     if image_url:
-        moderation = await image_moderation_async(image_url)
+        # moderation = await image_moderation_async(image_url)
+        moderation={"status": False, "message": None}
         if not moderation["status"]:
             return await safeSendGroupMessage(
                 group,

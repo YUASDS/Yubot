@@ -36,7 +36,7 @@ def _词转换(x, y, 淫乱度):
         return f"……{x}"
 
 
-def chs2yin(s, 淫乱度=0.5):
+def chs2yin(s, 淫乱度=0.6):
     return "".join([_词转换(x, y, 淫乱度) for x, y in pseg.cut(s)])
 
 
