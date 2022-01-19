@@ -14,6 +14,9 @@ jieba = "^0.42.1"
 graia-saya = "^0.0.13"
 PyYAML = "^6.0"
 graia-scheduler = "^0.0.6"
+httpx = "^0.21.3"
+peewee = "^3.14.8"
+prettytable = "^3.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
