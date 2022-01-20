@@ -250,7 +250,7 @@ async def get_ranking():
     answer_rank = answer_rank.get_string()
 
     return str(
-        f"ABot 排行榜：\n当前共服务了 {user_num} 位用户\n注意：排行榜每十分钟更新一次\n"
+        f"YuBot 排行榜：\n当前共服务了 {user_num} 位用户\n注意：排行榜每十分钟更新一次\n"
         + "================================================================================================"
         + f"\n{COIN_NAME}排行榜\n{gold_rank}\n发言排行榜\n{talk_rank}\n答题排行榜\n{answer_rank}\n"
     )

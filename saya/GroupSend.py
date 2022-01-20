@@ -44,8 +44,9 @@ async def main(group: Group, anythings: WildcardMatch, source: Source,keys:Regex
         saying = anythings.result.asDisplay()
         if len(saying) < 200:
             await safeSendGroupMessage(
-                send_group, MessageChain.create("收到信息:\n",saying), quote=source.id
-            )
+                group, MessageChain.create("已成功发送信息:\n",saying))
+            await safeSendGroupMessage(
+                send_group, MessageChain.create("收到信息:\n",saying))
         else:
             await safeSendGroupMessage(group, MessageChain.create("文字过长"))
     else:
