@@ -58,16 +58,18 @@ async def updateDict():
                    decorators=[Permission.require()])
 )
 async def main(group: Group, member: Member, message: MessageChain):
-
-    if (
-        yaml_data["Saya"]["ChatMS"]["Disabled"]
-        and group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]
-    ):
-        return
-    if "DisabledFunc" in group_data[str(group.id)]:
-        if "ChatMS" in group_data[str(group.id)]["DisabledFunc"]:
+    try:
+        if (
+            yaml_data["Saya"]["ChatMS"]["Disabled"]
+            and group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]
+        ):
             return
-
+        if "DisabledFunc" in group_data[str(group.id)]:
+            if "ChatMS" in group_data[str(group.id)]["DisabledFunc"]:
+                return
+    except:
+        logger.info("该群不可用")
+        return
     if message.has(At):
         if message.getFirst(At).target == yaml_data["Basic"]["MAH"]["BotQQ"]:
             try:

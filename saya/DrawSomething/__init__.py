@@ -3,6 +3,7 @@ import time
 import secrets
 import asyncio
 
+from loguru import logger
 from pathlib import Path
 from graia.saya import Saya, Channel
 from graia.ariadne.app import Ariadne
@@ -41,14 +42,17 @@ GROUP_GAME_PROCESS = {}
     )
 )
 async def main(app: Ariadne, group: Group, member: Member, source: Source):
-
-    # 判断插件是否处于禁用状态
-    if (
-        yaml_data["Saya"]["DrawSomething"]["Disabled"]
-        and group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]
-    ):
-        return
-    elif "DrawSomething" in group_data[str(group.id)]["DisabledFunc"]:
+    try:
+        # 判断插件是否处于禁用状态
+        if (
+            yaml_data["Saya"]["DrawSomething"]["Disabled"]
+            and group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]
+        ):
+            return
+        elif "DrawSomething" in group_data[str(group.id)]["DisabledFunc"]:
+            return
+    except:
+        logger.info("该群不可用")
         return
 
     # 判断用户是否正在游戏中

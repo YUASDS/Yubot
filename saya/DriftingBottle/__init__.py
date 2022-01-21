@@ -2,6 +2,7 @@ import re
 import time
 import httpx
 import asyncio
+from loguru import logger
 import numpy as np
 
 from io import BytesIO
@@ -76,15 +77,17 @@ async def throw_bottle_handler(
     arg_pic: ArgumentMatch,
     anythings1: WildcardMatch,
 ):
-
-    if (
-        yaml_data["Saya"]["DriftingBottle"]["Disabled"]
-        and group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]
-    ):
+    try:
+        if (
+            yaml_data["Saya"]["DriftingBottle"]["Disabled"]
+            and group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]
+        ):
+            return
+        elif "DriftingBottle" in group_data[str(group.id)]["DisabledFunc"]:
+            return
+    except:
+        logger.info("本群不可用")
         return
-    elif "DriftingBottle" in group_data[str(group.id)]["DisabledFunc"]:
-        return
-
     @Waiter.create_using_function(
         listening_events=[GroupMessage], using_decorators=[Permission.require()]
     )
@@ -234,13 +237,15 @@ async def throw_bottle_handler(
     )
 )
 async def pick_bottle_handler(group: Group):
-
-    if (
-        yaml_data["Saya"]["DriftingBottle"]["Disabled"]
-        and group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]
-    ):
-        return
-    elif "DriftingBottle" in group_data[str(group.id)]["DisabledFunc"]:
+    try:
+        if (
+            yaml_data["Saya"]["DriftingBottle"]["Disabled"]
+            and group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]
+        ):
+            return
+        elif "DriftingBottle" in group_data[str(group.id)]["DisabledFunc"]:
+            return
+    except:
         return
 
     bottle = get_bottle()
@@ -294,13 +299,15 @@ async def clear_bottle_handler(group: Group):
 async def drifting_bottle_handler(
     group: Group, member: Member, bottleid: WildcardMatch
 ):
-
-    if (
-        yaml_data["Saya"]["DriftingBottle"]["Disabled"]
-        and group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]
-    ):
-        return
-    elif "DriftingBottle" in group_data[str(group.id)]["DisabledFunc"]:
+    try:
+        if (
+            yaml_data["Saya"]["DriftingBottle"]["Disabled"]
+            and group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]
+        ):
+            return
+        elif "DriftingBottle" in group_data[str(group.id)]["DisabledFunc"]:
+            return
+    except:
         return
 
     if bottleid.matched and member.id == yaml_data["Basic"]["Permission"]["Master"]:
@@ -386,13 +393,15 @@ def qrdecode(img):
 async def bottle_score_handler(
     group: Group, member: Member, message: MessageChain, anythings: WildcardMatch
 ):
-
-    if (
-        yaml_data["Saya"]["DriftingBottle"]["Disabled"]
-        and group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]
-    ):
-        return
-    elif "DriftingBottle" in group_data[str(group.id)]["DisabledFunc"]:
+    try:
+        if (
+            yaml_data["Saya"]["DriftingBottle"]["Disabled"]
+            and group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]
+        ):
+            return
+        elif "DriftingBottle" in group_data[str(group.id)]["DisabledFunc"]:
+            return
+    except:
         return
 
     if anythings.matched:
