@@ -37,7 +37,8 @@ async def main(group: Group, anythings: WildcardMatch, source: Source,keys:Regex
         if keys in group_key:
             send_group=group_key[keys]
         else:
-            await safeSendGroupMessage(group, MessageChain.create("密钥错误"))
+            await safeSendGroupMessage(group, MessageChain.create("密钥错误或不存在"))
+            return
         
 
     if anythings.matched:
