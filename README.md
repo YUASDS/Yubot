@@ -3,6 +3,8 @@
 # Yubot bot for python
 </div>
 
+ - 基于[graia](https://github.com/GraiaProject/Ariadne)与[mirai-api-http](https://github.com/project-mirai/mirai-api-http)的缝合&跑团/娱乐骰娘
+
 Yubot的功能
 > -来源于[Abot](https://github.com/djkcyl/ABot-Graia)的涩涩词库
 
