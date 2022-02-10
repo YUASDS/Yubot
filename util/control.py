@@ -39,7 +39,7 @@ async def work_scheduled(app: Ariadne):
     )
 
 
-@channel.use(SchedulerSchema(crontabify("0 0 * * *")))
+@channel.use(SchedulerSchema(crontabify("4 0 * * *")))
 async def rest_scheduled(app: Ariadne):
     Rest.set_sleep(1)
     await app.sendFriendMessage(
