@@ -18,3 +18,5 @@ luckData.db
 start.bat
 bugmaker
 cache
+restrict.py
+saya/StorySend/scene.json
