@@ -18,12 +18,12 @@ channel = Channel.current()
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[
-            Twilight({"keys": RegexMatch("【[\s\S]+】"), "anythings": WildcardMatch()})
+            Twilight({"keys": RegexMatch("【[\s\S]+?】"), "anythings": WildcardMatch()})
         ],
         decorators=[Permission.require(), Rest.rest_control(), Interval.require()],
     )
 )
-async def main(group: Group, anythings: WildcardMatch, source: Source,keys:RegexMatch):
+async def main(group: Group, anythings: WildcardMatch,keys:RegexMatch):
 
     if (
         yaml_data["Saya"]["GroupSend"]["Disabled"]
