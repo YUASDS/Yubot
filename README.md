@@ -18,7 +18,9 @@
 
 > -来源于[Abot](https://github.com/djkcyl/ABot-Graia)的`背单词`
 
-> -来源于[Abot](https://github.com/djkcyl/ABot-Graia)的`淫语翻译`
+> -来源于[Abot](https://github.com/djkcyl/ABot-Graia)的`淫语翻译（改）`
+
+> -来源于[Abot](https://github.com/djkcyl/ABot-Graia)的`漂流瓶（改）`
 
 > -娱乐功能——`抽乌帕`
 
@@ -26,4 +28,20 @@
 
 ## TODO
 
-> I don't know
+>- `[ ] 基于AI的情节续写`
+
+>- `[ ] 魔都模组检索以及下载`
+
+>- `[ ] 100dice模组检索以及下载`
+
+>- `[ ] dicecho模组检索及下载连接获取`
+
+>- `[ ] 根据模组片段检索模组出处（可能（无限咕咕咕））`
+
+>- `[ ] 随机模组推荐`
+
+>- `[ ] 角色立绘随机生成`
+
+>- `[ ] 纯美苹果园-跑团教程`
+
+>- `[ ] 模组推荐墙`
