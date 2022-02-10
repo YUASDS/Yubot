@@ -1,4 +1,5 @@
 import random
+import re
 
 import jieba
 import jieba.posseg as pseg
@@ -39,12 +40,11 @@ def _词转换(x, y, 淫乱度):
 def chs2yin(s, 淫乱度=0.6):
     return "".join([_词转换(x, y, 淫乱度) for x, y in pseg.cut(s)])
 
-
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[
-            Twilight({"head": FullMatch("淫语"), "anythings": WildcardMatch()})
+            Twilight({"head": FullMatch("淫语"), "anythings": WildcardMatch(flags=re.DOTALL)})
         ],
         decorators=[Permission.require(), Rest.rest_control(), Interval.require()],
     )
