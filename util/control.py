@@ -20,7 +20,8 @@ from graia.scheduler.saya.schema import SchedulerSchema
 from graia.ariadne.message.element import Plain, Source
 from graia.ariadne.model import Friend, Member, MemberPerm
 
-from config import user_black_list, yaml_data
+from config import user_black_list, yaml_data,group_data
+
 
 from .sendMessage import safeSendGroupMessage
 
@@ -46,6 +47,7 @@ async def rest_scheduled(app: Ariadne):
         yaml_data["Basic"]["Permission"]["Master"],
         MessageChain.create([Plain("已进入休息时间")]),
     )
+
 
 
 class Rest:
@@ -247,3 +249,17 @@ class Interval:
             if member not in cls.sent_alert:
                 cls.sent_alert.add(member)
             raise ExecutionStop()
+
+
+def restrict(func,group):
+    try:
+        if (
+            yaml_data["Saya"][func]["Disabled"]
+            and group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]
+        ):
+            return 0
+        elif func in group_data[str(group.id)]["DisabledFunc"]:
+            return 0
+        return 1
+    except:
+        return 1
