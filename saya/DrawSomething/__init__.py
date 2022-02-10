@@ -2,6 +2,8 @@ import json
 import time
 import secrets
 import asyncio
+import os
+from loguru import logger
 
 from loguru import logger
 from pathlib import Path
@@ -17,9 +19,9 @@ from graia.ariadne.event.lifecycle import ApplicationShutdowned
 from graia.ariadne.event.message import GroupMessage, FriendMessage
 from graia.ariadne.message.parser.twilight import Twilight, FullMatch, WildcardMatch
 
-from util.control import Permission, Interval
+from util.control import Permission, Interval,restrict
 from util.sendMessage import safeSendGroupMessage
-from config import yaml_data, group_data, COIN_NAME
+from config import yaml_data, COIN_NAME
 from database.db import add_answer, reduce_gold, add_gold
 
 
@@ -42,17 +44,9 @@ GROUP_GAME_PROCESS = {}
     )
 )
 async def main(app: Ariadne, group: Group, member: Member, source: Source):
-    try:
-        # 判断插件是否处于禁用状态
-        if (
-            yaml_data["Saya"]["DrawSomething"]["Disabled"]
-            and group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]
-        ):
-            return
-        elif "DrawSomething" in group_data[str(group.id)]["DisabledFunc"]:
-            return
-    except:
-        logger.info("该群不可用")
+    func=os.path.dirname(__file__).split("\\")[-1]
+    if not restrict(func=func,group=group):
+        logger.info(f"{func}在{group.id}群不可用")
         return
 
     # 判断用户是否正在游戏中

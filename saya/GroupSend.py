@@ -1,53 +1,59 @@
+import os
+from loguru import logger
+
 from graia.saya import Saya, Channel
 from graia.ariadne.model import Group
-from graia.ariadne.message.element import Source
 from graia.ariadne.event.message import GroupMessage
 from graia.ariadne.message.chain import MessageChain
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import Twilight, RegexMatch, WildcardMatch
 
-
-from config import yaml_data,group_key
+from config import  group_key
 from util.sendMessage import safeSendGroupMessage
-from util.control import Permission, Interval, Rest
+from util.control import Permission, Interval, Rest,restrict
 
 saya = Saya.current()
 channel = Channel.current()
+
 
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[
-            Twilight({"keys": RegexMatch("【[\s\S]+?】"), "anythings": WildcardMatch()})
+            Twilight({
+                "keys": RegexMatch("【[\s\S]+?】"),
+                "anythings": WildcardMatch()
+            })
         ],
-        decorators=[Permission.require(), Rest.rest_control(), Interval.require()],
-    )
-)
-async def main(group: Group, anythings: WildcardMatch,keys:RegexMatch):
+        decorators=[
+            Permission.require(),
+            Rest.rest_control(),
+            Interval.require()
+        ],
+    ))
+async def main(group: Group, anythings: WildcardMatch, keys: RegexMatch):
 
-    if (
-        yaml_data["Saya"]["GroupSend"]["Disabled"]
-        and group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]
-    ):
+    func=os.path.dirname(__file__).split("\\")[-1]
+    if not restrict(func=func,group=group):
+        logger.info(f"{func}在{group.id}群不可用")
         return
     # elif "Yinglish" in group_data[str(group.id)]["DisabledFunc"]:
     #     return
     if keys.matched:
-        keys=keys.result.asDisplay()
+        keys = keys.result.asDisplay()
         if keys in group_key:
-            send_group=group_key[keys]
+            send_group = group_key[keys]
         else:
             await safeSendGroupMessage(group, MessageChain.create("密钥错误或不存在"))
             return
-        
 
     if anythings.matched:
         saying = anythings.result.asDisplay()
         if len(saying) < 200:
             await safeSendGroupMessage(
-                group, MessageChain.create("已成功发送信息:\n",saying))
-            await safeSendGroupMessage(
-                send_group, MessageChain.create("收到信息:\n",saying))
+                group, MessageChain.create("已成功发送信息:\n", saying))
+            await safeSendGroupMessage(send_group,
+                                       MessageChain.create("收到信息:\n", saying))
         else:
             await safeSendGroupMessage(group, MessageChain.create("文字过长"))
     else:

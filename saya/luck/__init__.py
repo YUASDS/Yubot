@@ -1,7 +1,5 @@
-import json
-import time
-import secrets
-import asyncio
+import os
+from loguru import logger
 
 
 from graia.saya import Saya, Channel
@@ -14,7 +12,7 @@ from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.event.message import GroupMessage
 from graia.ariadne.message.parser.twilight import Twilight, FullMatch, RegexMatch
 
-from util.control import Permission, Interval, Rest
+from util.control import Permission, Interval, Rest,restrict
 from util.sendMessage import safeSendGroupMessage
 from config import yaml_data, group_data, COIN_NAME
 from database.db import  reduce_gold, add_gold
@@ -37,13 +35,10 @@ inc = InterruptControl(bcc)
 )
 async def main(group: Group, member: Member,number: RegexMatch, source: Source):
 
-    if (
-        yaml_data["Saya"]["GroupSend"]["Disabled"]
-        and group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]
-    ):
+    func=os.path.dirname(__file__).split("\\")[-1]
+    if not restrict(func=func,group=group):
+        logger.info(f"{func}在{group.id}群不可用")
         return
-    elif "luck" in group_data[str(group.id)]["DisabledFunc"]:
-         return
     if number.matched:
         number=int(number.result.asDisplay())
         if number>10:

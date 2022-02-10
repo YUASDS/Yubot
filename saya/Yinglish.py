@@ -1,5 +1,7 @@
 import random
 import re
+import os
+from loguru import logger
 
 import jieba
 import jieba.posseg as pseg
@@ -12,9 +14,9 @@ from graia.ariadne.message.chain import MessageChain
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import Twilight, FullMatch, WildcardMatch
 
-from config import yaml_data, group_data
+from config import yaml_data
 from util.sendMessage import safeSendGroupMessage
-from util.control import Permission, Interval, Rest
+from util.control import Permission, Interval, Rest,restrict
 
 jieba.setLogLevel(20)
 
@@ -40,31 +42,36 @@ def _词转换(x, y, 淫乱度):
 def chs2yin(s, 淫乱度=0.6):
     return "".join([_词转换(x, y, 淫乱度) for x, y in pseg.cut(s)])
 
+
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[
-            Twilight({"head": FullMatch("淫语"), "anythings": WildcardMatch(flags=re.DOTALL)})
+            Twilight({
+                "head": FullMatch("淫语"),
+                "anythings": WildcardMatch(flags=re.DOTALL)
+            })
         ],
-        decorators=[Permission.require(), Rest.rest_control(), Interval.require()],
-    )
-)
+        decorators=[
+            Permission.require(),
+            Rest.rest_control(),
+            Interval.require()
+        ],
+    ))
 async def main(group: Group, anythings: WildcardMatch, source: Source):
 
-    if (
-        yaml_data["Saya"]["Yinglish"]["Disabled"]
-        and group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]
-    ):
+
+    func=os.path.dirname(__file__).split("\\")[-1]
+    if not restrict(func=func,group=group):
+        logger.info(f"{func}在{group.id}群不可用")
         return
-    # elif "Yinglish" in group_data[str(group.id)]["DisabledFunc"]:
-    #     return
 
     if anythings.matched:
         saying = anythings.result.asDisplay()
         if len(saying) < 200:
-            await safeSendGroupMessage(
-                group, MessageChain.create(chs2yin(saying)), quote=source.id
-            )
+            await safeSendGroupMessage(group,
+                                       MessageChain.create(chs2yin(saying)),
+                                       quote=source.id)
         else:
             await safeSendGroupMessage(group, MessageChain.create("文字过长"))
     else:
