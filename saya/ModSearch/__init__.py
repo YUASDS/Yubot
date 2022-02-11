@@ -17,6 +17,7 @@ from config import COIN_NAME
 from database.db import reduce_gold
 from .dicecho import dicecho
 from .RandomSearch import RandomSearch, RandomLoveSearch
+from .cnmods import cnmods
 
 saya = Saya.current()
 channel = Channel.current()
@@ -55,6 +56,53 @@ async def main(group: Group, member: Member, mod: WildcardMatch):
             )
         else:
             res = await dicecho(mod)
+            if len(res) > 0:
+                for i in res:
+                    await asyncio.sleep(0.5)
+                    await safeSendGroupMessage(
+                        group,
+                        MessageChain.create([At(member.id),
+                                             Plain("".join(i))]),
+                    )
+            else:
+                await safeSendGroupMessage(
+                    group,
+                    MessageChain.create([At(member.id),
+                                         Plain("\n无该搜索项")]),
+                )
+
+
+@channel.use(
+    ListenerSchema(
+        listening_events=[GroupMessage],
+        inline_dispatchers=[
+            Twilight({
+                "heads": FullMatch("魔都搜索"),
+                "mod": WildcardMatch()
+            })
+        ],
+        decorators=[
+            Permission.require(),
+            Rest.rest_control(),
+            Interval.require()
+        ],
+    ))
+async def CnmodsSearch(group: Group, member: Member, mod: WildcardMatch):
+
+    func = os.path.dirname(__file__).split("\\")[-1]
+    if not restrict(func=func, group=group):
+        logger.info(f"{func}在{group.id}群不可用")
+        return
+    if mod.matched:
+        mod = mod.result.asDisplay()
+        if not await reduce_gold(str(member.id), 5):
+            await safeSendGroupMessage(
+                group,
+                MessageChain.create(
+                    [At(member.id), Plain(f" 你的{COIN_NAME}不足。")]),
+            )
+        else:
+            res = await cnmods(mod)
             if len(res) > 0:
                 for i in res:
                     await asyncio.sleep(0.5)
