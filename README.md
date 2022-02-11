@@ -12,19 +12,27 @@
  - 基于[graia](https://github.com/GraiaProject/Ariadne)与[mirai-api-http](https://github.com/project-mirai/mirai-api-http)的缝合&跑团/娱乐骰娘
 
 ## Yubot的功能
-> -来源于[Abot](https://github.com/djkcyl/ABot-Graia)的`涩涩词库`
+>- 来源于[Abot](https://github.com/djkcyl/ABot-Graia)的`涩涩词库`
 
-> -来源于[Abot](https://github.com/djkcyl/ABot-Graia)的`你画我猜`
+>- 来源于[Abot](https://github.com/djkcyl/ABot-Graia)的`你画我猜`
 
-> -来源于[Abot](https://github.com/djkcyl/ABot-Graia)的`背单词`
+>- 来源于[Abot](https://github.com/djkcyl/ABot-Graia)的`背单词`
 
-> -来源于[Abot](https://github.com/djkcyl/ABot-Graia)的`淫语翻译（改）`
+>- 来源于[Abot](https://github.com/djkcyl/ABot-Graia)的`淫语翻译（改）`
 
-> -来源于[Abot](https://github.com/djkcyl/ABot-Graia)的`漂流瓶（改）`
+>- 来源于[Abot](https://github.com/djkcyl/ABot-Graia)的`漂流瓶（改）`
 
-> -娱乐功能——`抽乌帕`
+>- 娱乐功能——`抽乌帕`
 
-> -根据每个群的KEY进行单项转发`(用于跑团)`
+>- 根据每个群的KEY进行单项转发`(用于跑团)`
+
+>- 基于`彩云小梦`的情节续写
+
+>- `魔都模组`检索以及下载
+
+>- `随机模组`推荐
+
+>- `dicecho模组`检索及下载连接获取
 
 ## TODO
 
