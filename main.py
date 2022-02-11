@@ -1,5 +1,6 @@
 import os
 import asyncio
+import sys
 
 from pathlib import Path
 from loguru import logger
@@ -16,8 +17,6 @@ from graia.saya.builtins.broadcast import BroadcastBehaviour
 from config import yaml_data, save_config
 
 # ANCHOR: Audit debug
-
-import sys
 
 
 def broadcast_audit_hook(ev: str, args: tuple):
@@ -74,7 +73,6 @@ with saya.module_context():
         else:
             saya.require(f"saya.{module.split('.')[0]}")
     logger.info("saya加载完成")
-
 
 if __name__ == "__main__":
     app.launch_blocking()

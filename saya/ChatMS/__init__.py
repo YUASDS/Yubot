@@ -3,7 +3,6 @@ import httpx
 import random
 import asyncio
 import os
-from loguru import logger
 
 from pathlib import Path
 from loguru import logger
@@ -16,11 +15,10 @@ from graia.ariadne.event.message import GroupMessage
 from graia.scheduler.saya.schema import SchedulerSchema
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 
-from config import yaml_data, group_data
+from config import yaml_data
 
-from util.control import Permission, Interval,restrict
+from util.control import Permission, Interval, restrict
 from util.sendMessage import safeSendGroupMessage
-
 
 saya = Saya.current()
 channel = Channel.current()
@@ -36,9 +34,8 @@ async def update_data():
         "https://raw.fastgit.org/Kyomotoi/AnimeThesaurus/main/data.json",
         verify=False,
     ).json()
-    DATA_FILE.write_text(
-        json.dumps(root, indent=2, ensure_ascii=False), encoding="utf-8"
-    )
+    DATA_FILE.write_text(json.dumps(root, indent=2, ensure_ascii=False),
+                         encoding="utf-8")
     DATA = root
 
 
@@ -56,12 +53,11 @@ async def updateDict():
 
 
 @channel.use(
-    ListenerSchema(listening_events=[GroupMessage], 
-                   decorators=[Permission.require()])
-)
+    ListenerSchema(listening_events=[GroupMessage],
+                   decorators=[Permission.require()]))
 async def main(group: Group, member: Member, message: MessageChain):
-    func=os.path.dirname(__file__).split("\\")[-1]
-    if not restrict(func=func,group=group):
+    func = os.path.dirname(__file__).split("\\")[-1]
+    if not restrict(func=func, group=group):
         logger.info(f"{func}在{group.id}群不可用")
         return
     if message.has(At):

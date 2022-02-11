@@ -8,9 +8,9 @@ from graia.ariadne.message.chain import MessageChain
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import Twilight, RegexMatch, WildcardMatch
 
-from config import  group_key
+from config import group_key
 from util.sendMessage import safeSendGroupMessage
-from util.control import Permission, Interval, Rest,restrict
+from util.control import Permission, Interval, Rest, restrict
 
 saya = Saya.current()
 channel = Channel.current()
@@ -33,8 +33,8 @@ channel = Channel.current()
     ))
 async def main(group: Group, anythings: WildcardMatch, keys: RegexMatch):
 
-    func=os.path.dirname(__file__).split("\\")[-1]
-    if not restrict(func=func,group=group):
+    func = os.path.dirname(__file__).split("\\")[-1]
+    if not restrict(func=func, group=group):
         logger.info(f"{func}在{group.id}群不可用")
         return
     # elif "Yinglish" in group_data[str(group.id)]["DisabledFunc"]:

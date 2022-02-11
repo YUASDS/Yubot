@@ -29,11 +29,11 @@ from graia.ariadne.message.parser.twilight import (
 
 from database.db import reduce_gold
 from util.text2image import create_image
-from util.control import Permission, Interval,restrict
+from util.control import Permission, Interval, restrict
 from util.sendMessage import safeSendGroupMessage
 # from util.TextModeration import text_moderation_async
 # from util.ImageModeration import image_moderation_async
-from config import yaml_data, group_data, user_black_list, save_config, COIN_NAME
+from config import yaml_data, user_black_list, save_config, COIN_NAME
 
 from .db import (
     get_bottle,
@@ -54,7 +54,8 @@ inc = InterruptControl(bcc)
 IMAGE_PATH = Path(__file__).parent.joinpath("image")
 IMAGE_PATH.mkdir(exist_ok=True)
 
-func=os.path.dirname(__file__).split("\\")[-1]
+func = os.path.dirname(__file__).split("\\")[-1]
+
 
 @channel.use(
     ListenerSchema(
@@ -82,8 +83,8 @@ async def throw_bottle_handler(
     arg_pic: ArgumentMatch,
     anythings1: WildcardMatch,
 ):
-    func=os.path.dirname(__file__).split("\\")[-1]
-    if not restrict(func=func,group=group):
+    func = os.path.dirname(__file__).split("\\")[-1]
+    if not restrict(func=func, group=group):
         logger.info(func)
         return
 
@@ -231,13 +232,9 @@ async def throw_bottle_handler(
                     Interval.require(30)],
     ))
 async def pick_bottle_handler(group: Group):
-    try:
-        if (yaml_data["Saya"]["DriftingBottle"]["Disabled"] and
-                group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]):
-            return
-        elif "DriftingBottle" in group_data[str(group.id)]["DisabledFunc"]:
-            return
-    except:
+    func = os.path.dirname(__file__).split("\\")[-1]
+    if not restrict(func=func, group=group):
+        logger.info(func)
         return
 
     bottle = get_bottle()
@@ -292,13 +289,9 @@ async def clear_bottle_handler(group: Group):
     ))
 async def drifting_bottle_handler(group: Group, member: Member,
                                   bottleid: WildcardMatch):
-    try:
-        if (yaml_data["Saya"]["DriftingBottle"]["Disabled"] and
-                group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]):
-            return
-        elif "DriftingBottle" in group_data[str(group.id)]["DisabledFunc"]:
-            return
-    except:
+    func = os.path.dirname(__file__).split("\\")[-1]
+    if not restrict(func=func, group=group):
+        logger.info(func)
         return
 
     if bottleid.matched and member.id == yaml_data["Basic"]["Permission"][
@@ -383,13 +376,9 @@ def qrdecode(img):
 async def bottle_score_handler(group: Group, member: Member,
                                message: MessageChain,
                                anythings: WildcardMatch):
-    try:
-        if (yaml_data["Saya"]["DriftingBottle"]["Disabled"] and
-                group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]):
-            return
-        elif "DriftingBottle" in group_data[str(group.id)]["DisabledFunc"]:
-            return
-    except:
+    func = os.path.dirname(__file__).split("\\")[-1]
+    if not restrict(func=func, group=group):
+        logger.info(func)
         return
 
     if anythings.matched:
