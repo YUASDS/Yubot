@@ -10,6 +10,7 @@ from asyncio import Lock
 from graia.saya import Channel
 from collections import defaultdict
 from graia.ariadne.app import Ariadne
+from graia.ariadne.model import Group
 from graia.scheduler.timers import crontabify
 from typing import DefaultDict, Set, Tuple, Union
 from graia.broadcast.exceptions import ExecutionStop
@@ -20,7 +21,7 @@ from graia.scheduler.saya.schema import SchedulerSchema
 from graia.ariadne.message.element import Plain, Source
 from graia.ariadne.model import Friend, Member, MemberPerm
 
-from config import user_black_list, yaml_data,group_data
+from config import (user_black_list, yaml_data,group_data,group_black_list)
 
 
 from .sendMessage import safeSendGroupMessage
@@ -160,6 +161,24 @@ class Permission:
             if member.group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]:
                 raise ExecutionStop()
 
+    @classmethod
+    def restricter(cls,func)->Depend: 
+        """func 当前模块名字"""
+        def res(event: GroupMessage,group:Group):
+            member_level = cls.get(event.sender)
+            if member_level == cls.MASTER:
+                pass
+            if group.id == yaml_data["Basic"]["Permission"]["DebugGroup"]:
+                pass
+            if yaml_data["Saya"][func]["Disabled"]:
+                raise ExecutionStop()
+            elif group.id in group_black_list:
+                raise ExecutionStop()
+            elif func in group_data[str(group.id)]["DisabledFunc"]:
+                raise ExecutionStop()
+
+            
+        return Depend(res)
 
 class Interval:
     """
@@ -251,7 +270,11 @@ class Interval:
             raise ExecutionStop()
 
 
-def restrict(func,group):
+
+
+
+def restrict(func,group: Group):
+    '''用于管理插件启用'''
     try:
         if (
             yaml_data["Saya"][func]["Disabled"]
