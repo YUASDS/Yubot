@@ -1,11 +1,9 @@
 import random
 import re
 import os
-from loguru import logger
 
 import jieba
 import jieba.posseg as pseg
-
 from graia.saya import Saya, Channel
 from graia.ariadne.model import Group
 from graia.ariadne.message.element import Source
@@ -15,9 +13,12 @@ from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import Twilight, FullMatch, WildcardMatch
 
 from util.sendMessage import safeSendGroupMessage
-from util.control import Permission, Interval, Rest, restrict
+from util.control import Permission, Interval, Rest
 
 jieba.setLogLevel(20)
+
+func = os.path.dirname(__file__).split("\\")[-1]
+
 
 saya = Saya.current()
 channel = Channel.current()
@@ -53,16 +54,12 @@ def chs2yin(s, 淫乱度=0.6):
         ],
         decorators=[
             Permission.require(),
+            Permission.restricter(func),
             Rest.rest_control(),
             Interval.require()
         ],
     ))
 async def main(group: Group, anythings: WildcardMatch, source: Source):
-
-    func = os.path.dirname(__file__).split("\\")[-1]
-    if not restrict(func=func, group=group):
-        logger.info(f"{func}在{group.id}群不可用")
-        return
 
     if anythings.matched:
         saying = anythings.result.asDisplay()

@@ -1,0 +1,49 @@
+Basic:
+  API:
+    Tencent:
+      Cos:
+        bucket: xxxxx
+        region: xxxxx
+      secretId: xxxxx
+      secretKey: xxxxx
+  BotName: 千
+  CoinName: 乌帕
+  Event:
+    JoinGroup: true
+    KickGroup: true
+    LeaveGroup: true
+    Mute: true
+    NewFriend: true
+    PermissionChange: true
+  MAH:
+    BotQQ: 959686587
+    MiraiAuthKey: ServiceVerifyKey
+    MiraiHost: http://localhost:8080
+  Permission:
+    Admin:
+    - 1787569211
+    Debug: false
+    DebugGroup: 87111505
+    Master: 1787569211
+    MasterName: xxxx
+    Rest: false
+Final: true
+Saya:
+  ChatMS:
+    Disabled: true
+  DrawSomething:
+    Disabled: false
+  DriftingBottle:
+    Disabled: true
+  GroupSend:
+    Disabled: false
+  Luck:
+    Disabled: false
+  MapMaker:
+    Disabled: false
+  ModSearch:
+    Disabled: false
+  StorySend:
+    Disabled: false
+  Yinglish:
+    Disabled: false

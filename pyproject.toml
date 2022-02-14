@@ -6,20 +6,19 @@ authors = ["YUASDS <1787569211@qq.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-graia-ariadne = "^0.5.0"
 requests = "^2.27.1"
 aiohttp = {extras = ["speedups"], version = "^3.8.1"}
 Pillow = "^9.0.0"
 jieba = "^0.42.1"
-graia-saya = "^0.0.13"
 PyYAML = "^6.0"
-graia-scheduler = "^0.0.6"
 httpx = "^0.21.3"
 peewee = "^3.14.8"
 prettytable = "^3.0.0"
 pyzbar = "^0.1.8"
 numpy = "^1.22.1"
 beautifulsoup4 = "^4.10.0"
+opencv-contrib-python = "^4.5.5"
+graia-ariadne = {extras = ["full"], version = "^0.5.3"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

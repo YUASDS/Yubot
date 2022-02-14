@@ -1,5 +1,4 @@
 import os
-from re import S
 from loguru import logger
 
 from graia.saya import Saya, Channel

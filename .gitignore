@@ -5,7 +5,6 @@ tests
 setting.yml
 study
 logs
-config.yaml
 userlist.json
 grouplist.json
 groupdata.json
@@ -21,3 +20,4 @@ cache
 restrict.py
 saya/StorySend/scene.json
 naconfig.json
+start2.bat
