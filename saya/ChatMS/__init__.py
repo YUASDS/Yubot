@@ -17,7 +17,7 @@ from graia.saya.builtins.broadcast.schema import ListenerSchema
 
 from config import yaml_data
 
-from util.control import Permission, Interval, restrict
+from util.control import Permission, Interval
 from util.sendMessage import safeSendGroupMessage
 
 saya = Saya.current()
@@ -25,6 +25,7 @@ channel = Channel.current()
 
 DATA_FILE = Path(__file__).parent.joinpath("chat_data.json")
 DATA: dict = json.loads(DATA_FILE.read_text(encoding="utf-8"))
+func = os.path.dirname(__file__).split("\\")[-1]
 
 
 async def update_data():
@@ -53,13 +54,12 @@ async def updateDict():
 
 
 @channel.use(
-    ListenerSchema(listening_events=[GroupMessage],
-                   decorators=[Permission.require()]))
+    ListenerSchema(
+        listening_events=[GroupMessage],
+        decorators=[Permission.require(),
+                    Permission.restricter(func)]))
 async def main(group: Group, member: Member, message: MessageChain):
-    func = os.path.dirname(__file__).split("\\")[-1]
-    if not restrict(func=func, group=group):
-        logger.info(f"{func}在{group.id}群不可用")
-        return
+
     if message.has(At):
         if message.getFirst(At).target == yaml_data["Basic"]["MAH"]["BotQQ"]:
             try:
