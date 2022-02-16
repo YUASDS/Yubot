@@ -8,7 +8,8 @@ from graia.broadcast.interrupt import InterruptControl
 from graia.ariadne.message.element import Plain, At
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.event.message import GroupMessage
-from graia.ariadne.message.parser.twilight import Twilight, FullMatch, WildcardMatch
+from graia.ariadne.message.parser.twilight import (Twilight, FullMatch,
+                                                   WildcardMatch)
 
 from util.control import Permission, Interval, Rest, restrict
 from util.sendMessage import safeSendGroupMessage
@@ -74,16 +75,16 @@ async def main(group: Group, member: Member, text: WildcardMatch):
         print("sad")
         config[gid] = templete
         save_config(config, config_path)
-    if not config[gid]['token']:
-        return await safeSendGroupMessage(
-            group,
-            MessageChain.create([
-                At(member.id),
-                Plain('本群续写apikey未设置！请使用‘设置续写apikey’指令设置本群apikey！')
-            ]),
-        )
-
     if text.matched:
+        if not config[gid]['token']:
+            return await safeSendGroupMessage(
+                group,
+                MessageChain.create([
+                    At(member.id),
+                    Plain('本群续写apikey未设置！请使用‘设置续写apikey’指令设置本群apikey！')
+                ]),
+            )
+
         mid = model_list[config[gid]['model']]
         iter = config[gid]['iter']
         token = config[gid]['token']

@@ -174,6 +174,8 @@ class Permission:
                 raise ExecutionStop()
             elif group.id in group_black_list:
                 raise ExecutionStop()
+            if str(group.id) not in group_data:
+                pass
             elif func in group_data[str(group.id)]["DisabledFunc"]:
                 raise ExecutionStop()
 

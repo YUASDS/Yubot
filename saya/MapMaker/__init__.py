@@ -143,6 +143,8 @@ async def change(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
         file = MAP[gid]["bg"].copy()
         cell_size = config[gid]
         w = 0
+        if mid not in MAP[gid]["array"]:
+            return safeSendGroupMessage(group, MessageChain.create("请先加入地图"))
         for i in MAP[gid]["array"]:
             h = 0
             for j in i:
