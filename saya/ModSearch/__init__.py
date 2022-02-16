@@ -9,7 +9,8 @@ from graia.broadcast.interrupt import InterruptControl
 from graia.ariadne.message.element import Plain, At
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.event.message import GroupMessage
-from graia.ariadne.message.parser.twilight import Twilight, FullMatch, WildcardMatch
+from graia.ariadne.message.parser.twilight import (Twilight, FullMatch,
+                                                   WildcardMatch)
 
 from util.control import Permission, Interval, Rest, restrict
 from util.sendMessage import safeSendGroupMessage

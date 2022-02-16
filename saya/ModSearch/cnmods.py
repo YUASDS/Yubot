@@ -3,7 +3,6 @@ import aiohttp
 
 
 async def cnmods(mod):
-    #注：这里为了教学，故意让 api 返回 json 形式
     ero_url = f"https://www.cnmods.net/index/moduleListPage.do?title={mod}"
     async with aiohttp.ClientSession() as session:
         async with session.get(ero_url) as r:
