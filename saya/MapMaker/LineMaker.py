@@ -69,7 +69,7 @@ class line_maker():
         cell_size = self.cell_size
         back = Image.fromarray(file).convert('RGBA')
         img = Image.fromarray(img).convert('RGBA')
-        print(cell_size)
+
         imgs = img.resize((cell_size, cell_size), Image.ANTIALIAS)
         r, g, b, a = imgs.split()
         # imgs.show()
@@ -79,7 +79,7 @@ class line_maker():
         # print(x, y, cell_size)
         # print(y_dir, x_dir)
 
-        print(imgs.mode, back.mode)
+ 
         back.paste(imgs, (x_dir, y_dir), mask=a)
         self.bg_img_array = np.array(back)
         # if optional:
@@ -91,10 +91,13 @@ class line_maker():
 
     def post_array(self, pet_dict: dict, bg_array: list) -> bytes:
         i = 0
+
         for x in bg_array:
             j = 0
             for y in x:
-                if str(y) in pet_dict:
+
+                if y in pet_dict:
+
                     n = self.post_char(img=pet_dict[str(y)],
                                        x=j,
                                        y=i,
@@ -148,9 +151,9 @@ async def load_config(path):
         return {}
 
 
-async def get_pet(member_id: int) -> np.array:
+async def get_pet(member_id: str) -> np.array:
 
-    url = f"http://q1.qlogo.cn/g?b=qq&nk={str(member_id)}&s=640"
+    url = f"http://q1.qlogo.cn/g?b=qq&nk={member_id}&s=640"
     async with httpx.AsyncClient() as client:
         resp = await client.get(url=url)
 

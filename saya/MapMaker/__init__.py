@@ -54,8 +54,8 @@ async def main(group: Group, anythings: RegexMatch, source: Source):
     gid = str(group.id)
     MAP[gid] = {}
     MAP[gid]["pet"] = {}
-    MAP[gid]["array"] = np.zeros((imgs.rg1, imgs.rg2), dtype=int, order='C')
-    print(MAP)
+    lis=[[0 for i in range(imgs.part)] for i in range(imgs.part)]
+    MAP[gid]["array"] = lis
     MAP[gid]["bg"] = imgs.Img
     data = await load_config(CONFIG_FILE)
     data[gid] = cell_size
@@ -72,7 +72,7 @@ async def main(group: Group, anythings: RegexMatch, source: Source):
         inline_dispatchers=[
             Twilight({
                 "head": FullMatch("加入地图"),
-                "x": RegexMatch("[a-z]", optional=True),
+                "x": RegexMatch("[a-z]|[A-Z]", optional=True),
                 "y": RegexMatch("[0-9]", optional=True)
             })
         ],
@@ -87,21 +87,25 @@ async def join(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
     x = x.result.asDisplay()
     y = y.result.asDisplay()
     gid = str(group.id)
+    mid = str(member.id)
     x = ord(x.upper()) - 65
     y = int(y)
     config = await load_config(CONFIG_FILE)
     if gid in MAP:
         file = MAP[gid]["bg"].copy()
         cell_size = config[gid]
-        if member.id in MAP[gid]["array"]:
+        True in [mid in i for i in MAP[gid]["array"]]
+        
+        if True in [mid in i for i in MAP[gid]["array"]]:
             return await safeSendGroupMessage(group,
                                               MessageChain.create("请使用移动"))
-        MAP[gid]["array"][x][y] = member.id
+        MAP[gid]["array"][x][y] = mid
+
 
         maker = line_maker(file=file, cell_size=cell_size)
-        if str(member.id) not in MAP[gid]["pet"]:
-            pet = await get_pet(member.id)
-            MAP[gid]["pet"][str(member.id)] = pet
+        if mid not in MAP[gid]["pet"]:
+            pet = await get_pet(mid)
+            MAP[gid]["pet"][mid] = pet
 
         img = maker.post_array(pet_dict=MAP[gid]["pet"],
                                bg_array=MAP[gid]["array"])
@@ -120,7 +124,7 @@ async def join(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
         inline_dispatchers=[
             Twilight({
                 "head": FullMatch("移动"),
-                "x": RegexMatch("[a-z]", optional=True),
+                "x": RegexMatch("[a-z]|[A-Z]", optional=True),
                 "y": RegexMatch("[0-9]", optional=True)
             })
         ],
@@ -135,7 +139,7 @@ async def change(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
     x = x.result.asDisplay()
     y = y.result.asDisplay()
     gid = str(group.id)
-    mid = member.id
+    mid = str(member.id)
     x = ord(x.upper()) - 65
     y = int(y)
     config = await load_config(CONFIG_FILE)
@@ -143,8 +147,9 @@ async def change(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
         file = MAP[gid]["bg"].copy()
         cell_size = config[gid]
         w = 0
-        if mid not in MAP[gid]["array"]:
-            return safeSendGroupMessage(group, MessageChain.create("请先加入地图"))
+        if not True in [mid in i for i in MAP[gid]["array"]]:
+
+            return await safeSendGroupMessage(group, MessageChain.create("请先加入地图"))
         for i in MAP[gid]["array"]:
             h = 0
             for j in i:
@@ -156,9 +161,9 @@ async def change(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
                 h = h + 1
             w = w + 1
         maker = line_maker(file=file, cell_size=cell_size)
-        if str(member.id) not in MAP[gid]["pet"]:
-            pet = await get_pet(member.id)
-            MAP[gid]["pet"][str(member.id)] = pet
+        if mid not in MAP[gid]["pet"]:
+            pet = await get_pet(mid)
+            MAP[gid]["pet"][mid] = pet
 
         img = maker.post_array(pet_dict=MAP[gid]["pet"],
                                bg_array=MAP[gid]["array"])
