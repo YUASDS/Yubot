@@ -3,7 +3,6 @@ import json
 import os
 import asyncio
 
-
 import httpx
 from io import BytesIO
 from PIL import Image
@@ -38,6 +37,16 @@ class line_maker():
         img.save(imgByteArr, format='png')
         imgByteArr = imgByteArr.getvalue()
         return img.tostring()
+    
+    def get_reshape(self,w,h):
+        while w>800:
+            w=w//1.1
+            h=h//1.1
+        w=w//10
+        w=w*10
+        h=h//10
+        h=h*10
+        return int(w),int(h)
 
     async def map_pice(self,option=False) -> bytes:
         file = self.file
@@ -49,6 +58,10 @@ class line_maker():
             img=Image.open(file).convert('RGBA')
             img=np.array(img)
         (h, w, _) = img.shape
+        w,h=self.get_reshape(w,h)
+        img = Image.fromarray(img).convert('RGBA')
+        img = img.resize((w, h), Image.ANTIALIAS)
+        img=np.array(img)
         if w > h:
             rg1 = part
             cell_size = w // part
@@ -162,8 +175,8 @@ async def get_pet(member_id: str=None,image_url=None,msgchain=False) -> np.array
         url = f"http://q1.qlogo.cn/g?b=qq&nk={member_id}&s=640"
         async with httpx.AsyncClient() as client:
             resp = await client.get(url=url)
-
-        avatar = Image.open(BytesIO(resp.content)).convert('RGBA')
+        byt=BytesIO(resp.content)
+        avatar = Image.open(byt).convert('RGBA')
         return np.array(avatar)
     elif msgchain:
         resp=msgchain
@@ -172,10 +185,9 @@ async def get_pet(member_id: str=None,image_url=None,msgchain=False) -> np.array
     else:
         async with httpx.AsyncClient() as client:
             resp = await client.get(image_url)
-        image =  Image.open(BytesIO(resp.content)).convert('RGBA')
+        byt=BytesIO(resp.content)
+        image =  Image.open(byt).convert('RGBA')
         return np.array(image)
-
-
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()

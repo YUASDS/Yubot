@@ -37,6 +37,7 @@ channel = Channel.current()
         inline_dispatchers=[
             Twilight({
                 "head": RegexMatch("制作地图|制造地图|创建地图|刷新地图"),
+                "space":RegexMatch("[\s]+",optional=True),
                 "num":RegexMatch("[0-9]+",optional=True),
                 "anythings": WildcardMatch(flags=re.DOTALL)
             })
@@ -69,7 +70,7 @@ async def main(group: Group, anythings: RegexMatch,num:RegexMatch):
                     back=await get_pet(image_url=image_url)
                 except:
                     return await safeSendGroupMessage(
-                    group, MessageChain.create("图片获取错误，请重新发送吧~"))
+                    group, MessageChain.create("图片获取失败，换张图片吧~"))
                 imgs = line_maker(back,part=num)
                 img = await imgs.map_pice(option=1)
     else:
