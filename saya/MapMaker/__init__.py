@@ -1,3 +1,4 @@
+from email import message
 import os
 import re
 
@@ -29,7 +30,35 @@ MAP = {}
 saya = Saya.current()
 channel = Channel.current()
 
+@channel.use(
+    ListenerSchema(
+        priority=16,  # 优先度
+        listening_events=[GroupMessage],
+        inline_dispatchers=[
+            Twilight({
+                "head": RegexMatch("地图|地图帮助|地图功能"),
+            })
+        ],
+        decorators=[
+            Permission.require(),
+            Permission.restricter(func),
+            Rest.rest_control(),
+            Interval.require()
+        ],
+    ))
+async def main(group: Group):
+    msg="功能([]内为可选参数，|为同一个指令,【】内为必须参数,()内为解释说明)：\n"
+    part1="制作地图|制造地图|创建地图|刷新地图 [格子数（默认为6x6）][背景图片]\n使用方式：制造地图 8 [图片]\n\n"
+    part2="加入地图【x】【分割符(任意非数字即可)】【y】\n使用方法：加入地图3 3\n\n"
+    part3="移动【x】【分割符(任意非数字即可)】【y】\n使用方法：移动3 3（需要先加入地图）\n\n"
+    part4="添加角色|增加角色|添加NPC【空格分割】【NPC名】【空格分割】【x】"
+    part5="【分割符(任意非数字即可)】【y】[NPC立绘]\n使用方法：添加角色 白千音 3 3[图片]\n\n"
+    part6="移动NPC|移动角色 【NPC名】【x】【分割符(任意非数字即可)】【y】\n使用方法：移动角色 白千音 3 5"
+    message=msg+part1+part2+part3+part4+part5+part6
 
+    return  await safeSendGroupMessage(
+                    group, MessageChain.create( message))
+      
 @channel.use(
     ListenerSchema(
         priority=16,  # 优先度
@@ -98,8 +127,9 @@ async def main(group: Group, anythings: RegexMatch,num:RegexMatch):
         inline_dispatchers=[
             Twilight({
                 "head": FullMatch("加入地图"),
-                "x": RegexMatch("[a-z]|[A-Z]",optional=True),
-                "y": RegexMatch("[0-9]",optional=True)
+                "x": RegexMatch("[0-9]+",optional=True),
+                "space":RegexMatch("\D+",optional=True),
+                "y": RegexMatch("[0-9]+",optional=True)
             })
         ],
         decorators=[
@@ -117,8 +147,8 @@ async def join(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
     y = y.result.asDisplay()
     gid = str(group.id)
     mid = str(member.id)
-    x = ord(x.upper()) - 65
-    y = int(y)
+    x = int(x)-1
+    y = int(y)-1
     config = await load_config(CONFIG_FILE)
     if gid in MAP:
         file = MAP[gid]["bg"].copy()
@@ -151,8 +181,9 @@ async def join(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
         inline_dispatchers=[
             Twilight({
                 "head": FullMatch("移动"),
-                "x": RegexMatch("[a-z]|[A-Z]",optional=True),
-                "y": RegexMatch("[0-9]",optional=True)
+                "x": RegexMatch("[0-9]+",optional=True),
+                "space":RegexMatch("\D+",optional=True),
+                "y": RegexMatch("[0-9]+",optional=True)
             })
         ],
         decorators=[
@@ -170,8 +201,8 @@ async def change(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
     y = y.result.asDisplay()
     gid = str(group.id)
     mid = str(member.id)
-    x = ord(x.upper()) - 65
-    y = int(y)
+    x = int(x)-1
+    y = int(y)-1
     config = await load_config(CONFIG_FILE)
     if gid in MAP:
         file = MAP[gid]["bg"].copy()
@@ -216,8 +247,9 @@ async def change(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
                 "space1": RegexMatch("[\s]+",optional=True),
                 "npc": RegexMatch("[\S]+",optional=True),
                 "space2": RegexMatch("[\s]+",optional=True),
-                "x": RegexMatch("[a-z]|[A-Z]",optional=True),
-                "y": RegexMatch("[0-9]",optional=True),
+                "x": RegexMatch("[0-9]+",optional=True),
+                "space":RegexMatch("\D+",optional=True),
+                "y": RegexMatch("[0-9]+",optional=True),
                 "enter": FullMatch("\n",optional=True),
                 "anythings1": WildcardMatch(optional=True)
             })
@@ -236,8 +268,8 @@ async def joinImage(group: Group, npc: RegexMatch, x: RegexMatch,
     x = x.result.asDisplay()
     y = y.result.asDisplay()
     npc=npc.result.asDisplay()
-    x = ord(x.upper()) - 65
-    y = int(y)
+    x = int(x)-1
+    y = int(y)-1
     message_chain = anythings1.result
     config = await load_config(CONFIG_FILE)
     if gid in MAP:
@@ -279,7 +311,8 @@ async def joinImage(group: Group, npc: RegexMatch, x: RegexMatch,
                 "space1": RegexMatch("[\s]+",optional=True),
                 "npc": RegexMatch("[\S]+",optional=True),
                 "space2": RegexMatch("[\s]+",optional=True),
-                "x": RegexMatch("[a-z]|[A-Z]",optional=True),
+                "x": RegexMatch("[0-9]+",optional=True),
+                "space":RegexMatch("\D+",optional=True),
                 "y": RegexMatch("[0-9]",optional=True)
             })
         ],
@@ -303,8 +336,8 @@ async def change_npc(group: Group, x: RegexMatch, y: RegexMatch, member: Member,
     npc=npc.result.asDisplay()
     
     gid = str(group.id)
-    x = ord(x.upper()) - 65
-    y = int(y)
+    x = int(x) - 1
+    y = int(y) - 1
     config = await load_config(CONFIG_FILE)
     if gid in MAP:
         file = MAP[gid]["bg"].copy()
