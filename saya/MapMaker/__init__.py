@@ -127,9 +127,9 @@ async def main(group: Group, anythings: RegexMatch,num:RegexMatch):
         inline_dispatchers=[
             Twilight({
                 "head": FullMatch("加入地图"),
-                "x": RegexMatch("[0-9]+",optional=True),
+                "x": RegexMatch("[0-9]+",),
                 "space":RegexMatch("\D+",optional=True),
-                "y": RegexMatch("[0-9]+",optional=True)
+                "y": RegexMatch("[0-9]+")
             })
         ],
         decorators=[
@@ -142,7 +142,7 @@ async def main(group: Group, anythings: RegexMatch,num:RegexMatch):
 async def join(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
     if not x.matched and y.matched:
         return await safeSendGroupMessage(
-                    group, MessageChain.create("加入地图的时候需要带上位置哦~"))
+                    group, MessageChain.create("加入地图的时候需要带上两个位置哦~"))
     x = x.result.asDisplay()
     y = y.result.asDisplay()
     gid = str(group.id)
@@ -245,11 +245,11 @@ async def change(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
             Twilight({
                 "head": RegexMatch("添加角色|增加角色|添加NPC"),
                 "space1": RegexMatch("[\s]+",optional=True),
-                "npc": RegexMatch("[\S]+",optional=True),
+                "npc": RegexMatch("[\S]+"),
                 "space2": RegexMatch("[\s]+",optional=True),
-                "x": RegexMatch("[0-9]+",optional=True),
+                "x": RegexMatch("[0-9]+"),
                 "space":RegexMatch("\D+",optional=True),
-                "y": RegexMatch("[0-9]+",optional=True),
+                "y": RegexMatch("[0-9]+"),
                 "enter": FullMatch("\n",optional=True),
                 "anythings1": WildcardMatch(optional=True)
             })
@@ -309,11 +309,11 @@ async def joinImage(group: Group, npc: RegexMatch, x: RegexMatch,
             Twilight({
                 "head": RegexMatch("移动NPC|移动角色"),
                 "space1": RegexMatch("[\s]+",optional=True),
-                "npc": RegexMatch("[\S]+",optional=True),
+                "npc": RegexMatch("[\S]+"),
                 "space2": RegexMatch("[\s]+",optional=True),
-                "x": RegexMatch("[0-9]+",optional=True),
+                "x": RegexMatch("[0-9]+"),
                 "space":RegexMatch("\D+",optional=True),
-                "y": RegexMatch("[0-9]",optional=True)
+                "y": RegexMatch("[0-9]")
             })
         ],
         decorators=[
