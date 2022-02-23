@@ -21,7 +21,7 @@ channel = Channel.current()
         listening_events=[GroupMessage],
         inline_dispatchers=[
             Twilight({
-                "keys": RegexMatch("【[\s\S]+?】"),
+                "keys": RegexMatch("/【[\s\S]+?】"),
                 "anythings": WildcardMatch()
             })
         ],
