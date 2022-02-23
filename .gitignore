@@ -22,3 +22,6 @@ saya/StorySend/scene.json
 naconfig.json
 start2.bat
 saya/MapMaker/config.json
+archive
+database/talkData.db
+saya/TalkStatistic/ffmpeg.exe
