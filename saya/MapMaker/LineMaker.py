@@ -2,9 +2,9 @@
 import json
 import os
 import asyncio
+from io import BytesIO
 
 import httpx
-from io import BytesIO
 from PIL import Image
 import numpy as np
 
@@ -179,7 +179,7 @@ async def get_pet(member_id: str=None,image_url=None,msgchain=False) -> np.array
         avatar = Image.open(byt).convert('RGBA')
         return np.array(avatar)
     elif msgchain:
-        resp=msgchain
+        resp=msgchain.get_bytes()
         image =  Image.open(BytesIO(resp)).convert('RGBA')
         return np.array(image)
     else:
