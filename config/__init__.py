@@ -82,6 +82,15 @@ if (
         yaml.dump(yaml_data, f, allow_unicode=True)
     logger.warning("管理员内未包含主人，已自动添加")
 
+def change_config(data):
+    try:
+        with CONFIG_PATH.joinpath("config.yaml").open("w", encoding="utf-8") as f:
+            yaml.dump(data, f, allow_unicode=True)
+        return True
+    except:
+        return False
+
+
 
 def save_config():
     logger.info("正在保存配置文件")

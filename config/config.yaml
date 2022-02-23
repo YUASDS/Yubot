@@ -6,7 +6,7 @@ Basic:
         region: xxxxx
       secretId: xxxxx
       secretKey: xxxxx
-  BotName: 千
+  BotName: 千音
   CoinName: 乌帕
   Event:
     JoinGroup: true
@@ -17,18 +17,20 @@ Basic:
     PermissionChange: true
   MAH:
     BotQQ: 959686587
-    MiraiAuthKey: ServiceVerifyKey
-    MiraiHost: http://localhost:8080
+    MiraiAuthKey: QJU1787569211
+    MiraiHost: http://localhost:1235
   Permission:
     Admin:
     - 1787569211
     Debug: false
-    DebugGroup: 87111505
+    DebugGroup: 871115054
     Master: 1787569211
     MasterName: xxxx
     Rest: false
 Final: true
 Saya:
+  AiWaifu:
+    Disabled: false
   ChatMS:
     Disabled: true
   DrawSomething:
@@ -44,6 +46,8 @@ Saya:
   ModSearch:
     Disabled: false
   StorySend:
+    Disabled: false
+  WordCloud:
     Disabled: false
   Yinglish:
     Disabled: false

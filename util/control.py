@@ -21,7 +21,7 @@ from graia.scheduler.saya.schema import SchedulerSchema
 from graia.ariadne.message.element import Plain, Source
 from graia.ariadne.model import Friend, Member, MemberPerm
 
-from config import (user_black_list, yaml_data,group_data,group_black_list)
+from config import (user_black_list, yaml_data,group_data,group_black_list,change_config)
 
 
 from .sendMessage import safeSendGroupMessage
@@ -167,12 +167,18 @@ class Permission:
         def res(event: GroupMessage,group:Group):
             member_level = cls.get(event.sender)
             if member_level == cls.MASTER:
-                pass
+                return
             if group.id == yaml_data["Basic"]["Permission"]["DebugGroup"]:
-                pass
+                return
+            # if group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]:
+            #     raise ExecutionStop()
+            if func not in yaml_data["Saya"]:
+                yaml_data["Saya"][func]={}
+                yaml_data["Saya"][func]["Disabled"]=False
+                change_config(yaml_data)
             if yaml_data["Saya"][func]["Disabled"]:
                 raise ExecutionStop()
-            elif group.id in group_black_list:
+            elif str(group.id) in group_black_list:
                 raise ExecutionStop()
             if str(group.id) not in group_data:
                 pass
