@@ -10,17 +10,18 @@
 </div>
 
  - 基于[graia](https://github.com/GraiaProject/Ariadne)与[mirai-api-http](https://github.com/project-mirai/mirai-api-http)的缝合&跑团/娱乐骰娘
+ （感谢[Abot](https://github.com/djkcyl/ABot-Graia)的基础架构）
 
 ## Yubot的功能
->- 来源于[Abot](https://github.com/djkcyl/ABot-Graia)的`涩涩词库`
+>- `涩涩词库`
 
->- 来源于[Abot](https://github.com/djkcyl/ABot-Graia)的`你画我猜`
+>- `你画我猜`
 
->- 来源于[Abot](https://github.com/djkcyl/ABot-Graia)的`背单词`
+>- `背单词`
 
->- 来源于[Abot](https://github.com/djkcyl/ABot-Graia)的`淫语翻译（改）`
+>- `淫语翻译（改）`
 
->- 来源于[Abot](https://github.com/djkcyl/ABot-Graia)的`漂流瓶（改）`
+>- `漂流瓶（改）`
 
 >- 娱乐功能——`抽乌帕`
 
@@ -34,19 +35,24 @@
 
 >- `dicecho模组`检索及下载连接获取
 
+>- `跑团地图绘制`
+
+>- `词云`
+
+>- `发言统计`
+
+>- `功能查询`
+
+>- `主人管理`
+
+>- `随机头像`
+
 ## TODO
 
->- `[√] 基于彩云小梦的情节续写`
 
->- `[√] 魔都模组检索以及下载`
+>- `[ ]`  [ART](https://app.wombo.art/)
 
->- `[√] 随机模组推荐`
-
->- `[√] dicecho模组检索及下载连接获取`
-
->- `[ ] 跑团地图绘制`
-
->- `[ ] 角色立绘随机生成`
+>- `[ ]`  [waifulab](https://waifulabs.com/generate)
 
 >- `[ ] 纯美苹果园-跑团教程`
 
