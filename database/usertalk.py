@@ -1,11 +1,13 @@
 import time
 
-from peewee import IntegerField, SqliteDatabase, Model, CharField, BigIntegerField
+from peewee import (IntegerField, SqliteDatabase, Model, CharField,
+                    BigIntegerField)
 
 db = SqliteDatabase("./database/talkData.db")
 
 
 class BaseModel(Model):
+
     class Meta:
         database = db
 
@@ -33,12 +35,18 @@ async def add_talk(qq, group, type, msg, url=None):
     >>> 3 为闪照
     >>> 4 为语音
     """
-    p = UserTalk(qq=qq, group=group, type=type, url=url, msg=msg, time=int(time.time()))
+    p = UserTalk(qq=qq,
+                 group=group,
+                 type=type,
+                 url=url,
+                 msg=msg,
+                 time=int(time.time()))
     p.save()
 
 
 async def archive_exists(msg, type):
-    msg_exists = UserTalk.select().where(UserTalk.msg == msg, UserTalk.type == type)
+    msg_exists = UserTalk.select().where(UserTalk.msg == msg,
+                                         UserTalk.type == type)
     if msg_exists.exists():
         return True
     else:
@@ -59,9 +67,9 @@ async def get_user_talk(qq, group, time=0):
 
 
 async def get_group_talk(group, time=0):
-    talklist = UserTalk.select().where(
-        UserTalk.group == group, UserTalk.type == 1, UserTalk.time > time
-    )
+    talklist = UserTalk.select().where(UserTalk.group == group,
+                                       UserTalk.type == 1,
+                                       UserTalk.time > time)
     talk_list = []
     for talk in talklist:
         talk_list.append(talk.msg)

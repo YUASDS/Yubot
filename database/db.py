@@ -8,11 +8,11 @@ from peewee import SqliteDatabase, Model, CharField, IntegerField
 
 from config import COIN_NAME
 
-
 db = SqliteDatabase("./database/userData.db")
 
 
 class BaseModel(Model):
+
     class Meta:
         database = db
 
@@ -46,7 +46,8 @@ async def sign(qq):
     if user.is_sign:
         return False
     else:
-        p = User.update(is_sign=1, sign_num=User.sign_num + 1).where(User.qq == qq)
+        p = User.update(is_sign=1,
+                        sign_num=User.sign_num + 1).where(User.qq == qq)
         p.execute()
         return True
 
@@ -112,7 +113,8 @@ async def give_all_gold(num: int):
 
 
 async def add_answer(qq: str):
-    User.update(english_answer=User.english_answer + 1).where(User.qq == qq).execute()
+    User.update(english_answer=User.english_answer +
+                1).where(User.qq == qq).execute()
     return
 
 
@@ -154,9 +156,9 @@ async def get_ranking():
         user_gold = user_info.gold
         user_talk = user_info.talk_num
         user_answer = user_info.english_answer
-        gold_rank.add_row(
-            [user_id, user_qq, user_nick, user_gold, user_talk, user_answer, i]
-        )
+        gold_rank.add_row([
+            user_id, user_qq, user_nick, user_gold, user_talk, user_answer, i
+        ])
         i += 1
 
     gold_rank = gold_rank.get_string()
@@ -198,9 +200,9 @@ async def get_ranking():
         user_gold = user_info.gold
         user_talk = user_info.talk_num
         user_answer = user_info.english_answer
-        talk_rank.add_row(
-            [user_id, user_qq, user_nick, user_gold, user_talk, user_answer, i]
-        )
+        talk_rank.add_row([
+            user_id, user_qq, user_nick, user_gold, user_talk, user_answer, i
+        ])
         i += 1
 
     talk_rank = talk_rank.get_string()
@@ -242,27 +244,30 @@ async def get_ranking():
         user_gold = user_info.gold
         user_talk = user_info.talk_num
         user_answer = user_info.english_answer
-        answer_rank.add_row(
-            [user_id, user_qq, user_nick, user_gold, user_talk, user_answer, i]
-        )
+        answer_rank.add_row([
+            user_id, user_qq, user_nick, user_gold, user_talk, user_answer, i
+        ])
         i += 1
 
     answer_rank = answer_rank.get_string()
 
     return str(
-        f"YuBot 排行榜：\n当前共服务了 {user_num} 位用户\n注意：排行榜每十分钟更新一次\n"
-        + "================================================================================================"
-        + f"\n{COIN_NAME}排行榜\n{gold_rank}\n发言排行榜\n{talk_rank}\n答题排行榜\n{answer_rank}\n"
+        f"YuBot 排行榜：\n当前共服务了 {user_num} 位用户\n注意：排行榜每十分钟更新一次\n" +
+        "================================================================================================"
+        +
+        f"\n{COIN_NAME}排行榜\n{gold_rank}\n发言排行榜\n{talk_rank}\n答题排行榜\n{answer_rank}\n"
     )
 
 
 def ladder_rent_collection():
-    user_list = User.select().where(User.gold >= 1000).order_by(User.gold.desc())
+    user_list = User.select().where(User.gold >= 1000).order_by(
+        User.gold.desc())
     total_rent = 0
     for user in user_list:
         user: User
         leadder_rent = 1 - (math.floor(user.gold / 1000) / 100)
-        User.update(gold=user.gold * leadder_rent).where(User.id == user.id).execute()
+        User.update(gold=user.gold *
+                    leadder_rent).where(User.id == user.id).execute()
         gold = User.get(User.id == user.id).gold
         total_rent += user.gold - gold
         logger.info(f"{user.id} 被收取 {user.gold - gold} {COIN_NAME}")

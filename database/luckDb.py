@@ -1,24 +1,15 @@
-from cmath import e
-import json
-import math
 import random
-from tkinter import E
-import httpx
 
 from loguru import logger
-from prettytable import PrettyTable
 from peewee import SqliteDatabase, Model, CharField, IntegerField
-
-from config import COIN_NAME
 
 db = SqliteDatabase("./database/luckData.db")
 
-gold_dic={"0":0,
-          "1":10,
-          "2":-10}
+gold_dic = {"0": 0, "1": 10, "2": -10}
 
 
 class BaseModel(Model):
+
     class Meta:
         database = db
 
@@ -31,8 +22,8 @@ class Luck(BaseModel):
 
     class Meta:
         table_name = "luck_info"
-        
-        
+
+
 class User(BaseModel):
     qq = CharField()
     gold_raw = CharField(default='0')
@@ -42,8 +33,8 @@ class User(BaseModel):
 
     class Meta:
         table_name = "user_info"
-        
-        
+
+
 db.create_tables([Luck], safe=True)
 db.create_tables([User], safe=True)
 
@@ -61,7 +52,7 @@ def init_luck(qq="0"):
         logger.info("已初始化玩家数据")
 
 
-async def sign(id): # 切换是否打捞状态
+async def sign(id):  # 切换是否打捞状态
     init_luck()
     luck = Luck.get(id=id)
     if luck.is_sign:
@@ -87,27 +78,26 @@ async def get_user_info(qq: str):
 
 async def add_luck(qq: str, num: int):
     init_luck(qq=qq)
-    Luck.insert(gold=num,qq=qq).execute()
-    user=User.get(qq=qq)
-    line=user.gold_raw
-    s=""
-    if num<30:
-        s="2"
-        gold_change=line.join("2")
-    elif num>50:
-        s="1"
-        gold_change=line.join("1")
+    Luck.insert(gold=num, qq=qq).execute()
+    user = User.get(qq=qq)
+    line = user.gold_raw
+    s = ""
+    if num < 30:
+        s = "2"
+        gold_change = line.join("2")
+    elif num > 50:
+        s = "1"
+        gold_change = line.join("1")
     else:
-        s="0"
-        gold_change=line.join("0")
-    User.update(gold_raw=gold_change,res_time=user.res_time+1).where(User.qq==qq).execute()
+        s = "0"
+        gold_change = line.join("0")
+    User.update(gold_raw=gold_change,
+                res_time=user.res_time + 1).where(User.qq == qq).execute()
     return gold_dic[s]
 
 
-async def get_user_time(qq:str):
+async def get_user_time(qq: str):
     return User.get(qq=qq).res_time
-
-
 
 
 async def reset_sign():
@@ -126,39 +116,41 @@ async def give_all_gold(num: int):
     return True
 
 
-async def get_luck_id(): # 随机取一个符合条件的瓶子
-    un_sign=Luck.select().where(Luck.is_sign == 0)
-    s=[]
+async def get_luck_id():  # 随机取一个符合条件的瓶子
+    un_sign = Luck.select().where(Luck.is_sign == 0)
+    s = []
     for p in un_sign:
-        num=int(p.id)
+        num = int(p.id)
         s.append(num)
-    id_get=random.choice(s)
+    id_get = random.choice(s)
     return id_get
 
 
-async def get_luck_gold(id:int):
+async def get_luck_gold(id: int):
     try:
-        luck=Luck.get(id=id)
+        luck = Luck.get(id=id)
         return luck.gold
     except:
         return False
 
 
-async def get_user_change(qq:str): # 返回本次变化
-    user=User.get(qq=qq)
-    line=user.gold_raw
-    gold_change=line[-1]
-    if len(line)>0:
-        new_raw=line[:-1]
+async def get_user_change(qq: str):  # 返回本次变化
+    user = User.get(qq=qq)
+    line = user.gold_raw
+    gold_change = line[-1]
+    if len(line) > 0:
+        new_raw = line[:-1]
     else:
-        new_raw="0"
-    User.update(gold_raw=new_raw,res_time=user.res_time-1).where(User.qq==qq).execute()
-    return gold_dic [gold_change]
+        new_raw = "0"
+    User.update(gold_raw=new_raw,
+                res_time=user.res_time - 1).where(User.qq == qq).execute()
+    return gold_dic[gold_change]
 
 
 def set_all_luck_gold(gold: int):
     Luck.update(gold=gold).execute()
     return True
+
 
 # async def get_ranking():
 #     luck_list = Luck.select().order_by(Luck.gold.desc())
@@ -299,7 +291,6 @@ def set_all_luck_gold(gold: int):
 #         + f"\n{COIN_NAME}排行榜\n{gold_rank}\n发言排行榜\n{talk_rank}\n答题排行榜\n{answer_rank}\n"
 #     )
 
-
 # def ladder_rent_collection():
 #     luck_list = Luck.select().where(Luck.gold >= 1000).order_by(Luck.gold.desc())
 #     total_rent = 0
@@ -312,5 +303,3 @@ def set_all_luck_gold(gold: int):
 #         logger.info(f"{luck.id} 被收取 {luck.gold - gold} {COIN_NAME}")
 
 #     return total_rent
-
-

@@ -16,7 +16,8 @@ from graia.ariadne.message.element import Source, Plain, At
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.event.lifecycle import ApplicationShutdowned
 from graia.ariadne.event.message import GroupMessage, FriendMessage
-from graia.ariadne.message.parser.twilight import Twilight, FullMatch, WildcardMatch
+from graia.ariadne.message.parser.twilight import (Twilight, FullMatch,
+                                                   WildcardMatch)
 
 from util.control import Permission, Interval, restrict
 from util.sendMessage import safeSendGroupMessage
