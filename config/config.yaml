@@ -9,6 +9,7 @@ Basic:
   BotName: 千音
   CoinName: 乌帕
   Event:
+    DefaultAcceptInvite: true
     JoinGroup: true
     KickGroup: true
     LeaveGroup: true
@@ -22,6 +23,7 @@ Basic:
   Permission:
     Admin:
     - 1787569211
+    - 2225664821
     Debug: false
     DebugGroup: 871115054
     Master: 1787569211
