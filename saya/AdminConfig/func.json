@@ -1,0 +1,26 @@
+{
+    "funcList": [
+        {
+            "name": "AiWaifu",
+            "key": "AiWaifu",
+            "can_disabled": true,
+            "default_disabled": false
+        }
+    ],
+    "configList": [
+        {
+            "name": "事件播报",
+            "instruction": "本功能开启后将监听群内事件并进行播报，可修改的值为入群欢迎语",
+            "key": "EventBroadcast",
+            "can_edit": true
+        }
+    ],
+    "funcHelp": {
+        "AiWaifu": {
+            "instruction": "随机生成头像",
+            "usage": "发送指令：\nWaifu|头像生成|获取头像|随机头像|",
+            "options": "无",
+            "example": "头像生成"
+        }
+    }
+}
