@@ -125,6 +125,10 @@ async def help(group: Group):
     for func in funcList:
         funcname = func["name"]
         funckey = func["key"]
+        if funckey not in yaml_data["Saya"]:
+            yaml_data["Saya"][funckey]={}
+            yaml_data["Saya"][funckey]["Disabled"]=False
+            change_config(yaml_data)
         funcGlobalDisabled = yaml_data["Saya"][funckey]["Disabled"]
         funcGroupDisabledList = func["key"] in group_data[str(
             group.id)]["DisabledFunc"]
@@ -260,10 +264,6 @@ async def off_func(group: Group, func: WildcardMatch, all: ArgumentMatch):
             else:
                 funcname = func["name"]
                 funckey = func["key"]
-                if funckey not in yaml_data["Saya"]:
-                    yaml_data["Saya"][funckey]={}
-                    yaml_data["Saya"][funckey]["Disabled"]=False
-                    change_config(yaml_data)
                 funcCanDisabled = func["can_disabled"]
                 funcDisabledList = group_data[str(group.id)]["DisabledFunc"]
                 funcGroupDisabled = func["key"] in funcDisabledList
