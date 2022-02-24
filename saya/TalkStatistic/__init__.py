@@ -44,8 +44,7 @@ if not data_path.exists():
         listening_events=[GroupMessage],
         inline_dispatchers=[Twilight({"head": RegexMatch(r"查看(信|消)息量统计")})],
         decorators=[Permission.require(Permission.MASTER)],
-    )
-)
+    ))
 async def get_image(group: Group):
 
     talk_num, time = await get_message_analysis()
@@ -53,7 +52,8 @@ async def get_image(group: Group):
     time.reverse()
     image = await get_mapping(talk_num, time)
 
-    await safeSendGroupMessage(group, MessageChain.create([Image(data_bytes=image)]))
+    await safeSendGroupMessage(group,
+                               MessageChain.create([Image(data_bytes=image)]))
 
 
 @channel.use(ListenerSchema(listening_events=[GroupMessage]))
@@ -68,12 +68,14 @@ async def add_talk_word(group: Group, member: Member, message: MessageChain):
         for image in image_list:
             image_name = image.id
             await download(image, image_name, "image", 2)
-            await add_talk(str(member.id), str(group.id), 2, image_name, image.url)
+            await add_talk(str(member.id), str(group.id), 2, image_name,
+                           image.url)
     elif message.has(FlashImage):
         flash_image = message.getFirst(FlashImage)
         image_name = flash_image.id
         await download(flash_image, image_name, "flashimage", 3)
-        await add_talk(str(member.id), str(group.id), 3, image_name, flash_image.url)
+        await add_talk(str(member.id), str(group.id), 3, image_name,
+                       flash_image.url)
     elif message.has(Voice):
         voice = message.getFirst(Voice)
         voice_id = voice.id
@@ -86,9 +88,8 @@ async def download(element: MultimediaElement, name, path, type):
         now_path = data_path.joinpath(path, name[1:4])
     else:
         now_time = datetime.datetime.now()
-        now_path = data_path.joinpath(
-            path, str(now_time.year), str(now_time.month), str(now_time.day)
-        )
+        now_path = data_path.joinpath(path, str(now_time.year),
+                                      str(now_time.month), str(now_time.day))
     now_path.mkdir(0o755, True, True)
     if not await archive_exists(name, type):
         for _ in range(5):
@@ -105,8 +106,7 @@ async def download(element: MultimediaElement, name, path, type):
         if type == 4:
             try:
                 now_path.joinpath(f"{name}.mp3").write_bytes(
-                    await silkcoder.decode(r, audio_format="mp3")
-                )
+                    await silkcoder.decode(r, audio_format="mp3"))
             except silkcoder.CoderError:
                 now_path.joinpath(f"{name}.silk").write_bytes(r)
         else:

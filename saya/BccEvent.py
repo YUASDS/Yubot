@@ -27,8 +27,8 @@ async def make_msg_for_unknow_exception(event):
 
 
 @channel.use(ListenerSchema(listening_events=[ExceptionThrowed]))
-async def except_handle( event: ExceptionThrowed):
-    app=Ariadne.get_running()
+async def except_handle(event: ExceptionThrowed):
+    app = Ariadne.get_running()
 
     return await app.sendFriendMessage(
         yaml_data["Basic"]["Permission"]["Master"],
