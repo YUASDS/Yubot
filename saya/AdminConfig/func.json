@@ -5,6 +5,90 @@
             "key": "AiWaifu",
             "can_disabled": true,
             "default_disabled": false
+        },
+        {
+            "name": "词云",
+            "key": "WordCloud",
+            "can_disabled": true,
+            "default_disabled": false
+        },
+        {
+            "name": "有点涩的聊天",
+            "key": "ChatMS",
+            "can_disabled": true,
+            "default_disabled": false
+        },
+        {
+            "name": "用户功能",
+            "key": "UserFunction",
+            "can_disabled": false,
+            "default_disabled": false
+        },
+        {
+            "name": "签到",
+            "key": "Sign",
+            "can_disabled": true,
+            "default_disabled": false
+        },
+        {
+            "name": "你画我猜",
+            "key": "DrawSomething",
+            "can_disabled": true,
+            "default_disabled": false
+        },
+        {
+            "name": "淫文翻译机",
+            "key": "Yinglish",
+            "can_disabled": true,
+            "default_disabled": false
+        },
+        {
+            "name": "背单词",
+            "key": "EnglishTest",
+            "can_disabled": true,
+            "default_disabled": false
+        },
+        {
+            "name": "漂流瓶",
+            "key": "DriftingBottle",
+            "can_disabled": true,
+            "default_disabled": false
+        },
+        {
+            "name": "群功能",
+            "key": "GroupConfig",
+            "can_disabled": false,
+            "default_disabled": false
+        },
+        {
+            "name": "地图制作",
+            "key": "MapMaker",
+            "can_disabled": false,
+            "default_disabled": false
+        },
+        {
+            "name": "AI续写",
+            "key": "AiWriter",
+            "can_disabled": false,
+            "default_disabled": false
+        },
+        {
+            "name": "随机头像",
+            "key": "AiWaifu",
+            "can_disabled": false,
+            "default_disabled": false
+        },
+        {
+            "name": "模组搜索/随机模组",
+            "key": "ModSearch",
+            "can_disabled": false,
+            "default_disabled": false
+        },
+        {
+            "name": "抽乌帕",
+            "key": "Luck",
+            "can_disabled": false,
+            "default_disabled": false
         }
     ],
     "configList": [
@@ -21,6 +105,90 @@
             "usage": "发送指令：\nWaifu|头像生成|获取头像|随机头像|",
             "options": "无",
             "example": "头像生成"
+        },
+        "词云": {
+            "instruction": "记录并生成群内词云",
+            "usage": "发送指令：\n查看个人词云\n查看本群词云",
+            "options": "无",
+            "example": "（这也需要示例吗？"
+        },
+        "有点涩的聊天": {
+            "instruction": "调用词库进行回复",
+            "usage": "发送指令：\n@千音<文字>",
+            "options": "文字：任意可能被回复的文字",
+            "example": "（这也需要示例吗？"
+        },
+        "用户功能": {
+            "instruction": "用户基本功能",
+            "usage": "发送指令：\n查看个人信息\n查看排行榜",
+            "options": "无",
+            "example": "（这也需要示例吗？"
+        },
+        "签到": {
+            "instruction": "一个简单的签到功能，也是本机器人唯一的货币来源",
+            "usage": "发送指令：\n签到",
+            "options": "每日凌晨四点重置签到，每次签到可获得 5-21 个$COIN_NAME",
+            "example": "（这也需要示例吗？"
+        },
+        "你画我猜": {
+            "instruction": "群内互动小游戏，你画我猜",
+            "usage": "发送指令：\n你画我猜",
+            "options": "每次游玩时发起者消耗 4 个$COIN_NAME，游戏结束后获胜者获得 1 个$COIN_NAME，发起者返还 2 个$COIN_NAME",
+            "example": "（这也需要示例吗？"
+        },
+        "淫文翻译机": {
+            "instruction": "能把中文翻译成淫语的翻译机！",
+            "usage": "发送指令：\n淫语 <文字>",
+            "options": "文字：任意100字以内的文字（建议）",
+            "example": "淫语 不行，那里不行"
+        },
+        "背单词": {
+            "instruction": "字面意思",
+            "usage": "发送指令：\n背单词",
+            "options": "发送背单词后选择想要学习的词库，机器人将会发题，请根据题目作答，15秒后未作答将提供三次提示，答题系统为全群共享，即“一人开启，全群皆可作答”，如果不想学或者想更换题库可发送取消来终止进程。\n（本功能支持私聊使用）",
+            "example": "（这也需要示例吗？"
+        },
+        "漂流瓶": {
+            "instruction": "嗯，就是漂流瓶而已",
+            "usage": "发送指令：\n捞漂流瓶\n丢漂流瓶\n查漂流瓶\n漂流瓶评分 <漂流瓶编号> <分数>",
+            "options": "漂流瓶需消耗 10 个$COIN_NAME购买！\n漂流瓶内只可包含最多 400 个文字和 1 张图片\n如果无法发送图片可在命令后添加参数 -P\n漂流瓶可进行评分，每人每瓶仅限一次，评分为五分制。",
+            "example": "丢漂流瓶 Hello World!\n丢漂流瓶 -P This is Picture"
+        },
+        "群功能": {
+            "instruction": "群内可调节的功能",
+            "usage": "发送指令：\n群功能",
+            "options": "详细情况请输入“群功能”查看，后续会逐步添加新的可配置项",
+            "example": "（这也需要示例吗？"
+        },
+        "地图制作": {
+            "instruction": "制作方格地图",
+            "usage": "发送指令：\n地图",
+            "options": "详细情况请输入“地图”查看",
+            "example": "（这也需要示例吗？"
+        },
+        "AI续写": {
+            "instruction": "彩云小梦续写文章",
+            "usage": "发送指令：\n续写",
+            "options": "详细情况请输入“续写”查看",
+            "example": "（这也需要示例吗？"
+        },
+        "随机头像": {
+            "instruction": "随机一个跑团头像",
+            "usage": "发送指令：\nWaifu|头像生成|获取头像|随机头像",
+            "options": "获取头像消耗5 个$COIN_NAME",
+            "example": "（这也需要示例吗？"
+        },
+        "模组搜索/随机模组": {
+            "instruction": "搜索模组或者获取一个随机模组",
+            "usage": "发送指令：\n模组搜索+内容|魔都搜索+内容|随机模组|随机贴贴模组",
+            "options": "获取头像消耗5 个$COIN_NAME",
+            "example": "模组搜索 快乐王子"
+        },
+        "抽乌帕": {
+            "instruction": "放下一个乌帕，然后拿起一个乌帕",
+            "usage": "发送指令：\n放乌帕|抽乌帕",
+            "options": "试试就知道哦~",
+            "example": "放乌帕15"
         }
     }
 }
