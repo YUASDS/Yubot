@@ -277,20 +277,3 @@ class Interval:
                 cls.sent_alert.add(member)
             raise ExecutionStop()
 
-
-
-
-
-def restrict(func,group: Group):
-    '''用于管理插件启用'''
-    try:
-        if (
-            yaml_data["Saya"][func]["Disabled"]
-            and group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]
-        ):
-            return 0
-        elif func in group_data[str(group.id)]["DisabledFunc"]:
-            return 0
-        return 1
-    except:
-        return 1
