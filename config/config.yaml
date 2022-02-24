@@ -33,12 +33,18 @@ Final: true
 Saya:
   AiWaifu:
     Disabled: false
+  AiWriter:
+    Disabled: false
   ChatMS:
     Disabled: true
   DrawSomething:
     Disabled: false
   DriftingBottle:
     Disabled: true
+  EnglishTest:
+    Disabled: false
+  GroupConfig:
+    Disabled: false
   GroupSend:
     Disabled: false
   Luck:
@@ -47,7 +53,11 @@ Saya:
     Disabled: false
   ModSearch:
     Disabled: false
+  Sign:
+    Disabled: false
   StorySend:
+    Disabled: false
+  UserFunction:
     Disabled: false
   WordCloud:
     Disabled: false
