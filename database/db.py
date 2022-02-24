@@ -24,6 +24,7 @@ class User(BaseModel):
     english_answer = IntegerField(default=0)
     gold = IntegerField(default=0)
     talk_num = IntegerField(default=0)
+    favor=IntegerField(default=0)
 
     class Meta:
         table_name = "user_info"
@@ -40,7 +41,7 @@ def init_user(qq: str):
         logger.info(f"已初始化{qq}")
 
 
-async def sign(qq):
+async def sign(qq: str):
     init_user(qq)
     user = User.get(qq=qq)
     if user.is_sign:
@@ -52,10 +53,11 @@ async def sign(qq):
         return True
 
 
-async def get_info(qq):
+async def get_info(qq: str):
     init_user(qq)
     user = User.get(qq=qq)
-    return [user.id, user.is_sign, user.sign_num, user.gold, user.talk_num]
+    return {"id":user.id, "is_sign":user.is_sign, "sign_num":user.sign_num, 
+            "gold":user.gold, "talk_num":user.talk_num,"favor":user.favor}
 
 
 async def add_gold(qq: str, num: int):
@@ -64,6 +66,27 @@ async def add_gold(qq: str, num: int):
     p.execute()
     return True
 
+async def add_favor(qq: str, num: int):
+    init_user(qq)
+    p = User.update(favor=User.favor + num).where(User.qq == qq)
+    p.execute()
+    return True
+
+
+async def reduce_favor(qq: str, num: int, force: bool = False):
+    init_user(qq)
+    # favor_num = User.get(qq=qq).favor
+    # if favor_num < num:
+    #     if force:
+    #         p = User.update(favor=0).where(User.qq == qq)
+    #         p.execute()
+    #         return
+    #     else:
+    #         return False
+    # else:
+    p = User.update(favor=User.favor - num).where(User.qq == qq)
+    p.execute()
+    return True
 
 async def reduce_gold(qq: str, num: int, force: bool = False):
     init_user(qq)
@@ -117,6 +140,31 @@ async def add_answer(qq: str):
                 1).where(User.qq == qq).execute()
     return
 
+class favor:
+    def __init__(self,favors) -> None:
+        self.favors=favors                 
+        self.level=self.get_level()       
+        self.res=self.get_res()
+        self.next=self.get_next_level()
+        pass
+    def  get_level(self): # 当前等级
+        favors=self.favors
+        level=1
+        while(2**level<favors):
+            level+=1
+            favors=favors-2**level
+        return level
+
+    def get_res(self):# 当前显示好感度
+        favors=self.favors
+        res=favors-2**(self.level-1)
+        if res<0:
+            res=0
+        return res
+
+
+    def get_next_level(self): # 下一等级所需好感度
+        return 2**self.level
 
 async def get_ranking():
     user_list = User.select().order_by(User.gold.desc())
@@ -252,7 +300,7 @@ async def get_ranking():
     answer_rank = answer_rank.get_string()
 
     return str(
-        f"YuBot 排行榜：\n当前共服务了 {user_num} 位用户\n注意：排行榜每十分钟更新一次\n" +
+        f"千音 排行榜：\n当前共服务了 {user_num} 位用户\n注意：排行榜每十分钟更新一次\n" +
         "================================================================================================"
         +
         f"\n{COIN_NAME}排行榜\n{gold_rank}\n发言排行榜\n{talk_rank}\n答题排行榜\n{answer_rank}\n"
