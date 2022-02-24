@@ -18,7 +18,7 @@ from graia.ariadne.message.parser.twilight import (
 from util.text2image import create_image
 from util.control import Permission, Interval
 from util.sendMessage import safeSendGroupMessage
-from config import save_config, yaml_data, group_data, COIN_NAME
+from config import save_config, yaml_data, group_data, COIN_NAME,change_config
 
 saya = Saya.current()
 channel = Channel.current()
@@ -41,7 +41,9 @@ groupInitData = {
     "EventBroadcast": {
         "Enabled": True,
         "Message": None
-    },
+    }}
+    
+Agreement={
     "Agreement":
     "0. 本协议是 骰娘白千音（下统称“千音”）默认服务协议。如果你看到了这句话，意味着你或你的群友应用默认协议，请注意。该协议仅会出现一次。\n"
     "1. 邀请千音、使用千音服务和在群内阅读此协议视为同意并承诺遵守此协议，否则请持有管理员或管理员以上权限的用户使用 .dismiss 移出千音。"
@@ -258,6 +260,10 @@ async def off_func(group: Group, func: WildcardMatch, all: ArgumentMatch):
             else:
                 funcname = func["name"]
                 funckey = func["key"]
+                if funckey not in yaml_data["Saya"]:
+                    yaml_data["Saya"][funckey]={}
+                    yaml_data["Saya"][funckey]["Disabled"]=False
+                    change_config(yaml_data)
                 funcCanDisabled = func["can_disabled"]
                 funcDisabledList = group_data[str(group.id)]["DisabledFunc"]
                 funcGroupDisabled = func["key"] in funcDisabledList

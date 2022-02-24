@@ -17,7 +17,7 @@ from graia.ariadne.message.parser.twilight import (
     WildcardMatch,
 )
 
-from .AdminConfig import groupInitData
+from .AdminConfig import Agreement
 from util.text2image import create_image
 from util.control import Rest, Permission
 from database.db import add_gold, give_all_gold
@@ -613,7 +613,7 @@ async def gset_open(group: Group, func: WildcardMatch):
     ))
 async def user_agreement(app: Ariadne, friend: Friend):
     Permission.manual(friend, Permission.MASTER)
-    image = await create_image(groupInitData["Agreement"])
+    image = await create_image(Agreement["Agreement"])
     groupList = ([
         await app.getGroup(yaml_data["Basic"]["Permission"]["DebugGroup"])
     ] if yaml_data["Basic"]["Permission"]["Debug"] else await

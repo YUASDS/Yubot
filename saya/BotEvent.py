@@ -27,7 +27,7 @@ from util.text2image import create_image
 from util.sendMessage import safeSendGroupMessage
 from config import save_config, yaml_data, group_data, group_list, user_list
 
-from .AdminConfig import groupInitData
+from .AdminConfig import groupInitData,Agreement
 
 saya = Saya.current()
 channel = Channel.current()
@@ -155,7 +155,7 @@ async def accept(app: Ariadne, invite: BotInvitedJoinGroupRequestEvent):
         await app.sendFriendMessage(
             invite.supplicant,
             MessageChain.create(
-                Image(data_bytes=await create_image(groupInitData["Agreement"]
+                Image(data_bytes=await create_image(Agreement["Agreement"]
                                                     ))),
         )
         await invite.accept()
@@ -298,7 +298,7 @@ async def get_BotJoinGroup(app: Ariadne, joingroup: BotJoinGroupEvent):
                 joingroup.group.id,
                 MessageChain.create(
                     Image(data_bytes=await create_image(
-                        groupInitData["Agreement"]))),
+                        Agreement["Agreement"]))),
             )
 
 
