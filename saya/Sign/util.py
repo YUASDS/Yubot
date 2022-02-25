@@ -27,7 +27,7 @@ async def get_qlogo(id: int) -> bytes:
 
 
 async def get_hotokoto() -> str:
-    url = "https://v1.hitokoto.cn/?encode=text&charset=utf-8&max_length=100"
+    url = "https://api.dzzui.com/api/yiyan"
     async with httpx.AsyncClient() as client:
         try:
             hotokoto = await client.get(url=url)
