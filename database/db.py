@@ -41,7 +41,7 @@ def init_user(qq: str):
         logger.info(f"已初始化{qq}")
 
 
-async def sign(qq: str):
+async def is_sign(qq: str):
     init_user(qq)
     user = User.get(qq=qq)
     if user.is_sign:
