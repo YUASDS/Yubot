@@ -200,6 +200,8 @@ async def change(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
     y = y.result.asDisplay()
     gid = str(group.id)
     mid = str(member.id)
+    if not x.isdigit() and y.isdigit():
+        return
     x = int(x)-1
     y = int(y)-1
     config = await load_config(CONFIG_FILE)
@@ -216,7 +218,12 @@ async def change(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
             for j in i:
                 if j == mid:
                     MAP[gid]["array"][w][h] = 0
-                    MAP[gid]["array"][x][y] = mid
+                    try:
+                        MAP[gid]["array"][x][y] = mid
+                    except Exception :
+                        return await safeSendGroupMessage(group,
+                                MessageChain.create("当前的移动超出了地图范围哦~"))
+
                     # print(w, h)
                     # print(MAP[gid]["array"])
                 h = h + 1
