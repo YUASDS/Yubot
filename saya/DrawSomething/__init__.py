@@ -19,7 +19,7 @@ from graia.ariadne.event.message import GroupMessage, FriendMessage
 from graia.ariadne.message.parser.twilight import (Twilight, FullMatch,
                                                    WildcardMatch)
 
-from util.control import Permission, Interval, restrict
+from util.control import Permission, Interval
 from util.sendMessage import safeSendGroupMessage
 from config import yaml_data, COIN_NAME
 from database.db import add_answer, reduce_gold, add_gold
@@ -29,6 +29,7 @@ channel = Channel.current()
 bcc = saya.broadcast
 inc = InterruptControl(bcc)
 
+func = os.path.dirname(__file__).split("\\")[-1]
 WORD = json.loads(
     Path(__file__).parent.joinpath("word.json").read_text("UTF-8"))
 MEMBER_RUNING_LIST = []
@@ -40,14 +41,12 @@ GROUP_GAME_PROCESS = {}
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[Twilight({"head": FullMatch("你画我猜")})],
-        decorators=[Permission.require(),
+        decorators=[
+            Permission.restricter(func),
+            Permission.require(),
                     Interval.require(60)],
     ))
 async def main(app: Ariadne, group: Group, member: Member, source: Source):
-    func = os.path.dirname(__file__).split("\\")[-1]
-    if not restrict(func=func, group=group):
-        logger.info(f"{func}在{group.id}群不可用")
-        return
 
     # 判断用户是否正在游戏中
     if member.id in MEMBER_RUNING_LIST:

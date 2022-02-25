@@ -1,6 +1,3 @@
-import os
-from loguru import logger
-
 from graia.saya import Saya, Channel
 from graia.ariadne.model import Group
 from graia.ariadne.event.message import GroupMessage
@@ -10,11 +7,10 @@ from graia.ariadne.message.parser.twilight import Twilight, RegexMatch, Wildcard
 
 from config import group_key
 from util.sendMessage import safeSendGroupMessage
-from util.control import Permission, Interval, Rest, restrict
+from util.control import Permission, Interval, Rest
 
 saya = Saya.current()
 channel = Channel.current()
-
 
 @channel.use(
     ListenerSchema(
@@ -32,13 +28,6 @@ channel = Channel.current()
         ],
     ))
 async def main(group: Group, anythings: WildcardMatch, keys: RegexMatch):
-
-    func = os.path.dirname(__file__).split("\\")[-1]
-    if not restrict(func=func, group=group):
-        logger.info(f"{func}在{group.id}群不可用")
-        return
-    # elif "Yinglish" in group_data[str(group.id)]["DisabledFunc"]:
-    #     return
     if keys.matched:
         keys = keys.result.asDisplay()
         if keys in group_key:

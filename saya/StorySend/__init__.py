@@ -14,10 +14,11 @@ from graia.ariadne.message.parser.twilight import Twilight, RegexMatch
 
 
 from util.sendMessage import safeSendGroupMessage
-from util.control import Permission, Interval, Rest,restrict
+from util.control import Permission, Interval, Rest
 
 DATA_FILE = Path(__file__).parent.joinpath("scene.json")
 DATA: dict = json.loads(DATA_FILE.read_text(encoding="utf-8"))
+func = os.path.dirname(__file__).split("\\")[-1]
 
 saya = Saya.current()
 channel = Channel.current()
@@ -28,6 +29,7 @@ channel = Channel.current()
         listening_events=[GroupMessage],
         inline_dispatchers=[Twilight({"keys": RegexMatch("-[\s\S]+-")})],
         decorators=[
+            Permission.restricter(func),
             Permission.require(),
             Rest.rest_control(),
             Interval.require()
@@ -35,10 +37,6 @@ channel = Channel.current()
     ))
 async def main(group: Group, member: Member, keys: RegexMatch):
 
-    func=os.path.dirname(__file__).split("\\")[-1]
-    if not restrict(func=func,group=group):
-        logger.info(f"{func}在{group.id}群不可用")
-        return
     if keys.matched:
 
         keys = keys.result.asDisplay()

@@ -22,7 +22,7 @@ from graia.ariadne.message.element import Plain, Source
 from graia.ariadne.model import Friend, Member, MemberPerm
 
 from config import (user_black_list, yaml_data,group_data,group_black_list,change_config)
-
+from database.db import all_sign_num,reset_sign
 
 from .sendMessage import safeSendGroupMessage
 
@@ -44,9 +44,11 @@ async def work_scheduled(app: Ariadne):
 @channel.use(SchedulerSchema(crontabify("4 0 * * *")))
 async def rest_scheduled(app: Ariadne):
     Rest.set_sleep(1)
+    sign=await all_sign_num()
+    await reset_sign()
     await app.sendFriendMessage(
         yaml_data["Basic"]["Permission"]["Master"],
-        MessageChain.create([Plain("已进入休息时间")]),
+        MessageChain.create([Plain(f"已完成签到重置，签到统计{sign[0]}/{sign[1]}")]),
     )
 
 
@@ -277,14 +279,3 @@ class Interval:
                 cls.sent_alert.add(member)
             raise ExecutionStop()
 
-def restrict(func, group: Group):
-    '''用于管理插件启用'''
-    try:
-        if (yaml_data["Saya"][func]["Disabled"] and
-                group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]):
-            return 0
-        elif func in group_data[str(group.id)]["DisabledFunc"]:
-            return 0
-        return 1
-    except:
-        return 1

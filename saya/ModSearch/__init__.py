@@ -12,7 +12,7 @@ from graia.ariadne.event.message import GroupMessage
 from graia.ariadne.message.parser.twilight import (Twilight, FullMatch,
                                                    WildcardMatch)
 
-from util.control import Permission, Interval, Rest, restrict
+from util.control import Permission, Interval, Rest
 from util.sendMessage import safeSendGroupMessage
 from config import COIN_NAME
 from database.db import reduce_gold
@@ -24,7 +24,7 @@ saya = Saya.current()
 channel = Channel.current()
 bcc = saya.broadcast
 inc = InterruptControl(bcc)
-
+func = os.path.dirname(__file__).split("\\")[-1]
 
 @channel.use(
     ListenerSchema(
@@ -36,6 +36,7 @@ inc = InterruptControl(bcc)
             })
         ],
         decorators=[
+            Permission.restricter(func),
             Permission.require(),
             Rest.rest_control(),
             Interval.require()
@@ -43,10 +44,6 @@ inc = InterruptControl(bcc)
     ))
 async def main(group: Group, member: Member, mod: WildcardMatch):
 
-    func = os.path.dirname(__file__).split("\\")[-1]
-    if not restrict(func=func, group=group):
-        logger.info(f"{func}在{group.id}群不可用")
-        return
     if mod.matched:
         mod = mod.result.asDisplay()
         if not await reduce_gold(str(member.id), 5):
@@ -83,6 +80,7 @@ async def main(group: Group, member: Member, mod: WildcardMatch):
             })
         ],
         decorators=[
+            Permission.restricter(func),
             Permission.require(),
             Rest.rest_control(),
             Interval.require()
@@ -90,10 +88,6 @@ async def main(group: Group, member: Member, mod: WildcardMatch):
     ))
 async def CnmodsSearch(group: Group, member: Member, mod: WildcardMatch):
 
-    func = os.path.dirname(__file__).split("\\")[-1]
-    if not restrict(func=func, group=group):
-        logger.info(f"{func}在{group.id}群不可用")
-        return
     if mod.matched:
         mod = mod.result.asDisplay()
         if not await reduce_gold(str(member.id), 5):
@@ -125,6 +119,7 @@ async def CnmodsSearch(group: Group, member: Member, mod: WildcardMatch):
         listening_events=[GroupMessage],
         inline_dispatchers=[Twilight({"heads": FullMatch("随机模组")})],
         decorators=[
+            Permission.restricter(func),
             Permission.require(),
             Rest.rest_control(),
             Interval.require()
@@ -132,10 +127,7 @@ async def CnmodsSearch(group: Group, member: Member, mod: WildcardMatch):
     ))
 async def GroupRandomSearch(group: Group, member: Member):
 
-    func = os.path.dirname(__file__).split("\\")[-1]
-    if not restrict(func=func, group=group):
-        logger.info(f"{func}在{group.id}群不可用")
-        return
+
 
     if not await reduce_gold(str(member.id), 5):
         await safeSendGroupMessage(
@@ -157,6 +149,7 @@ async def GroupRandomSearch(group: Group, member: Member):
         listening_events=[GroupMessage],
         inline_dispatchers=[Twilight({"heads": FullMatch("随机贴贴模组")})],
         decorators=[
+            Permission.restricter(func),
             Permission.require(),
             Rest.rest_control(),
             Interval.require()
@@ -164,10 +157,7 @@ async def GroupRandomSearch(group: Group, member: Member):
     ))
 async def GroupRandomLoveSearch(group: Group, member: Member):
 
-    func = os.path.dirname(__file__).split("\\")[-1]
-    if not restrict(func=func, group=group):
-        logger.info(f"{func}在{group.id}群不可用")
-        return
+
 
     if not await reduce_gold(str(member.id), 5):
         await safeSendGroupMessage(

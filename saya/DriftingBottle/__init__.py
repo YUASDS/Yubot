@@ -29,7 +29,7 @@ from graia.ariadne.message.parser.twilight import (
 
 from database.db import reduce_gold
 from util.text2image import create_image
-from util.control import Permission, Interval, restrict
+from util.control import Permission, Interval
 from util.sendMessage import safeSendGroupMessage
 # from util.TextModeration import text_moderation_async
 # from util.ImageModeration import image_moderation_async
@@ -73,7 +73,9 @@ func = os.path.dirname(__file__).split("\\")[-1]
                     WildcardMatch(optional=True),
                 }, )
         ],
-        decorators=[Permission.require(),
+        decorators=[
+            Permission.restricter(func),
+            Permission.require(),
                     Interval.require(30)],
     ))
 async def throw_bottle_handler(
@@ -83,10 +85,6 @@ async def throw_bottle_handler(
     arg_pic: ArgumentMatch,
     anythings1: WildcardMatch,
 ):
-    func = os.path.dirname(__file__).split("\\")[-1]
-    if not restrict(func=func, group=group):
-        logger.info(func)
-        return
 
     @Waiter.create_using_function(listening_events=[GroupMessage],
                                   using_decorators=[Permission.require()])
@@ -228,14 +226,11 @@ async def throw_bottle_handler(
         inline_dispatchers=[
             Twilight({"head": RegexMatch(r"^(捡|打?捞)(漂流瓶|瓶子)$")})
         ],
-        decorators=[Permission.require(),
+        decorators=[Permission.restricter(func),
+                    Permission.require(),
                     Interval.require(30)],
     ))
 async def pick_bottle_handler(group: Group):
-    func = os.path.dirname(__file__).split("\\")[-1]
-    if not restrict(func=func, group=group):
-        logger.info(func)
-        return
 
     bottle = get_bottle()
 
@@ -284,16 +279,12 @@ async def clear_bottle_handler(group: Group):
                 "bottleid": WildcardMatch(optional=True)
             })
         ],
-        decorators=[Permission.require(),
+        decorators=[Permission.restricter(func),
+                    Permission.require(),
                     Interval.require()],
     ))
 async def drifting_bottle_handler(group: Group, member: Member,
                                   bottleid: WildcardMatch):
-    func = os.path.dirname(__file__).split("\\")[-1]
-    if not restrict(func=func, group=group):
-        logger.info(func)
-        return
-
     if bottleid.matched and member.id == yaml_data["Basic"]["Permission"][
             "Master"]:
         bottle_id = int(bottleid.result.asDisplay())
@@ -370,16 +361,14 @@ async def delete_bottle_handler(group: Group, anything: WildcardMatch):
                 "anythings": WildcardMatch(optional=True),
             })
         ],
-        decorators=[Permission.require(),
+        decorators=[Permission.restricter(func),
+                    Permission.require(),
                     Interval.require(5)],
     ))
 async def bottle_score_handler(group: Group, member: Member,
                                message: MessageChain,
                                anythings: WildcardMatch):
-    func = os.path.dirname(__file__).split("\\")[-1]
-    if not restrict(func=func, group=group):
-        logger.info(func)
-        return
+
 
     if anythings.matched:
         try:

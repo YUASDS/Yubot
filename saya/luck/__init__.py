@@ -10,7 +10,7 @@ from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.event.message import GroupMessage
 from graia.ariadne.message.parser.twilight import Twilight, FullMatch, RegexMatch
 
-from util.control import Permission, Interval, Rest, restrict
+from util.control import Permission, Interval, Rest
 from util.sendMessage import safeSendGroupMessage
 from config import yaml_data, group_data, COIN_NAME
 from database.db import reduce_gold, add_gold
@@ -21,6 +21,7 @@ channel = Channel.current()
 bcc = saya.broadcast
 inc = InterruptControl(bcc)
 
+func = os.path.dirname(__file__).split("\\")[-1]
 
 @channel.use(
     ListenerSchema(
@@ -32,18 +33,13 @@ inc = InterruptControl(bcc)
             })
         ],
         decorators=[
+            Permission.restricter(func),
             Permission.require(),
             Rest.rest_control(),
             Interval.require()
         ],
     ))
-async def main(group: Group, member: Member, number: RegexMatch,
-               source: Source):
-
-    func = os.path.dirname(__file__).split("\\")[-1]
-    if not restrict(func=func, group=group):
-        logger.info(f"{func}在{group.id}群不可用")
-        return
+async def main(group: Group, member: Member, number: RegexMatch):
     if number.matched:
         number = int(number.result.asDisplay())
         if number > 10:

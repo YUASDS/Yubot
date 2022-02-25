@@ -12,7 +12,7 @@ from graia.ariadne.message.parser.twilight import Twilight, FullMatch
 from util.sendMessage import safeSendGroupMessage
 from util.text2image import font_file
 from util.control import Permission, Interval, Rest
-from database.db import favor,get_info,add_favor,add_gold,sign
+from database.db import favor,get_info,add_favor,add_gold,is_sign
 from .util import Reward
 from .sign import get_signin_img
 
@@ -39,7 +39,7 @@ channel = Channel.current()
     ))
 async def main(group: Group,  member: Member):
     mid=member.id
-    if not await sign(str(mid)):
+    if not await is_sign(str(mid)):
         return await safeSendGroupMessage(group, MessageChain.create("你今天已经签到过了哦，等明天再来吧~"))
     info=await get_info(str(mid)) # 获取信息
     uid=info["id"]
