@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+# 来源 https://github.com/Redlnn/signin-image-generator 
+# 有所修改
 # import time
 from io import BytesIO
 from os.path import dirname, join

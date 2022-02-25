@@ -14,7 +14,7 @@ from util.text2image import font_file
 from util.control import Permission, Interval, Rest
 from database.db import favor,get_info,add_favor,add_gold,sign
 from .util import Reward
-from .sigh import get_signin_img
+from .sign import get_signin_img
 
 func = os.path.dirname(__file__).split("\\")[-1]
 path = os.path.dirname(__file__)
@@ -40,10 +40,19 @@ channel = Channel.current()
 async def main(group: Group,  member: Member):
     mid=member.id
     if not await sign(str(mid)):
-        return safeSendGroupMessage(group, MessageChain.create("你今天已经签到过了哦，等明天再来吧~"))
+        return await safeSendGroupMessage(group, MessageChain.create("你今天已经签到过了哦，等明天再来吧~"))
     info=await get_info(str(mid)) # 获取信息
     uid=info["id"]
     favors=info["favor"]
+    gold_add=randint(1,15)
+    favor_add=1
+    
+    await add_gold(qq=str(mid),num=gold_add)
+    await add_favor(qq=str(mid),num=favor_add)
+    favors_now=favors+favor_add
+    fav=favor(favors_now) # 获取好感度相关数据
+    exp=[favors_now,fav.next]
+    mahojin_path=os.path.join(path, "imgs", "mahojin.png")
     rewards=[
             Reward(name="乌帕",
                 num=gold_add, ico=os.path.join(path, "imgs", "原石.png")),
@@ -51,14 +60,6 @@ async def main(group: Group,  member: Member):
                    num=favor_add,
                    ico=os.path.join(path, "imgs", "纠缠之缘.png")),
         ] # 奖励信息
-    favor_add=1
-    gold_add=randint(1,15)
-    await add_gold(qq=str(mid),num=gold_add)
-    await add_favor(qq=str(mid),num=favor_add)
-    favors_now=favors+favor_add
-    fav=favor(favors_now) # 获取好感度相关数据
-    exp=[favors_now,fav.next]
-    mahojin_path=os.path.join(path, "imgs", "mahojin.png")
     pic=await get_signin_img(qq=mid,
                         name=member.name,
                         uuid=uid,

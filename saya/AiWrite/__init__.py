@@ -11,7 +11,7 @@ from graia.ariadne.event.message import GroupMessage
 from graia.ariadne.message.parser.twilight import (Twilight, FullMatch,
                                                    WildcardMatch)
 
-from util.control import Permission, Interval, Rest, restrict
+from util.control import Permission, Interval, Rest
 from util.sendMessage import safeSendGroupMessage
 from config import COIN_NAME
 from database.db import reduce_gold
@@ -19,6 +19,9 @@ from .novel_data import get_cont_continuation, load_config, save_config
 
 saya = Saya.current()
 channel = Channel.current()
+
+func = os.path.dirname(__file__).split("\\")[-1]
+
 bcc = saya.broadcast
 inc = InterruptControl(bcc)
 
@@ -59,6 +62,7 @@ templete = {'iter': 3, 'model': '小梦0号', 'token': ''}
             })
         ],
         decorators=[
+            Permission.restricter(func),
             Permission.require(),
             Rest.rest_control(),
             Interval.require()
@@ -66,10 +70,6 @@ templete = {'iter': 3, 'model': '小梦0号', 'token': ''}
     ))
 async def main(group: Group, member: Member, text: WildcardMatch):
 
-    func = os.path.dirname(__file__).split("\\")[-1]
-    if not restrict(func=func, group=group):
-        logger.info(f"{func}在{group.id}群不可用")
-        return
     gid = str(group.id)
     if gid not in config:
         print("sad")
@@ -133,17 +133,13 @@ async def main(group: Group, member: Member, text: WildcardMatch):
             })
         ],
         decorators=[
+            Permission.restricter(func),
             Permission.require(),
             Rest.rest_control(),
             Interval.require()
         ],
     ))
 async def APIKEY(group: Group, member: Member, text: WildcardMatch):
-
-    func = os.path.dirname(__file__).split("\\")[-1]
-    if not restrict(func=func, group=group):
-        logger.info(f"{func}在{group.id}群不可用")
-        return
 
     if text.matched:
         gid = str(group.id)
@@ -187,17 +183,13 @@ async def APIKEY(group: Group, member: Member, text: WildcardMatch):
             })
         ],
         decorators=[
-            Permission.require(20),
+            Permission.restricter(func),
+            Permission.require(Permission.GROUP_ADMIN),
             Rest.rest_control(),
             Interval.require()
         ],
     ))
 async def novel_iteration(group: Group, member: Member, text: WildcardMatch):
-
-    func = os.path.dirname(__file__).split("\\")[-1]
-    if not restrict(func=func, group=group):
-        logger.info(f"{func}在{group.id}群不可用")
-        return
     gid = str(group.id)
     if text.matched:
         if gid not in config:
@@ -244,17 +236,14 @@ async def novel_iteration(group: Group, member: Member, text: WildcardMatch):
             })
         ],
         decorators=[
-            Permission.require(20),
+            Permission.restricter(func),
+            Permission.require(Permission.GROUP_ADMIN),
             Rest.rest_control(),
             Interval.require()
         ],
     ))
 async def on_prefix(group: Group, member: Member, text: WildcardMatch):
 
-    func = os.path.dirname(__file__).split("\\")[-1]
-    if not restrict(func=func, group=group):
-        logger.info(f"{func}在{group.id}群不可用")
-        return
     gid = str(group.id)
     if text.matched:
 
