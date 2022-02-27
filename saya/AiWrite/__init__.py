@@ -1,5 +1,4 @@
 import os
-from loguru import logger
 
 from graia.saya import Saya, Channel
 from graia.ariadne.message.chain import MessageChain
