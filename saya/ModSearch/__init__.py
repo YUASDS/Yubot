@@ -1,12 +1,12 @@
 import os
 import asyncio
-from loguru import logger
+from datetime import datetime
 
 from graia.saya import Saya, Channel
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.model import Group, Member
 from graia.broadcast.interrupt import InterruptControl
-from graia.ariadne.message.element import Plain, At
+from graia.ariadne.message.element import Plain, At,Forward, ForwardNode
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.event.message import GroupMessage
 from graia.ariadne.message.parser.twilight import (Twilight, FullMatch,
@@ -53,15 +53,18 @@ async def main(group: Group, member: Member, mod: WildcardMatch):
                     [At(member.id), Plain(f" 你的{COIN_NAME}不足。")]),
             )
         else:
+            fwd_nodeList = []
             res = await dicecho(mod)
             if len(res) > 0:
                 for i in res:
-                    await asyncio.sleep(0.5)
-                    await safeSendGroupMessage(
-                        group,
-                        MessageChain.create([At(member.id),
-                                             Plain("".join(i))]),
-                    )
+                    fwd_nodeList.append(
+                    ForwardNode(
+                    target=member,
+                    time=datetime.now(),
+                    message=MessageChain.create("".join(i))
+                    ))
+                message = MessageChain.create(Forward(nodeList=fwd_nodeList))
+                await safeSendGroupMessage(group,message)
             else:
                 await safeSendGroupMessage(
                     group,
@@ -98,14 +101,17 @@ async def CnmodsSearch(group: Group, member: Member, mod: WildcardMatch):
             )
         else:
             res = await cnmods(mod)
+            fwd_nodeList = []
             if len(res) > 0:
                 for i in res:
-                    await asyncio.sleep(0.5)
-                    await safeSendGroupMessage(
-                        group,
-                        MessageChain.create([At(member.id),
-                                             Plain("".join(i))]),
-                    )
+                    fwd_nodeList.append(
+                    ForwardNode(
+                    target=member,
+                    time=datetime.now(),
+                    message=MessageChain.create("".join(i))
+                    ))
+                message = MessageChain.create(Forward(nodeList=fwd_nodeList))
+                await safeSendGroupMessage(group,message)
             else:
                 await safeSendGroupMessage(
                     group,

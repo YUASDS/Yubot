@@ -18,19 +18,19 @@ async def getRes(ret):
     if totalCount < 1:
         return totalDes
     else:
-        if totalCount > 5:
-            totalDes.append("\n搜索项大于五，仅显示前五项")
-            totalCount = 5
+        if totalCount > 10:
+            totalDes.append("搜索项大于10，仅显示前10项")
+            totalCount = 10
         for i in range(totalCount):
             modDes = []
             data = ret["data"]["data"][i]
             originTitle = data["originTitle"]
             title = data["title"]
             if originTitle != title:
-                modDes.append(f"\n原模组名: {originTitle}")
+                modDes.append(f"原模组名: {originTitle}")
                 modDes.append(f"\n模组名: {title}")
             else:
-                modDes.append(f"\n模组名: {title}")
+                modDes.append(f"模组名: {title}")
             moduleRule = data["moduleRule"]
             modDes.append(f"\n规则: {moduleRule}")
             description = data["description"]
