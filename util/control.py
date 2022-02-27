@@ -41,7 +41,7 @@ async def work_scheduled(app: Ariadne):
     )
 
 
-@channel.use(SchedulerSchema(crontabify("4 0 * * *")))
+@channel.use(SchedulerSchema(crontabify("0 4 * * *")))
 async def rest_scheduled(app: Ariadne):
     Rest.set_sleep(1)
     sign=await all_sign_num()
@@ -240,8 +240,7 @@ class Interval:
                             MessageChain.create(
                                 [
                                     Plain(
-                                        f"冷却还有{last[1] + suspend_time - current:.2f}秒结束，"
-                                        f"之后可再执行{max_exec}次"
+                                        f"前辈不要心急哦~心急的孩子可是要变成玩具的哦~（当然是开玩笑的w）"
                                     )
                                 ]
                             ),

@@ -1,5 +1,4 @@
 import os
-import asyncio
 from datetime import datetime
 
 from graia.saya import Saya, Channel
