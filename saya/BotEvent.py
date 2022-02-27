@@ -104,7 +104,7 @@ async def get_BotNewFriend(app: Ariadne, events: NewFriendRequestEvent):
             groupname = "未知"
 
     if yaml_data["Basic"]["Event"]["NewFriend"]:
-        for qq in yaml_data["Basic"]["Permission"]["Admin"]:
+            qq = yaml_data["Basic"]["Permission"]["Master"]
             await app.sendFriendMessage(
                 qq,
                 MessageChain.create([
@@ -318,7 +318,7 @@ async def get_BotKickGroup(app: Ariadne, kickgroup: BotLeaveEventKick):
     save_config()
 
     if yaml_data["Basic"]["Event"]["KickGroup"]:
-        for qq in yaml_data["Basic"]["Permission"]["Admin"]:
+            qq = yaml_data["Basic"]["Permission"]["Master"]
             await app.sendFriendMessage(
                 qq,
                 MessageChain.create("收到被踢出群聊事件"
@@ -340,7 +340,7 @@ async def get_BotLeaveEventActive(app: Ariadne, events: BotLeaveEventActive):
     save_config()
 
     if yaml_data["Basic"]["Event"]["LeaveGroup"]:
-        for qq in yaml_data["Basic"]["Permission"]["Admin"]:
+            qq = yaml_data["Basic"]["Permission"]["Master"]
             await app.sendFriendMessage(
                 qq,
                 MessageChain.create("收到主动退出群聊事件"
@@ -357,7 +357,7 @@ async def get_BotPermissionChange(
     群内权限变动
     """
     if yaml_data["Basic"]["Event"]["PermissionChange"]:
-        for qq in yaml_data["Basic"]["Permission"]["Admin"]:
+            qq = yaml_data["Basic"]["Permission"]["Master"]
             await app.sendFriendMessage(
                 qq,
                 MessageChain.create([
@@ -389,7 +389,7 @@ async def get_BotMuteGroup(app: Ariadne, group: Group, mute: BotMuteEvent):
     save_config()
 
     if yaml_data["Basic"]["Event"]["Mute"]:
-        for qq in yaml_data["Basic"]["Permission"]["Admin"]:
+            qq = yaml_data["Basic"]["Permission"]["Master"]
             await app.sendFriendMessage(
                 qq,
                 MessageChain.create([
@@ -410,17 +410,17 @@ async def get_BotCardChange(app: Ariadne, events: MemberCardChangeEvent):
     """
     if events.member.id == yaml_data["Basic"]["MAH"]["BotQQ"]:
         if events.current != yaml_data["Basic"]["BotName"]:
-            for qq in yaml_data["Basic"]["Permission"]["Admin"]:
-                await app.sendFriendMessage(
-                    qq,
-                    MessageChain.create([
-                        Plain(f"检测到 {yaml_data['Basic']['BotName']} 群名片变动"),
-                        Plain(f"\n群号：{str(events.member.group.id)}"),
-                        Plain(f"\n群名：{events.member.group.name}"),
-                        Plain(f"\n被修改为：{events.current}"),
-                        Plain(f"\n已为你修改回：{yaml_data['Basic']['BotName']}"),
-                    ]),
-                )
+            qq = yaml_data["Basic"]["Permission"]["Master"]
+            await app.sendFriendMessage(
+                qq,
+                MessageChain.create([
+                    Plain(f"检测到 {yaml_data['Basic']['BotName']} 群名片变动"),
+                    Plain(f"\n群号：{str(events.member.group.id)}"),
+                    Plain(f"\n群名：{events.member.group.name}"),
+                    Plain(f"\n被修改为：{events.current}"),
+                    Plain(f"\n已为你修改回：{yaml_data['Basic']['BotName']}"),
+                ]),
+            )
             await app.modifyMemberInfo(
                 group=events.member.group.id,
                 member=yaml_data["Basic"]["MAH"]["BotQQ"],

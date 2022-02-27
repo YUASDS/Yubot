@@ -26,6 +26,7 @@ Basic:
     - 2225664821
     Debug: false
     DebugGroup: 871115054
+    DefaultAcceptInvite: true
     Master: 1787569211
     MasterName: xxxx
     Rest: false
