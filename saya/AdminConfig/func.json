@@ -89,6 +89,12 @@
             "key": "Luck",
             "can_disabled": false,
             "default_disabled": false
+        },
+        {
+            "name": "好感度",
+            "key": "Favor",
+            "can_disabled": false,
+            "default_disabled": false
         }
     ],
     "configList": [
@@ -189,6 +195,12 @@
             "usage": "发送指令：\n放乌帕|抽乌帕",
             "options": "试试就知道哦~",
             "example": "放乌帕15"
+        },
+        "好感度": {
+            "instruction": "千音的好感度系统",
+            "usage": "发送指令：\n摸千音|抱抱千音|千音抱抱",
+            "options": "试试就知道哦~",
+            "example": "抱抱千音"
         }
     }
 }

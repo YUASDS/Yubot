@@ -143,24 +143,25 @@ async def add_answer(qq: str):
 class favor:
     def __init__(self,favors) -> None:
         self.favors=favors                 
-        self.level=self.get_level()       
-        self.res=self.get_res()
+        self.level=self.get_level()[0]       
+        self.res=self.get_level()[1]
         self.next=self.get_next_level()
         pass
     def  get_level(self): # 当前等级
         favors=self.favors
-        level=1
-        while(2**level<favors):
-            level+=1
+        level=0
+        while(2**level<favors or 2**level==favors):
             favors=favors-2**level
-        return level
+            level+=1
+        return [level,favors]
 
     def get_res(self):# 当前显示好感度
         favors=self.favors
-        res=favors-2**(self.level-1)
-        if res<0:
-            res=0
-        return res
+        for i in range(self.level):
+            favors=favors-2**i
+        if favors<0:
+            favors=0
+        return favors
 
 
     def get_next_level(self): # 下一等级所需好感度

@@ -14,7 +14,7 @@ from graia.ariadne.message.parser.twilight import Twilight, FullMatch
 
 from config import COIN_NAME
 from util.text2image import create_image
-from database.db import get_ranking, get_info
+from database.db import get_ranking, get_info,favor
 from util.control import Permission, Interval
 from util.sendMessage import safeSendGroupMessage
 
@@ -63,6 +63,8 @@ async def bot_Launched():
 )
 async def get_user_info(group: Group, member: Member):
     user_info = await get_info(str(member.id))
+    favors=user_info["favor"]
+    # user_favor=favor(favors)
     await safeSendGroupMessage(
         group,
         MessageChain.create(
@@ -71,6 +73,7 @@ async def get_user_info(group: Group, member: Member):
                 Plain(f"\n你已累计签到 {user_info['sign_num']} 天"),
                 Plain(f"\n当前共有 {user_info['gold']} 个{COIN_NAME}"),
                 Plain(f"\n从有记录以来你共有 {user_info['talk_num']} 次发言"),
+                Plain(f"\n千音对你你共有 {favors} 点好感"),
             ]
         ),
     )

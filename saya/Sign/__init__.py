@@ -51,7 +51,7 @@ async def main(group: Group,  member: Member):
     await add_favor(qq=str(mid),num=favor_add)
     favors_now=favors+favor_add
     fav=favor(favors_now) # 获取好感度相关数据
-    exp=[favors_now,fav.next]
+    exp=[fav.res,fav.next]
     mahojin_path=os.path.join(path, "imgs", "mahojin.png")
     rewards=[
             Reward(name="乌帕",
