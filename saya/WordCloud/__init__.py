@@ -43,7 +43,7 @@ RUNNING_LIST = []
         decorators=[
             Permission.restricter(FUNC),
             Permission.require(),
-            Interval.require(150),
+            Interval.require(30),
         ],
     )
 )
