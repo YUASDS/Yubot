@@ -33,6 +33,9 @@ from config import (
 
 from .AdminConfig import funcList
 
+bot_qq=yaml_data["Basic"]["MAH"]["BotQQ"]
+
+
 saya = Saya.current()
 channel = Channel.current()
 funcList = funcList
@@ -45,6 +48,7 @@ funcList = funcList
         decorators=[Permission.require(Permission.MASTER)],
     ))
 async def get_botQueue(app: Ariadne, message: MessageChain, source: Source):
+    print(1)
     if message.has(Quote):
         messageid = message.getFirst(Quote).id
         try:
