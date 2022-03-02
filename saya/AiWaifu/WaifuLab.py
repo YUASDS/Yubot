@@ -31,7 +31,7 @@ class waifu:
         url = self.url
         pw = await async_playwright().start()
         browser = await pw.chromium.launch(
-            headless=False)
+            headless=True)
         page = await browser.new_page()
         try:
             await asyncio.wait_for(page.goto(url), timeout=2000)
