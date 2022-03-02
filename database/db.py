@@ -25,6 +25,7 @@ class User(BaseModel):
     gold = IntegerField(default=0)
     talk_num = IntegerField(default=0)
     favor=IntegerField(default=0)
+    favor_data=IntegerField(default=0)
 
     class Meta:
         table_name = "user_info"
@@ -57,7 +58,9 @@ async def get_info(qq: str):
     init_user(qq)
     user = User.get(qq=qq)
     return {"id":user.id, "is_sign":user.is_sign, "sign_num":user.sign_num, 
-            "gold":user.gold, "talk_num":user.talk_num,"favor":user.favor}
+            "gold":user.gold, "talk_num":user.talk_num,"favor":user.favor,
+            "favor_data":user.favor_data
+            }
 
 
 async def add_gold(qq: str, num: int):
@@ -66,9 +69,27 @@ async def add_gold(qq: str, num: int):
     p.execute()
     return True
 
-async def add_favor(qq: str, num: int):
+async def reset_favor_data():
+    User.update(favor_data=0).where(User.favor_data > 0).execute()
+    return
+
+async def add_favor(qq: str, num: int,force: bool = False):
     init_user(qq)
-    p = User.update(favor=User.favor + num).where(User.qq == qq)
+    user_info=await get_info(qq=qq)
+    user_favor=user_info["favor"]
+    total=user_favor+ num
+    today=user_info["favor_data"]
+    if not force:
+        if today>=5 or user_favor >=62:
+            return
+        if today+num>5:   # 当天获得好感度超过5
+            total=user_info+5-today
+            today=6
+        else:
+            today=today+num
+        if total>62:
+            total=62
+    p = User.update(favor=total,favor_data=today).where(User.qq == qq)
     p.execute()
     return True
 

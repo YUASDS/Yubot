@@ -1,17 +1,20 @@
 import os
 import json
 import random
+import time
 
 from pathlib import Path
+from typing import DefaultDict,Tuple
+from collections import defaultdict
+from graia.ariadne.app import Ariadne
 from graia.saya import Saya, Channel
-from graia.ariadne.model import Group
-from graia.ariadne.message.element import Member,Source
-from graia.ariadne.event.message import GroupMessage,FriendMessage
-from graia.ariadne.message.chain import MessageChain
+from graia.ariadne.model import Member,Friend
+from graia.broadcast.exceptions import ExecutionStop
+from graia.ariadne.event.message import MessageEvent,FriendMessage,GroupMessage
+from graia.ariadne.message.chain import MessageChain,Source
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import Twilight, RegexMatch
 
-from util.sendMessage import safeSendGroupMessage
 from util.control import Permission, Interval, Rest
 from database.db import favor,get_info,add_favor,reduce_favor
 
@@ -20,37 +23,27 @@ func = os.path.dirname(__file__).split("\\")[-1]
 FAVOR_PATH= Path(__file__).parent.joinpath("favor_chat_data.json")
 COUNT_PATH=Path(__file__).parent.joinpath("count.txt")
 favor_data:dict=json.loads(FAVOR_PATH.read_text(encoding="utf-8"))
+key_word="|".join([key for key in favor_data])
+
+last_exe=[]
+
 
 saya = Saya.current()
 channel = Channel.current()
 
-@channel.use(
-    ListenerSchema(
-        listening_events=[GroupMessage,FriendMessage],
-        inline_dispatchers=[
-            Twilight({
-                "head": RegexMatch("(\S)*(千音)(\S)*",)
-            })
-        ],
-        decorators=[
-            Permission.require(),
-            Permission.restricter(func),
-            Rest.rest_control(),
-            Interval.require(15)
-        ],
-    ))
-async def main(group: Group, head: RegexMatch, member: Member,source:Source):
-    info=await get_info(str(member.id))
-    # global PATH
-    with open (file=COUNT_PATH,mode="r",encoding="utf-8") as c:
-        count=int(c.read())
-    order=head.result.asDisplay()
-    pun=0
-    bon=0
-    info_favor=favor(info["favor"])
+
+async def get_reply(order:str,qq:int):
     if order in favor_data:   # 如果有这条好感度回复
+        
+        pun=0
+        bon=0
+        with open (file=COUNT_PATH,mode="r",encoding="utf-8") as c:
+            count:int=int(c.read())
+        info=await get_info(str(qq))
+        info_favor=favor(info["favor"])
         level_min=favor_data[order]["min"]
         level_max=favor_data[order]["max"]
+        reply=[]
         if info_favor.level>level_min:   # 如果满足最低好感度回复
             succ_rate=favor_data[order]["成功率"]
             rate_get=random.randint(1,100)
@@ -65,35 +58,43 @@ async def main(group: Group, head: RegexMatch, member: Member,source:Source):
                     if info_favor.level>level_max:# 如果超过没有最高好感度回复等级
                         level_choice=random.randint(level_min,level_max)
                     else:
-                        level_choice==random.randint(level_min,info_favor.level)
-                bon=random.randint(1,favor_data[order]["奖励"])
-                reply=random.choice(favor_data[order][str(level_choice)]) #获取一条随机的回复
+                        level_choice=random.randint(level_min,info_favor.level)
+                bon=random.randint(1,favor_data[order]["奖励"]) # 获取奖励
+                reply.append(random.choice(favor_data[order][str(level_choice)])) #获取一条随机的回复
             else:
-                reply=random.choice(favor_data[order]["失败"])
+                reply.append(random.choice(favor_data[order]["失败"]))
                 if "惩罚" in favor_data[order]:
-                    pun:int=favor_data[order]["惩罚"]
+                    pun:int=random.randint(1,favor_data[order]["惩罚"])
         else:
-            reply=random.choice(favor_data[order]["失败"])
+            reply.append(random.choice(favor_data[order]["失败"]))
             if "惩罚" in favor_data[order]:
                     pun:int=favor_data[order]["惩罚"]
         if bon>0:
             count+=1
             if count<100:
-                await add_favor(str(member.id),num=bon)
                 with open (file=COUNT_PATH,mode="w",encoding="utf-8") as c:
                     c.write(str(count))
+                await add_favor(str(qq),num=bon)
             else:
                 with open (file=COUNT_PATH,mode="w",encoding="utf-8") as c:
                     c.write('1')
                 bon=random.randint(10,20)
-                await add_favor(str(member.id),num=bon)
-                reply=random.choice(favor_data[order]["大成功"])
-                await safeSendGroupMessage(group, MessageChain.create("千音完美亲和触发"))
-        else:
-            await reduce_favor(str(member.id),num=pun)
-        await safeSendGroupMessage(group, MessageChain.create(reply),quote=source)
+                reply=[]
+                reply.append("千音完美亲和触发")
+                reply.append(random.choice(favor_data[order]["大成功"]))
+                await add_favor(str(qq),num=bon,force=True)
+                # if group:
+                # await safeSendGroupMessage(group, MessageChain.create("千音完美亲和触发"))
+                # else:
+                # await app.sendFriendMessage(friend,MessageChain.create(reply))
+        
+        elif pun>0:
+            await reduce_favor(str(qq),num=pun)
+        return count,reply
     else:
-        pass
+        return None
+
+
 
 def  get_level(favors:int)->int: # 当前等级
     level=1
@@ -108,3 +109,63 @@ def get_favor_full(level:int)->int:
         favors+=2**i
     return favors
 
+last_exec_favor:DefaultDict[str, Tuple[int, float]]=defaultdict(lambda: (1, 0.0))
+async def cd_check(event:MessageEvent,suspend_time:float=60,silent:bool=False,sent_alert=[]):
+    current = time.time()
+    eid=str(event.sender.id)
+    if current - last_exec_favor[eid][1] >= suspend_time:
+        last_exec_favor[eid] = (1, current)
+        if eid in sent_alert:
+            sent_alert.remove(eid)
+        return
+    if eid not in sent_alert:
+        app:Ariadne=Ariadne.get_running()
+        if not silent:
+            if isinstance(event.sender,Member):
+                await app.sendGroupMessage(
+                event.sender.group,
+                MessageChain.create(
+                f"前辈不要心急哦~心急的孩子可是要被做成玩具的哦~（当前功能正处于冷却哦~）"
+                ),
+                quote=event.messageChain.getFirst(Source).id
+            )
+            elif isinstance(event.sender,Friend):
+                
+                await app.sendFriendMessage(
+                    event.sender,MessageChain.create(
+                f"前辈不要心急哦~心急的孩子可是要被做成玩具的哦~（当前功能正处于冷却哦~）" 
+                ),
+                quote=event.messageChain.getFirst(Source).id,
+                )
+        sent_alert.append(eid)
+    raise ExecutionStop()
+
+
+@channel.use(
+    ListenerSchema(
+        listening_events=[FriendMessage,GroupMessage],
+        inline_dispatchers=[
+            Twilight({
+                "head": RegexMatch(key_word)
+            })
+        ],
+        decorators=[
+            Permission.require(),
+            Permission.restricter(func),
+            Rest.rest_control()
+        ],
+     ))
+async def main(app:Ariadne ,head: RegexMatch, event: MessageEvent,Source_msg:Source):
+    await cd_check(event)
+    order=head.result.asDisplay()
+    source=event.sender
+    result=await get_reply(order=order,qq=source.id)
+    if not result :
+        return
+    if isinstance(source,Friend):
+        for reply in result[1]:
+            await app.sendFriendMessage(source,MessageChain.create(reply),quote=Source_msg)
+    elif isinstance(source,Member):
+        for reply in result[1]:
+            await app.sendGroupMessage(source,MessageChain.create(reply),quote=Source_msg)
+    return

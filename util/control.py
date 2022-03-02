@@ -15,14 +15,18 @@ from graia.scheduler.timers import crontabify
 from typing import DefaultDict, Set, Tuple, Union
 from graia.broadcast.exceptions import ExecutionStop
 from graia.ariadne.message.chain import MessageChain
-from graia.ariadne.event.message import GroupMessage
+from graia.ariadne.event.message import MessageEvent,GroupMessage
 from graia.broadcast.builtin.decorators import Depend
 from graia.scheduler.saya.schema import SchedulerSchema
 from graia.ariadne.message.element import Plain, Source
 from graia.ariadne.model import Friend, Member, MemberPerm
 
-from config import (user_black_list, yaml_data,group_data,group_black_list,change_config)
-from database.db import all_sign_num,reset_sign
+from config import (user_black_list, 
+                    yaml_data,
+                    group_data,
+                    group_black_list,
+                    change_config)
+from database.db import all_sign_num,reset_sign,reset_favor_data
 
 from .sendMessage import safeSendGroupMessage
 
@@ -45,6 +49,7 @@ async def work_scheduled(app: Ariadne):
 async def rest_scheduled(app: Ariadne):
     Rest.set_sleep(1)
     sign=await all_sign_num()
+    await reset_favor_data()
     await reset_sign()
     await app.sendFriendMessage(
         yaml_data["Basic"]["Permission"]["Master"],
@@ -109,6 +114,7 @@ class Permission:
         if isinstance(member, int):
             user = member
             user_permission = cls.DEFAULT
+        
 
         if user in yaml_data["Basic"]["Permission"]["Admin"]:
             res = cls.MASTER
@@ -128,18 +134,19 @@ class Permission:
         :param level: 限制等级
         """
 
-        def perm_check(event: GroupMessage):
-            member_level = cls.get(event.sender)
+        def perm_check(event: MessageEvent):
+            member_level = cls.get(event.sender.id)
             if member_level == cls.MASTER:
                 pass
             elif member_level < level:
                 raise ExecutionStop()
             elif yaml_data["Basic"]["Permission"]["Debug"]:
-                if (
-                    event.sender.group.id
-                    != yaml_data["Basic"]["Permission"]["DebugGroup"]
-                ):
-                    raise ExecutionStop()
+                if isinstance(event.sender,Member):
+                    if (
+                        event.sender.group.id
+                        != yaml_data["Basic"]["Permission"]["DebugGroup"]
+                    ):
+                        raise ExecutionStop()
 
         return Depend(perm_check)
 
@@ -164,28 +171,35 @@ class Permission:
                 raise ExecutionStop()
 
     @classmethod
-    def restricter(cls,func)->Depend: 
+    def restricter(cls,func:str)->Depend: 
         """func 当前模块名字"""
-        def res(event: GroupMessage,group:Group):
-            member_level = cls.get(event.sender)
-            if member_level == cls.MASTER:
+        def res(event: MessageEvent):
+            member_level = cls.get(event.sender.id)
+            if member_level == cls.MASTER  : # master直接通过,
                 return
+            
+            if isinstance(event.sender,Member):
+                 # 允许私聊触发的功能除全局禁用外不做限制，但是仅限于好友
+                group=event.sender.group
+            elif isinstance(event.sender,Friend):
+                if yaml_data["Saya"][func]["Disabled"]:
+                    raise ExecutionStop()
+                return   
+                # 正常的群聊限制
             if group.id == yaml_data["Basic"]["Permission"]["DebugGroup"]:
                 return
-            # if group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]:
+            
+            # if group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]:# 本处用于测试
             #     raise ExecutionStop()
             if func not in yaml_data["Saya"]:
                 yaml_data["Saya"][func]={}
                 yaml_data["Saya"][func]["Disabled"]=False
                 change_config(yaml_data)
-            if yaml_data["Saya"][func]["Disabled"]:
-                raise ExecutionStop()
-            elif str(group.id) in group_black_list:
+            if (str(group.id) in group_black_list # 黑名单群聊
+                or func in group_data[str(group.id)]["DisabledFunc"]):# 群组禁用
                 raise ExecutionStop()
             if str(group.id) not in group_data:
                 pass
-            elif func in group_data[str(group.id)]["DisabledFunc"]:
-                raise ExecutionStop()
 
             
         return Depend(res)
@@ -195,8 +209,8 @@ class Interval:
     用于冷却管理的类，不应被实例化
     """
 
-    last_exec: DefaultDict[int, Tuple[int, float]] = defaultdict(lambda: (1, 0.0))
-    sent_alert: Set[int] = set()
+    last_exec: DefaultDict[str, Tuple[int, float]] = defaultdict(lambda: (1, 0.0))
+    sent_alert: Set[str] = set()
     lock: Lock = Lock()
 
     @classmethod
@@ -205,7 +219,7 @@ class Interval:
         suspend_time: float = 10,
         max_exec: int = 1,
         override_level: int = Permission.MASTER,
-        silent: bool = False,
+        silent: bool = False
     ):
         """
         指示用户每执行 `max_exec` 次后需要至少相隔 `suspend_time` 秒才能再次触发功能
@@ -217,36 +231,42 @@ class Interval:
         :param override_level: 可超越限制的最小等级
         """
 
-        async def cd_check(event: GroupMessage):
-            if Permission.get(event.sender) >= override_level:
+        async def cd_check(event: MessageEvent):
+            eid=str(event.sender.id)
+            if Permission.get(int(eid)) >= override_level:
                 return
             current = time.time()
             async with cls.lock:
-                last = cls.last_exec[event.sender.id]
-                if current - cls.last_exec[event.sender.id][1] >= suspend_time:
-                    cls.last_exec[event.sender.id] = (1, current)
-                    if event.sender.id in cls.sent_alert:
-                        cls.sent_alert.remove(event.sender.id)
+                last = cls.last_exec[eid]
+                if current - cls.last_exec[eid][1] >= suspend_time:
+                    cls.last_exec[eid] = (1, current)
+                    if eid in cls.sent_alert:
+                        cls.sent_alert.remove(eid)
                     return
                 elif last[0] < max_exec:
-                    cls.last_exec[event.sender.id] = (last[0] + 1, current)
-                    if event.sender.id in cls.sent_alert:
-                        cls.sent_alert.remove(event.sender.id)
+                    cls.last_exec[eid] = (last[0] + 1, current)
+                    if eid in cls.sent_alert:
+                        cls.sent_alert.remove(eid)
                     return
-                if event.sender.id not in cls.sent_alert:
+                if eid not in cls.sent_alert:
                     if not silent:
-                        await safeSendGroupMessage(
+                        if isinstance(event.sender,Member):
+                            await safeSendGroupMessage(
                             event.sender.group,
                             MessageChain.create(
-                                [
-                                    Plain(
-                                        f"前辈不要心急哦~心急的孩子可是要变成玩具的哦~（当然是开玩笑的w）"
-                                    )
-                                ]
+                            f"前辈不要心急哦~心急的孩子可是要被做成玩具的哦~（当前功能正处于冷却哦~）"
+                            ),
+                            quote=event.messageChain.getFirst(Source).id
+                        )
+                        elif isinstance(event.sender,Friend):
+                            app:Ariadne=Ariadne.get_running()
+                            await app.sendFriendMessage(
+                                event.sender,MessageChain.create(
+                            f"前辈不要心急哦~心急的孩子可是要被做成玩具的哦~（当前功能正处于冷却哦~）" 
                             ),
                             quote=event.messageChain.getFirst(Source).id,
-                        )
-                    cls.sent_alert.add(event.sender.id)
+                            )
+                    cls.sent_alert.add(eid)
                 raise ExecutionStop()
 
         return Depend(cd_check)
