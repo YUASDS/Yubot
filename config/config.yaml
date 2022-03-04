@@ -60,6 +60,8 @@ Saya:
     Disabled: false
   StorySend:
     Disabled: false
+  StoryTeller:
+    Disabled: false
   UserFunction:
     Disabled: false
   WordCloud:
