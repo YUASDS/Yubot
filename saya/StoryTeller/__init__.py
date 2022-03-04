@@ -1,7 +1,6 @@
 import json
 import asyncio
 import os
-from loguru import logger
 
 from pathlib import Path
 from graia.saya import Saya, Channel

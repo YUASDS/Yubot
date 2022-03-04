@@ -115,7 +115,7 @@ async def funchelp(group: Group, func: WildcardMatch):
             Twilight({"head": RegexMatch(r"^[。\./]?help$|^帮助$|^菜单$")})
         ],
         decorators=[Permission.require(),
-                    Interval.require(10)],
+                    Interval.require()],
     ))
 async def help(group: Group):
     msg = (

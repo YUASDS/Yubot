@@ -15,7 +15,8 @@ from graia.ariadne.message.chain import MessageChain,Source
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import Twilight, RegexMatch
 
-from util.control import Permission, Interval, Rest
+from util.sendMessage import autoSendMessage
+from util.control import Permission, Rest
 from database.db import favor,get_info,add_favor,reduce_favor
 
 
@@ -155,17 +156,13 @@ async def cd_check(event:MessageEvent,suspend_time:float=60,silent:bool=False,se
             Rest.rest_control()
         ],
      ))
-async def main(app:Ariadne ,head: RegexMatch, event: MessageEvent,Source_msg:Source):
+async def main(head: RegexMatch, event: MessageEvent,Source_msg:Source):
     await cd_check(event)
     order=head.result.asDisplay()
     source=event.sender
     result=await get_reply(order=order,qq=source.id)
     if not result :
         return
-    if isinstance(source,Friend):
-        for reply in result[1]:
-            await app.sendFriendMessage(source,MessageChain.create(reply),quote=Source_msg)
-    elif isinstance(source,Member):
-        for reply in result[1]:
-            await app.sendGroupMessage(source,MessageChain.create(reply),quote=Source_msg)
+    for reply in result[1]:
+        await autoSendMessage(source,MessageChain.create(reply),quote=Source_msg)
     return
