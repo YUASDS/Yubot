@@ -1,7 +1,7 @@
 from typing import Optional, Union
 from graia.ariadne.context import ariadne_ctx
 from graia.ariadne.exception import UnknownTarget
-from graia.ariadne.model import BotMessage, Group
+from graia.ariadne.model import BotMessage, Group,Member,Friend
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.message.element import At, Plain, Source
 
@@ -32,3 +32,14 @@ async def safeSendGroupMessage(
             )
         except UnknownTarget:
             return await app.sendGroupMessage(target, MessageChain.create(msg))
+
+async def autoSendMessage(target:Union[Member, Friend],
+    message: MessageChain,
+    quote: Optional[Union[Source, int]] = None,
+    ) -> BotMessage:
+    '''根据输入的目标类型自动选取发送好友信息或是群组信息'''
+    app=ariadne_ctx.get()
+    if isinstance(target,Member):
+        return await app.sendGroupMessage(target,message,quote=quote)
+    elif isinstance(target,Friend):
+        return await app.sendFriendMessage(target,message,quote=quote)
