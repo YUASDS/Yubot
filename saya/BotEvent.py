@@ -403,32 +403,32 @@ async def get_BotMuteGroup(app: Ariadne, group: Group, mute: BotMuteEvent):
     await app.quitGroup(group)
 
 
-@channel.use(ListenerSchema(listening_events=[MemberCardChangeEvent]))
-async def get_BotCardChange(app: Ariadne, events: MemberCardChangeEvent):
-    """
-    群名片被修改
-    """
-    if events.member.id == yaml_data["Basic"]["MAH"]["BotQQ"]:
-        if events.current != yaml_data["Basic"]["BotName"]:
-            qq = yaml_data["Basic"]["Permission"]["Master"]
-            await app.sendFriendMessage(
-                qq,
-                MessageChain.create([
-                    Plain(f"检测到 {yaml_data['Basic']['BotName']} 群名片变动"),
-                    Plain(f"\n群号：{str(events.member.group.id)}"),
-                    Plain(f"\n群名：{events.member.group.name}"),
-                    Plain(f"\n被修改为：{events.current}"),
-                    Plain(f"\n已为你修改回：{yaml_data['Basic']['BotName']}"),
-                ]),
-            )
-            await app.modifyMemberInfo(
-                group=events.member.group.id,
-                member=yaml_data["Basic"]["MAH"]["BotQQ"],
-                info=MemberInfo(name=yaml_data["Basic"]["BotName"]),
-            )
-            await safeSendGroupMessage(
-                events.member.group.id,
-                MessageChain.create([Plain("请不要修改我的群名片")]))
+# @channel.use(ListenerSchema(listening_events=[MemberCardChangeEvent]))
+# async def get_BotCardChange(app: Ariadne, events: MemberCardChangeEvent):
+#     """
+#     群名片被修改
+#     """
+#     if events.member.id == yaml_data["Basic"]["MAH"]["BotQQ"]:
+#         if events.current != yaml_data["Basic"]["BotName"]:
+#             qq = yaml_data["Basic"]["Permission"]["Master"]
+#             await app.sendFriendMessage(
+#                 qq,
+#                 MessageChain.create([
+#                     Plain(f"检测到 {yaml_data['Basic']['BotName']} 群名片变动"),
+#                     Plain(f"\n群号：{str(events.member.group.id)}"),
+#                     Plain(f"\n群名：{events.member.group.name}"),
+#                     Plain(f"\n被修改为：{events.current}"),
+#                     Plain(f"\n已为你修改回：{yaml_data['Basic']['BotName']}"),
+#                 ]),
+#             )
+#             await app.modifyMemberInfo(
+#                 group=events.member.group.id,
+#                 member=yaml_data["Basic"]["MAH"]["BotQQ"],
+#                 info=MemberInfo(name=yaml_data["Basic"]["BotName"]),
+#             )
+#             await safeSendGroupMessage(
+#                 events.member.group.id,
+#                 MessageChain.create([Plain("请不要修改我的群名片")]))
     # elif group_data[str(events.member.group.id)]["EventBroadcast"]["Enabled"]:
     #     resp = await text_moderation_async(events.origin)
     #     resp_current = await text_moderation_async(events.current)
