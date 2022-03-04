@@ -2,6 +2,7 @@ import re
 import time
 import asyncio
 import os
+import json
 from io import BytesIO
 
 
@@ -9,7 +10,6 @@ import numpy
 import jieba.analyse
 from pathlib import Path
 from PIL import Image as IMG
-from matplotlib import pyplot
 from graia.saya import Saya, Channel
 from graia.ariadne.model import Group, Member
 from wordcloud import WordCloud, ImageColorGenerator
@@ -31,7 +31,8 @@ BASEPATH = Path(__file__).parent
 MASK = numpy.array(IMG.open(BASEPATH.joinpath("bgg.jpg")))
 FONT_PATH = Path("font").joinpath("sarasa-mono-sc-regular.ttf")
 STOPWORDS = BASEPATH.joinpath("stopwords")
-
+CHANGE_PATH= Path(__file__).parent.joinpath("change_words.json")
+change_words:dict=json.loads(CHANGE_PATH.read_text(encoding="utf-8"))
 RUNNING = 0
 RUNNING_LIST = []
 
@@ -93,9 +94,15 @@ async def wordcloud(group: Group, member: Member, message: MessageChain):
             )
 
 
+
 async def get_frequencies(msg_list):
     text = "\n".join(msg_list)
     words = jieba.analyse.extract_tags(text, topK=800, withWeight=True)
+    words=dict(words)
+    for key in change_words:
+        if key in words:
+            if change_words[key] not in words:
+                words[change_words[key]]=words.pop(key)
     return dict(words)
 
 
@@ -111,8 +118,8 @@ def make_wordcloud(words):
     wordcloud.generate_from_frequencies(words)
     image_colors = ImageColorGenerator(MASK, default_color=(255, 255, 255))
     wordcloud.recolor(color_func=image_colors)
-    pyplot.imshow(wordcloud.recolor(color_func=image_colors), interpolation="bilinear")
-    pyplot.axis("off")
+    # pyplot.imshow(wordcloud.recolor(color_func=image_colors), interpolation="bilinear")
+    # pyplot.axis("off")
     image = wordcloud.to_image()
     imageio = BytesIO()
     image.save(imageio, format="JPEG", quality=98)
