@@ -36,13 +36,13 @@ channel = Channel.current()
 SLEEP = 0
 
 
-@channel.use(SchedulerSchema(crontabify("30 7 * * *")))
-async def work_scheduled(app: Ariadne):
-    Rest.set_sleep(0)
-    await app.sendFriendMessage(
-        yaml_data["Basic"]["Permission"]["Master"],
-        MessageChain.create([Plain("已退出休息时间")]),
-    )
+# @channel.use(SchedulerSchema(crontabify("30 7 * * *")))
+# async def work_scheduled(app: Ariadne):
+#     Rest.set_sleep(0)
+#     await app.sendFriendMessage(
+#         yaml_data["Basic"]["Permission"]["Master"],
+#         MessageChain.create([Plain("已退出休息时间")]),
+#     )
 
 
 @channel.use(SchedulerSchema(crontabify("0 4 * * *")))
@@ -100,7 +100,7 @@ class Permission:
     DEFAULT = USER
 
     @classmethod
-    def get(cls, member: Union[Member, int]) -> int:
+    def get(cls, member: Union[Member,Friend,int]) -> int:
         """
         获取用户的权限
 
@@ -111,9 +111,14 @@ class Permission:
         if isinstance(member, Member):
             user = member.id
             user_permission = member.permission
-        if isinstance(member, int):
+        elif isinstance(member, int):
             user = member
             user_permission = cls.DEFAULT
+        elif isinstance(member, Friend):
+            user = member.id
+            user_permission = cls.DEFAULT
+        else:
+            raise ExecutionStop()
         
 
         if user in yaml_data["Basic"]["Permission"]["Admin"]:
@@ -135,7 +140,7 @@ class Permission:
         """
 
         def perm_check(event: MessageEvent):
-            member_level = cls.get(event.sender.id)
+            member_level = cls.get(event.sender)
             if member_level == cls.MASTER:
                 pass
             elif member_level < level:
