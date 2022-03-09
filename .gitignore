@@ -26,3 +26,7 @@ archive
 database/talkData.db
 saya/TalkStatistic/ffmpeg.exe
 saya/Favor/count.txt
+saya/MapMaker/config.json
+saya/Favor/count.txt
+saya/StoryTeller
+saya/StoryTeller/__init__.py

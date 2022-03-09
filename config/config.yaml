@@ -34,6 +34,8 @@ Final: true
 Saya:
   AiWaifu:
     Disabled: false
+  AiWrite:
+    Disabled: false
   AiWriter:
     Disabled: false
   ChatMS:
