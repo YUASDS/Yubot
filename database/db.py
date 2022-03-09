@@ -47,11 +47,10 @@ async def is_sign(qq: str):
     user = User.get(qq=qq)
     if user.is_sign:
         return False
-    else:
-        p = User.update(is_sign=1,
-                        sign_num=User.sign_num + 1).where(User.qq == qq)
-        p.execute()
-        return True
+    p = User.update(is_sign=1,
+                    sign_num=User.sign_num + 1).where(User.qq == qq)
+    p.execute()
+    return True
 
 
 async def get_info(qq: str):
@@ -87,8 +86,7 @@ async def add_favor(qq: str, num: int,force: bool = False):
             today=6
         else:
             today=today+num
-        if total>62:
-            total=62
+        total = min(total, 62)
     p = User.update(favor=total,favor_data=today).where(User.qq == qq)
     p.execute()
     return True
@@ -113,12 +111,11 @@ async def reduce_gold(qq: str, num: int, force: bool = False):
     init_user(qq)
     gold_num = User.get(qq=qq).gold
     if gold_num < num:
-        if force:
-            p = User.update(gold=0).where(User.qq == qq)
-            p.execute()
-            return
-        else:
+        if not force:
             return False
+        p = User.update(gold=0).where(User.qq == qq)
+        p.execute()
+        return
     else:
         p = User.update(gold=User.gold - num).where(User.qq == qq)
         p.execute()
@@ -163,11 +160,10 @@ async def add_answer(qq: str):
 
 class favor:
     def __init__(self,favors) -> None:
-        self.favors=favors                 
-        self.level=self.get_level()[0]       
+        self.favors=favors
+        self.level=self.get_level()[0]
         self.res=self.get_level()[1]
         self.next=self.get_next_level()
-        pass
     def  get_level(self): # 当前等级
         favors=self.favors
         level=0
@@ -180,8 +176,7 @@ class favor:
         favors=self.favors
         for i in range(self.level):
             favors=favors-2**i
-        if favors<0:
-            favors=0
+        favors = max(favors, 0)
         return favors
 
 

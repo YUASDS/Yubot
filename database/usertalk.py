@@ -47,10 +47,7 @@ async def add_talk(qq, group, type, msg, url=None):
 async def archive_exists(msg, type):
     msg_exists = UserTalk.select().where(UserTalk.msg == msg,
                                          UserTalk.type == type)
-    if msg_exists.exists():
-        return True
-    else:
-        return False
+    return bool(msg_exists.exists())
 
 
 async def get_user_talk(qq, group, time=0):
@@ -60,20 +57,14 @@ async def get_user_talk(qq, group, time=0):
         UserTalk.type == 1,
         UserTalk.time > time,
     )
-    talk_list = []
-    for talk in talklist:
-        talk_list.append(talk.msg)
-    return talk_list
+    return [talk.msg for talk in talklist]
 
 
 async def get_group_talk(group, time=0):
     talklist = UserTalk.select().where(UserTalk.group == group,
                                        UserTalk.type == 1,
                                        UserTalk.time > time)
-    talk_list = []
-    for talk in talklist:
-        talk_list.append(talk.msg)
-    return talk_list
+    return [talk.msg for talk in talklist]
 
 
 async def get_all_message():
@@ -82,8 +73,7 @@ async def get_all_message():
 
 def get_last_time(hour=24):
     curr_time = int(time.time())
-    last_time = curr_time - curr_time % 3600 - hour * 3600
-    return last_time
+    return curr_time - curr_time % 3600 - hour * 3600
 
 
 async def get_message_analysis():
