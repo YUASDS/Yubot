@@ -46,7 +46,6 @@ async def main(group: Group,  member: Member):
     favors=info["favor"]
     gold_add=randint(1,15)
     favor_add=1
-    
     await add_gold(qq=str(mid),num=gold_add)
     await add_favor(qq=str(mid),num=favor_add)
     favors_now=favors+favor_add
@@ -70,6 +69,6 @@ async def main(group: Group,  member: Member):
                         mahojin_path=mahojin_path
                         )
     await safeSendGroupMessage(group, MessageChain.create(Image(data_bytes=pic)))
-    pass
+    
 
 

@@ -12,7 +12,7 @@ from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import Twilight, RegexMatch
 
 
-from util.sendMessage import safeSendGroupMessage
+from util.sendMessage import autoSendMessage
 from util.control import Permission, Interval, Rest
 
 DATA_FILE = Path(__file__).parent.joinpath("scene.json")
@@ -46,7 +46,7 @@ async def main(group: Group, member: Member, keys: RegexMatch):
                     s = contain
                     for SCkey in s:
                         await asyncio.sleep(0.5)
-                        await safeSendGroupMessage(
+                        await autoSendMessage(
                             group, MessageChain.create(s[SCkey]))
 
         except IndexError:

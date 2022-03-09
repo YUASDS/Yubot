@@ -32,17 +32,17 @@ from .sendMessage import safeSendGroupMessage
 
 channel = Channel.current()
 
-
 SLEEP = 0
 
 
-# @channel.use(SchedulerSchema(crontabify("30 7 * * *")))
-# async def work_scheduled(app: Ariadne):
-#     Rest.set_sleep(0)
-#     await app.sendFriendMessage(
-#         yaml_data["Basic"]["Permission"]["Master"],
-#         MessageChain.create([Plain("已退出休息时间")]),
-#     )
+@channel.use(SchedulerSchema(crontabify("30 7 * * *")))
+async def work_scheduled(app: Ariadne):
+    # Rest.set_sleep(0)
+    group=random.choice(await app.getGroupList())
+    await app.sendGroupMessage(
+        group,
+        MessageChain.create("今天被我指到的人，一整天都要涩涩哦~"),
+    )
 
 
 @channel.use(SchedulerSchema(crontabify("0 4 * * *")))
@@ -119,17 +119,16 @@ class Permission:
             user_permission = cls.DEFAULT
         else:
             raise ExecutionStop()
-        
+
 
         if user in yaml_data["Basic"]["Permission"]["Admin"]:
-            res = cls.MASTER
+            return cls.MASTER
         elif user in user_black_list:
-            res = cls.BANNED
+            return cls.BANNED
         elif user_permission in [MemberPerm.Administrator, MemberPerm.Owner]:
-            res = cls.GROUP_ADMIN
+            return cls.GROUP_ADMIN
         else:
-            res = cls.DEFAULT
-        return res
+            return cls.DEFAULT
 
     @classmethod
     def require(cls, level: int = DEFAULT) -> Depend:
@@ -146,12 +145,11 @@ class Permission:
             elif member_level < level:
                 raise ExecutionStop()
             elif yaml_data["Basic"]["Permission"]["Debug"]:
-                if isinstance(event.sender,Member):
-                    if (
-                        event.sender.group.id
-                        != yaml_data["Basic"]["Permission"]["DebugGroup"]
-                    ):
-                        raise ExecutionStop()
+                if isinstance(event.sender, Member) and (
+                    event.sender.group.id
+                    != yaml_data["Basic"]["Permission"]["DebugGroup"]
+                ):
+                    raise ExecutionStop()
 
         return Depend(perm_check)
 
@@ -179,10 +177,10 @@ class Permission:
     def restricter(cls,func:str)->Depend: 
         """func 当前模块名字"""
         def res(event: MessageEvent):
-            member_level = cls.get(event.sender.id)
+            member_level = cls.get(event.sender)
             if member_level == cls.MASTER  : # master直接通过,
                 return
-            
+
             if isinstance(event.sender,Member):
                  # 允许私聊触发的功能除全局禁用外不做限制，但是仅限于好友
                 group=event.sender.group
@@ -193,18 +191,16 @@ class Permission:
                 # 正常的群聊限制
             if group.id == yaml_data["Basic"]["Permission"]["DebugGroup"]:
                 return
-            
+
             # if group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]:# 本处用于测试
             #     raise ExecutionStop()
             if func not in yaml_data["Saya"]:
-                yaml_data["Saya"][func]={}
-                yaml_data["Saya"][func]["Disabled"]=False
+                yaml_data["Saya"][func] = {"Disabled": False}
                 change_config(yaml_data)
             if (str(group.id) in group_black_list # 黑名单群聊
-                or func in group_data[str(group.id)]["DisabledFunc"]):# 群组禁用
+                or func in group_data[str(group.id)]["DisabledFunc"]# 群组禁用
+                or yaml_data["Saya"][func]["Disabled"]):# 全局禁用
                 raise ExecutionStop()
-            if str(group.id) not in group_data:
-                pass
 
             
         return Depend(res)
@@ -257,20 +253,23 @@ class Interval:
                     if not silent:
                         if isinstance(event.sender,Member):
                             await safeSendGroupMessage(
-                            event.sender.group,
-                            MessageChain.create(
-                            f"前辈不要心急哦~心急的孩子可是要被做成玩具的哦~（当前功能正处于冷却哦~）"
-                            ),
-                            quote=event.messageChain.getFirst(Source).id
-                        )
+                                event.sender.group,
+                                MessageChain.create(
+                                    "前辈不要心急哦~心急的孩子可是要被做成玩具的哦~（当前功能正处于冷却哦~）"
+                                ),
+                                quote=event.messageChain.getFirst(Source).id,
+                            )
+
                         elif isinstance(event.sender,Friend):
                             app:Ariadne=Ariadne.get_running()
                             await app.sendFriendMessage(
-                                event.sender,MessageChain.create(
-                            f"前辈不要心急哦~心急的孩子可是要被做成玩具的哦~（当前功能正处于冷却哦~）" 
-                            ),
-                            quote=event.messageChain.getFirst(Source).id,
+                                event.sender,
+                                MessageChain.create(
+                                    "前辈不要心急哦~心急的孩子可是要被做成玩具的哦~（当前功能正处于冷却哦~）"
+                                ),
+                                quote=event.messageChain.getFirst(Source).id,
                             )
+
                     cls.sent_alert.add(eid)
                 raise ExecutionStop()
 

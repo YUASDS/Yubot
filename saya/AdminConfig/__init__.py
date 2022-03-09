@@ -74,6 +74,7 @@ Agreement={
                     Interval.require(5)],
     ))
 async def funchelp(group: Group, func: WildcardMatch):
+    # sourcery skip: use-fstring-for-concatenation
     if func.matched:
         num = func.result.asDisplay().strip()
         if num.isdigit():
@@ -121,13 +122,11 @@ async def help(group: Group):
     msg = (
         f"{yaml_data['Basic']['BotName']} 群菜单 / {str(group.id)}\n{group.name}\n"
         + "========================================================")
-    i = 1
-    for func in funcList:
+    for i, func in enumerate(funcList, start=1):
         funcname = func["name"]
         funckey = func["key"]
         if funckey not in yaml_data["Saya"]:
-            yaml_data["Saya"][funckey]={}
-            yaml_data["Saya"][funckey]["Disabled"]=False
+            yaml_data["Saya"][funckey] = {"Disabled": False}
             change_config(yaml_data)
         funcGlobalDisabled = yaml_data["Saya"][funckey]["Disabled"]
         funcGroupDisabledList = func["key"] in group_data[str(
@@ -138,12 +137,8 @@ async def help(group: Group):
             statu = "【  关闭  】"
         else:
             statu = "            "
-        if i < 10:
-            si = " " + str(i)
-        else:
-            si = str(i)
+        si = f" {str(i)}" if i < 10 else str(i)
         msg += f"\n{si}  {statu}  {funcname}"
-        i += 1
     msg += str(
         "\n========================================================" +
         "\n详细查看功能使用方法请发送 功能 <id>，例如：功能 1" + "\n管理员可发送 开启功能/关闭功能 <功能id> " +

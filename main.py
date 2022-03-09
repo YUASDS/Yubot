@@ -20,7 +20,7 @@ from config import yaml_data, save_config
 
 
 def broadcast_audit_hook(ev: str, args: tuple):
-    if ev in ("RequirementCrashed", "BroadcastException"):
+    if ev in {"RequirementCrashed", "BroadcastException"}:
         logger.error(args[0])
         logger.error(args[1])
 

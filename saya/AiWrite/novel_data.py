@@ -18,8 +18,7 @@ def save_config(config: dict, path):
 def load_config(path):
     try:
         with open(path, 'r', encoding='utf8') as f:
-            config = json.load(f)
-            return config
+            return json.load(f)
     except:
         return {}
 
@@ -33,24 +32,23 @@ HEADER = {
 
 async def get_nid(text: str, token) -> str:
     """获得文章id"""
-    url = f'http://if.caiyunai.com/v2/novel/{token}/novel_save'
+    url = f'https://if.caiyunai.com/v2/novel/{token}/novel_save'
     data = {"content": text, "title": "", "ostype": ""}
     async with aiohttp.ClientSession() as session:
         response = await session.post(url, json=data, headers=HEADER)
-    if response.status == 200:
-        res = await response.json()
-        if res['status'] != 0:
-            if res['status'] == -1:
-                raise Exception('账号不存在，请更换apikey！')
-            if res['status'] == -6:
-                raise Exception('账号已被封禁，请更换apikey！')
-            else:
-                raise Exception(res['msg'])
-        # print(res)
-        return res['data']['nid'], res['data']['novel']['branchid'], res[
-            'data']['novel']['firstnode']
-    else:
+    if response.status != 200:
         raise Exception(f'HTTP {response.status}')
+    res = await response.json()
+    if res['status'] != 0:
+        if res['status'] == -1:
+            raise Exception('账号不存在，请更换apikey！')
+        if res['status'] == -6:
+            raise Exception('账号已被封禁，请更换apikey！')
+        else:
+            raise Exception(res['msg'])
+    # print(res)
+    return res['data']['nid'], res['data']['novel']['branchid'], res[
+        'data']['novel']['firstnode']
 
 
 async def submit_to_ai(text: str,
@@ -61,7 +59,7 @@ async def submit_to_ai(text: str,
                        title="",
                        model_id: str = '601f92f60c9aaf5f28a6f908'):
     """将文本提交到指定模型的AI，得到xid"""
-    url = f'http://if.caiyunai.com/v2/novel/{token}/novel_ai'
+    url = f'https://if.caiyunai.com/v2/novel/{token}/novel_ai'
     data = {
         "nid": novel_id,
         "content": text,
@@ -89,8 +87,7 @@ async def submit_to_ai(text: str,
             )
         else:
             raise Exception(rsp_json['msg'])
-    nodes = rsp_json['data']['nodes']
-    return nodes
+    return rsp_json['data']['nodes']
 
 
 # async def poll_for_result(nid: str, xid: str, token):
@@ -148,7 +145,7 @@ async def submit_to_ai(text: str,
 
 async def add_node(nid, node, nodeids, token):
     """获得文章id"""
-    url = f'http://if.caiyunai.com/v2/novel/{token}/add_node'
+    url = f'https://if.caiyunai.com/v2/novel/{token}/add_node'
     data = {
         "nodeids": nodeids,
         "choose": node["_id"],
@@ -159,19 +156,18 @@ async def add_node(nid, node, nodeids, token):
     }
     async with aiohttp.ClientSession() as session:
         response = await session.post(url, json=data, headers=HEADER)
-    if response.status == 200:
-        res = await response.json()
-        if res['status'] != 0:
-            if res['status'] == -1:
-                raise Exception('账号不存在，请更换apikey！')
-            if res['status'] == -6:
-                raise Exception('账号已被封禁，请更换apikey！')
-            else:
-                raise Exception(res['msg'])
-        #print(res)
-        return
-    else:
+    if response.status != 200:
         raise Exception(f'HTTP {response.status}')
+    res = await response.json()
+    if res['status'] != 0:
+        if res['status'] == -1:
+            raise Exception('账号不存在，请更换apikey！')
+        if res['status'] == -6:
+            raise Exception('账号已被封禁，请更换apikey！')
+        else:
+            raise Exception(res['msg'])
+    #print(res)
+    return
 
 
 async def get_cont_continuation(text: str,
@@ -193,9 +189,7 @@ async def get_cont_continuation(text: str,
                                            title=title,
                                            model_id=mid)
                 choose = random.choice(nodes)
-                nodeids = []
-                for node in nodes:
-                    nodeids.append(node["_id"])
+                nodeids = [node["_id"] for node in nodes]
                 result += choose['content']
                 await add_node(nid, choose, nodeids, token)
                 lastnode = choose["_id"]
@@ -204,9 +198,9 @@ async def get_cont_continuation(text: str,
                     result = f'第{i}次迭代中断：{e}\n 当前续写结果：{result}......'
                     return result
                 else:
-                    raise Exception(e)
+                    raise Exception(e) from e
         if result:
             result = "续写结果：\n" + result + '......'
         return result
     except Exception as e:
-        raise Exception(e)
+        raise Exception(e) from e

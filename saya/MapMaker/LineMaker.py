@@ -115,10 +115,8 @@ class line_maker():
         return imgByteArr
 
     def post_array(self, pet_dict: dict, bg_array: list) -> bytes:
-        i = 0
-        for x in bg_array:
-            j = 0
-            for y in x:
+        for i, x in enumerate(bg_array):
+            for j, y in enumerate(x):
                 if y in pet_dict:
                     n = self.post_char(img=pet_dict[str(y)],
                                        x=j,
@@ -126,18 +124,13 @@ class line_maker():
                                        optional=True)
 
                     self.file = self.bg_img_array
-                j = j + 1
-            i = i + 1
         # succ, img = cv2.imencode(".jpg", self.bg_img_array)
         return n
 
 
 async def test():
-    MAP = {}
     gid = "123"
-    MAP[gid] = {}
-    MAP[gid]["pet"] = {}
-    MAP[gid]["array"] = np.zeros((6, 6), dtype=int, order='C')
+    MAP = {gid: {"pet": {}, "array": np.zeros((6, 6), dtype=int, order='C')}}
     img = line_maker(os.path.join(os.path.dirname(__file__), 'bg.jpg'))
     pet = await get_pet(1787569211)
     im_g = Image.fromarray(pet).convert('RGBA')
@@ -164,8 +157,7 @@ async def load_config(path):
 
     try:
         with open(path, 'r', encoding='utf8') as f:
-            config = json.load(f)
-            return config
+            return json.load(f)
     except:
         return {}
 
