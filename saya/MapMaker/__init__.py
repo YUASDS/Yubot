@@ -1,6 +1,6 @@
 import os
 import re
-
+import asyncio
 
 from pathlib import Path
 from graia.saya import Saya, Channel
@@ -96,10 +96,10 @@ async def main(group: Group, anythings: RegexMatch,num:RegexMatch):
                 return await safeSendGroupMessage(
                 group, MessageChain.create("图片获取失败，换张图片吧~"))
             imgs = line_maker(back,part=num)
-            img = await imgs.map_pice(option=1)
+            img = await asyncio.to_thread(imgs.map_pice(option=1)) 
     else:
         imgs = line_maker(bg,part=num)
-        img = await imgs.map_pice()
+        img = await asyncio.to_thread(imgs.map_pice()) 
     cell_size = imgs.cell_size
     gid = str(group.id)
     MAP[gid] = {"pet": {}}

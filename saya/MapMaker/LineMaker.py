@@ -17,7 +17,7 @@ class line_maker():
         self.part = part
         self.Img = None
 
-    async def map(self) -> bytes:
+    def map(self) -> bytes:
         file = self.file
         cell_size = self.cell_size
         img=Image.open(file).convert('RGBA')
@@ -48,7 +48,7 @@ class line_maker():
         h=h*10
         return int(w),int(h)
 
-    async def map_pice(self,option=False) -> bytes:
+    def map_pice(self,option=False) -> bytes:
         file = self.file
         part = self.part
         if option:
