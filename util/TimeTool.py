@@ -19,7 +19,10 @@ def calc_time_total(t):
 
     timedelta = datetime.timedelta(seconds=int(t / 1000))
     day = timedelta.days
-    hour, mint, sec = tuple([int(n) for n in str(timedelta).split(",")[-1].split(":")])
+    hour, mint, sec = tuple(
+        int(n) for n in str(timedelta).split(",")[-1].split(":")
+    )
+
     total = ""
     if day:
         total += "%d天" % day
@@ -27,7 +30,7 @@ def calc_time_total(t):
         total += "%d小时" % hour
     if mint:
         total += "%d分钟" % mint
-    if sec and not (day or hour):
+    if sec and not day and not hour:
         total += "%d秒" % sec
 
     return total

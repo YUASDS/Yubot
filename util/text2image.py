@@ -14,7 +14,7 @@ try:
     font = ImageFont.truetype(font_file, 22)
 except OSError:
     logger.error(
-        f"未找到字体文件：{font_file}，请前往 https://github.com/djkcyl/ABot-Resource/releases/tag/Font 进行下载后解压至 ABot 根目录"
+        f"未找到字体文件：{font_file}，请前往 https://github.com/djkcyl/ABot-Resource/releases/tag/Font 进行下载后解压至根目录"
     )
     exit(1)
 cache = Path("./cache/t2i")
