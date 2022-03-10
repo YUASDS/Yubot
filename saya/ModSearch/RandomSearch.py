@@ -6,9 +6,9 @@ async def RandomSearch():
     # 获取数据
     api = "https://www.dicecho.com/api/mod/random?"
     PageSet = "pageSize=12&sort%5BlastRateAt%5D=-1&tagsMode=all"
-    ero_url = api + PageSet
+    dicecho_url = api + PageSet
     async with aiohttp.ClientSession() as session:
-        async with session.get(ero_url) as r:
+        async with session.get(dicecho_url) as r:
             ret = await r.json(content_type='json', encoding="utf-8-sig")
         return getRandomRes(ret)
 
@@ -18,9 +18,9 @@ async def RandomLoveSearch(tag="贴贴"):
     page = "pageSize=12&sort%5BlastRateAt%5D=-1"
     rule = "&filter%5BmoduleRule%5D=克苏鲁的呼唤"
     tags = f"&tags%5B0%5D={tag}&tagsMode=in"
-    ero_url = api + page + rule + tags
+    dicecho_url = api + page + rule + tags
     async with aiohttp.ClientSession() as session:
-        async with session.get(ero_url) as r:
+        async with session.get(dicecho_url) as r:
             ret = await r.json(content_type='json', encoding="utf-8-sig")
         return getRandomRes(ret)
 
