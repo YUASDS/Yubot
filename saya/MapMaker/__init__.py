@@ -121,7 +121,7 @@ async def main(group: Group, anythings: RegexMatch,num:RegexMatch):
             Twilight({
                 "head": FullMatch("加入地图"),
                 "x": RegexMatch("[0-9]+",),
-                "space":RegexMatch("\D+",optional=True),
+                "space":RegexMatch("\D+"),
                 "y": RegexMatch("[0-9]+")
             })
         ],
@@ -173,9 +173,9 @@ async def join(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
         inline_dispatchers=[
             Twilight({
                 "head": FullMatch("移动"),
-                "x": RegexMatch("[0-9]+",optional=True),
-                "space":RegexMatch("\D+",optional=True),
-                "y": RegexMatch("[0-9]+",optional=True)
+                "x": RegexMatch("[0-9]+"),
+                "space":RegexMatch("\D+"),
+                "y": RegexMatch("[0-9]+")
             })
         ],
         decorators=[
@@ -193,7 +193,7 @@ async def change(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
     y:str = y.result.asDisplay()
     gid = str(group.id)
     mid = str(member.id)
-    if not x.isdigit() and y.isdigit():
+    if not (x.isdigit() and y.isdigit()):
         return
     x = int(x)-1
     y = int(y)-1
@@ -209,7 +209,6 @@ async def change(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
             h = 0
             for j in i:
                 if j == mid:
-                    
                     try:
                         MAP[gid]["array"][x][y] = mid
                     except Exception :
@@ -244,7 +243,7 @@ async def change(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
                 "npc": RegexMatch("[\S]+"),
                 "space2": RegexMatch("[\s]+",optional=True),
                 "x": RegexMatch("[0-9]+"),
-                "space":RegexMatch("\D+",optional=True),
+                "space":RegexMatch("\D+"),
                 "y": RegexMatch("[0-9]+"),
                 "enter": FullMatch("\n",optional=True),
                 "anythings1": WildcardMatch(optional=True)
