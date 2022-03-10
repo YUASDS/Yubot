@@ -24,7 +24,6 @@ class waifu:
     def __init__(self, url=waifu_url,water_mark=True) -> None:
         self.url = url
         self.water_mark=water_mark
-        pass
     
     
     async def gey_browser(self):
@@ -42,17 +41,15 @@ class waifu:
         self.browser = browser
         return True
     
-    async def shot(self,page:Page,ShotSelector:str,WaitSelector:str=None)->BytesIO:
+    async def shot(self,page:Page,ShotSelector:str,WaitSelector:str=None) -> BytesIO:
         if WaitSelector:
             try:
                 await page.wait_for_selector(WaitSelector, timeout=6000)
             except asyncio.TimeoutError:
-                print("超时")
                 return
         await page.wait_for_timeout(3000)
         shot = await page.query_selector(ShotSelector)
-        buffer = BytesIO(await shot.screenshot(type='jpeg'))
-        return buffer
+        return BytesIO(await shot.screenshot(type='jpeg'))
 
 
 
@@ -63,7 +60,7 @@ class waifu:
         buffer=await self.shot(page=page,WaitSelector=selector2,ShotSelector=selector)
         return buffer
     
-    async def other_shot(self,choose:int=1)->list:
+    async def other_shot(self,choose:int=1) -> list:
         page=self.page
         end_selector="#wizard-container > div > div > div.waifu-preview.shadow.cross-fade-appear-done.cross-fade-enter-done > img"
         # 下载按钮 
@@ -73,10 +70,7 @@ class waifu:
         try:
             byt_no_water=await self.get_product()
             await page.wait_for_selector(end_selector,timeout=2000)
-            if self.water_mark:
-                return await self.get_product()
-            else:
-                return byt_no_water
+            return await self.get_product() if self.water_mark else byt_no_water
         except:
             return await self.page_shot()
     
@@ -90,7 +84,7 @@ class waifu:
         ChooseBuffer=await self.shot(page=page,WaitSelector=selector,ShotSelector=ChooseSelector)     #小图片截图
         return PictureBuffer,ChooseBuffer
     
-    async def get_product(self)->BytesIO:
+    async def get_product(self) -> BytesIO:
         '''
         获取左边的大图片，有延迟就是有水印，无延迟就是无水印
         '''
@@ -114,13 +108,12 @@ class waifu:
         # ims=Image.open(str_url)
         # ims.show()
         # buffer = BytesIO(await pic.screenshot(type='jpeg'))
-        
+
         imgs_selector='//*[@id="wizard-container"]/div/div/div[1]/img'
         imgs=await page.query_selector(imgs_selector)  # 获取图片选择器
         imgs=await imgs.get_attribute("src")
         imgs=imgs.split("base64,")[1]
-        buffer = BytesIO(base64.b64decode(imgs))
-        return buffer
+        return BytesIO(base64.b64decode(imgs))
     
     async def close(self):
         await self.browser.close()
@@ -171,7 +164,6 @@ async def test():
     byt=await waifu_get.other_shot(rd)
     img = Image.open(byt)
     img.show()
-    pass
 
 
 if __name__ == "__main__":

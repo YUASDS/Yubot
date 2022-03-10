@@ -10,8 +10,7 @@ async def RandomSearch():
     async with aiohttp.ClientSession() as session:
         async with session.get(ero_url) as r:
             ret = await r.json(content_type='json', encoding="utf-8-sig")
-        res = await getRandomRes(ret)
-        return res
+        return getRandomRes(ret)
 
 
 async def RandomLoveSearch(tag="贴贴"):
@@ -23,28 +22,23 @@ async def RandomLoveSearch(tag="贴贴"):
     async with aiohttp.ClientSession() as session:
         async with session.get(ero_url) as r:
             ret = await r.json(content_type='json', encoding="utf-8-sig")
-        res = await getRandomRes(ret)
-        return res
+        return getRandomRes(ret)
 
 
-async def getRandomRes(ret):
-    modDes = []
+def getRandomRes(ret):
     data = ret["data"]
     originTitle = data["originTitle"]
     title = data["title"]
-    modDes.append("\n你抽到的随机模组是————")
+    modDes = ["\n你抽到的随机模组是————"]
     if originTitle != title:
         modDes.append(f"\n原模组名: {originTitle}")
-        modDes.append(f"\n模组名: {title}")
-    else:
-        modDes.append(f"\n模组名: {title}")
+    modDes.append(f"\n模组名: {title}")
     moduleRule = data["moduleRule"]
     modDes.append(f"\n规则: {moduleRule}")
     description = data["description"]
     modDes.append(f"\n简介: {description}")
     originUrl = data["originUrl"]
     modDes.append(f"\n网站: {originUrl}")
-    print(modDes)
     return modDes
 
 

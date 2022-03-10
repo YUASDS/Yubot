@@ -48,7 +48,6 @@ funcList = funcList
         decorators=[Permission.require(Permission.MASTER)],
     ))
 async def get_botQueue(app: Ariadne, message: MessageChain, source: Source):
-    print(1)
     if message.has(Quote):
         messageid = message.getFirst(Quote).id
         try:
@@ -582,13 +581,12 @@ async def gset_open(group: Group, func: WildcardMatch):
                         MessageChain.create(
                             [Plain(f"{sayfunc['name']} 已处于全局开启状态")]),
                     )
-                else:
-                    yaml_data["Saya"][sayfunc["key"]]["Disabled"] = False
-                    save_config()
-                    return await safeSendGroupMessage(
-                        group,
-                        MessageChain.create(
-                            [Plain(f"{sayfunc['name']} 已全局开启")]))
+                yaml_data["Saya"][sayfunc["key"]]["Disabled"] = False
+                save_config()
+                return await safeSendGroupMessage(
+                    group,
+                    MessageChain.create(
+                        [Plain(f"{sayfunc['name']} 已全局开启")]))
         else:
             await safeSendGroupMessage(group, MessageChain.create("功能编号仅可为数字"))
     else:
@@ -657,7 +655,6 @@ async def clean_group(app: Ariadne, friend: Friend):
     i = 0
     for group in group_list:
         member_count = len(await app.getMemberList(group))
-        print(member_count)
         if member_count < 15:
             if group.id not in group_list["white"]:
                 try:

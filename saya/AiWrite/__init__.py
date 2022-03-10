@@ -71,7 +71,6 @@ async def main(group: Group, member: Member, text: WildcardMatch):
 
     gid = str(group.id)
     if gid not in config:
-        print("sad")
         config[gid] = templete
         save_config(config, config_path)
     if text.matched:
@@ -210,19 +209,18 @@ async def novel_iteration(group: Group, member: Member, text: WildcardMatch):
                 group,
                 MessageChain.create(
                     [At(member.id), f'\n本群默认续写迭代次数已修改为{text}次！']))
-            return
         else:
             await safeSendGroupMessage(
                 group,
                 MessageChain.create([At(member.id), '\n迭代次数仅接受纯数字，请重新输入！']))
-            return
     else:
         await safeSendGroupMessage(
             group,
             MessageChain.create([
                 At(member.id), f'\n请输入默认续写迭代次数！当前默认迭代次数：{config[gid]["iter"]}'
             ]))
-        return
+
+    return
 
 
 @channel.use(
@@ -256,7 +254,6 @@ async def on_prefix(group: Group, member: Member, text: WildcardMatch):
             await safeSendGroupMessage(
                 group,
                 MessageChain.create([At(member.id), f'\n本群默认续写模型已修改为{text}！']))
-            return
         else:
             await safeSendGroupMessage(
                 group,
@@ -264,7 +261,6 @@ async def on_prefix(group: Group, member: Member, text: WildcardMatch):
                     At(member.id),
                     f"\n未找到该模型，请重新输入！\n 可用模型：{','.join(model_list.keys())}"
                 ]))
-            return
     else:
         mods = config[gid]['model']
         await safeSendGroupMessage(
@@ -273,4 +269,5 @@ async def on_prefix(group: Group, member: Member, text: WildcardMatch):
                 At(member.id),
                 f"\n请选择默认续写模型！当前模型：{mods}\n 可用模型：{','.join(model_list.keys())}"
             ]))
-        return
+
+    return
