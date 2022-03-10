@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from random import choice
 import time
 from pathlib import Path
 from typing import Optional, Union
@@ -9,9 +10,11 @@ import httpx
 from PIL import Image, ImageDraw
 from PIL.ImageFont import FreeTypeFont
 from pydantic import BaseModel
-
 Ink = Union[str, int, tuple[int, int, int], tuple[int, int, int, int]]
 
+path=Path(__file__).parent.joinpath("teller.txt")
+with open(path,mode="r") as s:
+    teller=s.readline().replace("\\n","\n")
 
 async def get_qlogo(id: int) -> bytes:
     """获取QQ头像
@@ -27,16 +30,16 @@ async def get_qlogo(id: int) -> bytes:
 
 
 async def get_hotokoto() -> str:
-    url = "https://api.dzzui.com/api/yiyan"
-    async with httpx.AsyncClient() as client:
-        try:
-            hotokoto = await client.get(url=url)
-        except Exception as e:
-            hotokoto = "一言获取失败"
-            print(e)
-        else:
-            hotokoto = hotokoto.text
-    return hotokoto
+    # url = "https://api.dzzui.com/api/yiyan"
+    # async with httpx.AsyncClient() as client:
+    #     try:
+    #         hotokoto = await client.get(url=url)
+    #     except Exception as e:
+    #         hotokoto = "一言获取失败"
+    #         print(e)
+    #     else:
+    #         hotokoto = hotokoto.text
+    return choice(teller)
 
 
 def get_time() -> str:
@@ -105,17 +108,20 @@ def exp_bar(w: int,
     bar_canvase = Image.new("RGBA", (w, h), "#00000000")
     bar_draw = ImageDraw.Draw(bar_canvase)
     # draw background
-    bar_draw.ellipse((0, 0, h, h), fill=bg)
-    bar_draw.ellipse((w - h, 0, w, h), fill=bg)
-    bar_draw.rectangle((h // 2, 0, w - h // 2, h), fill=bg)
-
+    exp_bar_draw(bar_draw, h, bg, w)
     # draw exp bar
     n_w = w * rato if rato <= 1 else w
-    bar_draw.ellipse((0, 0, h, h), fill=fg)
-    bar_draw.ellipse((n_w - h, 0, n_w, h), fill=fg)
-    bar_draw.rectangle((h // 2, 0, n_w - h // 2, h), fill=fg)
-
+    exp_bar_draw(bar_draw, h, fg, n_w)
     return bar_canvase.resize((origin_w, origin_h), Image.LANCZOS)
+
+
+def exp_bar_draw(bar_draw, h, fill, arg3):
+    '''
+    draw exp
+    '''
+    bar_draw.ellipse((0, 0, h, h), fill=fill)
+    bar_draw.ellipse((arg3 - h, 0, arg3, h), fill=fill)
+    bar_draw.rectangle((h // 2, 0, arg3 - h // 2, h), fill=fill)
 
 
 class Reward(BaseModel):
