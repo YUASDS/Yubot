@@ -52,9 +52,7 @@ async def wordcloud(group: Group, member: Member, message: MessageChain):
 
     global RUNNING, RUNNING_LIST
     pattern = re.compile(r"^查看(个人|本群)词云")
-    match = pattern.match(message.asDisplay())
-
-    if match:
+    if match := pattern.match(message.asDisplay()):
         if RUNNING < 5:
             RUNNING += 1
             RUNNING_LIST.append(member.id)
@@ -100,9 +98,8 @@ async def get_frequencies(msg_list):
     words = jieba.analyse.extract_tags(text, topK=800, withWeight=True)
     words=dict(words)
     for key in change_words:
-        if key in words:
-            if change_words[key] not in words:
-                words[change_words[key]]=words.pop(key)
+        if key in words and change_words[key] not in words:
+            words[change_words[key]]=words.pop(key)
     return dict(words)
 
 
