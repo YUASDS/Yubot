@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from random import choice
+import random
 import time
 from pathlib import Path
 from typing import Optional, Union
@@ -13,9 +13,9 @@ from pydantic import BaseModel
 Ink = Union[str, int, tuple[int, int, int], tuple[int, int, int, int]]
 
 path=Path(__file__).parent.joinpath("teller.txt")
-with open(path,mode="r") as s:
-    teller=s.readline().replace("\\n","\n")
-
+with open(path,mode="r",encoding="utf-8") as s:
+    teller = [line.replace("\\n","\n") for line in s]
+    
 async def get_qlogo(id: int) -> bytes:
     """获取QQ头像
     Args:
@@ -39,7 +39,7 @@ async def get_hotokoto() -> str:
     #         print(e)
     #     else:
     #         hotokoto = hotokoto.text
-    return choice(teller)
+    return random.choice(teller)
 
 
 def get_time() -> str:
