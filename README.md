@@ -47,12 +47,11 @@
 
 >- `随机头像`
 
+>- [waifulab](https://waifulabs.com/generate)
 ## TODO
 
 
 >- `[ ]`  [ART](https://app.wombo.art/)
-
->- `[ ]`  [waifulab](https://waifulabs.com/generate)
 
 >- `[ ] 纯美苹果园-跑团教程`
 
@@ -61,3 +60,9 @@
 >- `[ ] 100dice模组检索以及下载(暂且搁置)`
 
 >- `[ ] 根据模组片段检索模组出处（可能（无限咕咕咕））`
+
+>- `[ ] 俄罗斯轮盘`
+
+>- `[ ] 剧情模式`
+
+>- `[ ] 调查员奇遇`
