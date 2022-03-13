@@ -10,7 +10,6 @@ from asyncio import Lock
 from graia.saya import Channel
 from collections import defaultdict
 from graia.ariadne.app import Ariadne
-from graia.ariadne.model import Group
 from graia.scheduler.timers import crontabify
 from typing import DefaultDict, Set, Tuple, Union
 from graia.broadcast.exceptions import ExecutionStop
@@ -33,16 +32,6 @@ from .sendMessage import safeSendGroupMessage
 channel = Channel.current()
 
 SLEEP = 0
-
-
-@channel.use(SchedulerSchema(crontabify("30 7 * * *")))
-async def work_scheduled(app: Ariadne):
-    # Rest.set_sleep(0)
-    group=random.choice(await app.getGroupList())
-    await app.sendGroupMessage(
-        group,
-        MessageChain.create("今天被我指到的人，一整天都要涩涩哦~"),
-    )
 
 
 @channel.use(SchedulerSchema(crontabify("0 4 * * *")))
@@ -217,7 +206,7 @@ class Interval:
     @classmethod
     def require(
         cls,
-        suspend_time: float = 10,
+        suspend_time: float = 5,
         max_exec: int = 1,
         override_level: int = Permission.MASTER,
         silent: bool = False
