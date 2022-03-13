@@ -18,9 +18,9 @@ async def get(url:str,type:str="JSON",headers=headers,encoding="utf-8"):
 
     async with aiohttp.ClientSession() as session:
         resp = await session.get(url=url,headers=headers)
-        if type=="JSON":
+        if type in {"JSON","json"}:
             return  await resp.json(encoding=encoding)
-        if type=="img":
+        if type in {"img","IMG"}:
             return await BytesIO(resp.content).getvalue()
         return await resp.text(encoding=encoding)
         
