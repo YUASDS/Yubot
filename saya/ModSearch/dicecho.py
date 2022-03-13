@@ -17,27 +17,30 @@ async def getRes(ret):
     totalCount = ret["data"]["totalCount"]
     if totalCount < 1:
         return totalDes
-    else:
-        if totalCount > 10:
-            totalDes.append("搜索项大于10，仅显示前10项")
-            totalCount = 10
-        for i in range(totalCount):
-            modDes = []
-            data = ret["data"]["data"][i]
-            originTitle = data["originTitle"]
-            title = data["title"]
-            if originTitle != title:
-                modDes.append(f"原模组名: {originTitle}")
-                modDes.append(f"\n模组名: {title}")
-            else:
-                modDes.append(f"模组名: {title}")
-            moduleRule = data["moduleRule"]
-            modDes.append(f"\n规则: {moduleRule}")
-            description = data["description"]
-            modDes.append(f"\n简介: {description}")
-            originUrl = data["originUrl"]
-            modDes.append(f"\n网站: {originUrl}")
-            totalDes.append(modDes)
+    if totalCount > 10:
+        totalDes.append("搜索项大于10，仅显示前10项")
+        totalCount = 10
+    for i in range(totalCount):
+        modDes = []
+        data = ret["data"]["data"][i]
+        originTitle = data["originTitle"]
+        title = data["title"]
+        if originTitle != title:
+            modDes.extend((f"原模组名: {originTitle}", f"\n模组名: {title}"))
+        else:
+            modDes.append(f"模组名: {title}")
+        moduleRule = data["moduleRule"]
+        originUrl = data["originUrl"]
+        description = data["description"]
+        modDes.extend(
+            (
+                f"\n规则: {moduleRule}",
+                f"\n简介: {description}",
+                f"\n网站: {originUrl}",
+            )
+        )
+
+        totalDes.append(modDes)
     return totalDes
 
 

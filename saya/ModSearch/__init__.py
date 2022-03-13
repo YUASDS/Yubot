@@ -43,33 +43,31 @@ func = os.path.dirname(__file__).split("\\")[-1]
     ))
 async def main(group: Group, member: Member, mod: WildcardMatch):
 
-    if mod.matched:
-        mod = mod.result.asDisplay()
-        if not await reduce_gold(str(member.id), 5):
-            await safeSendGroupMessage(
-                group,
-                MessageChain.create(
-                    [At(member.id), Plain(f" 你的{COIN_NAME}不足。")]),
-            )
-        else:
-            fwd_nodeList = []
-            res = await dicecho(mod)
-            if len(res) > 0:
-                for i in res:
-                    fwd_nodeList.append(
-                    ForwardNode(
+    if not mod.matched:
+        return
+    mod = mod.result.asDisplay()
+    if not await reduce_gold(str(member.id), 5):
+        await safeSendGroupMessage(
+            group,
+            MessageChain.create(
+                [At(member.id), Plain(f" 你的{COIN_NAME}不足。")]),
+        )
+    else:
+        res = await dicecho(mod)
+        if len(res) > 0:
+            fwd_nodeList = [ForwardNode(
                     target=member,
                     time=datetime.now(),
                     message=MessageChain.create("".join(i))
-                    ))
-                message = MessageChain.create(Forward(nodeList=fwd_nodeList))
-                await safeSendGroupMessage(group,message)
-            else:
-                await safeSendGroupMessage(
-                    group,
-                    MessageChain.create([At(member.id),
-                                         Plain("\n无该搜索项")]),
-                )
+                    ) for i in res]
+            message = MessageChain.create(Forward(nodeList=fwd_nodeList))
+            await safeSendGroupMessage(group,message)
+        else:
+            await safeSendGroupMessage(
+                group,
+                MessageChain.create([At(member.id),
+                                     Plain("\n无该搜索项")]),
+            )
 
 
 @channel.use(
@@ -90,33 +88,31 @@ async def main(group: Group, member: Member, mod: WildcardMatch):
     ))
 async def CnmodsSearch(group: Group, member: Member, mod: WildcardMatch):
 
-    if mod.matched:
-        mod = mod.result.asDisplay()
-        if not await reduce_gold(str(member.id), 5):
-            await safeSendGroupMessage(
-                group,
-                MessageChain.create(
-                    [At(member.id), Plain(f" 你的{COIN_NAME}不足。")]),
-            )
-        else:
-            res = await cnmods(mod)
-            fwd_nodeList = []
-            if len(res) > 0:
-                for i in res:
-                    fwd_nodeList.append(
-                    ForwardNode(
+    if not mod.matched:
+        return
+    mod = mod.result.asDisplay()
+    if not await reduce_gold(str(member.id), 5):
+        await safeSendGroupMessage(
+            group,
+            MessageChain.create(
+                [At(member.id), Plain(f" 你的{COIN_NAME}不足。")]),
+        )
+    else:
+        res = await cnmods(mod)
+        if len(res) > 0:
+            fwd_nodeList = [ForwardNode(
                     target=member,
                     time=datetime.now(),
                     message=MessageChain.create("".join(i))
-                    ))
-                message = MessageChain.create(Forward(nodeList=fwd_nodeList))
-                await safeSendGroupMessage(group,message)
-            else:
-                await safeSendGroupMessage(
-                    group,
-                    MessageChain.create([At(member.id),
-                                         Plain("\n无该搜索项")]),
-                )
+                    ) for i in res]
+            message = MessageChain.create(Forward(nodeList=fwd_nodeList))
+            await safeSendGroupMessage(group,message)
+        else:
+            await safeSendGroupMessage(
+                group,
+                MessageChain.create([At(member.id),
+                                     Plain("\n无该搜索项")]),
+            )
 
 
 @channel.use(

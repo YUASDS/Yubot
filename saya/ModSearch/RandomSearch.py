@@ -32,13 +32,18 @@ def getRandomRes(ret):
     modDes = ["\n你抽到的随机模组是————"]
     if originTitle != title:
         modDes.append(f"\n原模组名: {originTitle}")
-    modDes.append(f"\n模组名: {title}")
-    moduleRule = data["moduleRule"]
-    modDes.append(f"\n规则: {moduleRule}")
     description = data["description"]
-    modDes.append(f"\n简介: {description}")
+    moduleRule = data["moduleRule"]
     originUrl = data["originUrl"]
-    modDes.append(f"\n网站: {originUrl}")
+    modDes.extend(
+        (
+            f"\n模组名: {title}",
+            f"\n规则: {moduleRule}",
+            f"\n简介: {description}",
+            f"\n网站: {originUrl}",
+        )
+    )
+
     return modDes
 
 

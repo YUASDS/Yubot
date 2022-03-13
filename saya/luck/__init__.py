@@ -71,18 +71,13 @@ async def main(group: Group, member: Member, number: RegexMatch):
         listening_events=[GroupMessage],
         inline_dispatchers=[Twilight({"heads": FullMatch("抽乌帕")})],
         decorators=[
+            Permission.restricter(func),
             Permission.require(),
             Rest.rest_control(),
             Interval.require()
         ],
     ))
 async def luck_draw(group: Group, member: Member):
-
-    if (yaml_data["Saya"]["GroupSend"]["Disabled"]
-            and group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]):
-        return
-    elif "luck" in group_data[str(group.id)]["DisabledFunc"]:
-        return
     qq = str(member.id)
     if await luckDB.get_user_time(qq=qq):
         change = await luckDB.get_user_change(qq=qq)
@@ -107,18 +102,14 @@ async def luck_draw(group: Group, member: Member):
         listening_events=[GroupMessage],
         inline_dispatchers=[Twilight({"heads": FullMatch("乌帕抽奖")})],
         decorators=[
+            Permission.restricter(func),
             Permission.require(),
             Rest.rest_control(),
             Interval.require()
         ],
     ))
-async def luck(group: Group, member: Member):
+async def luck(group: Group):
 
-    if (yaml_data["Saya"]["GroupSend"]["Disabled"]
-            and group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]):
-        return
-    elif "luck" in group_data[str(group.id)]["DisabledFunc"]:
-        return
     await safeSendGroupMessage(
         group,
         MessageChain.create(

@@ -56,7 +56,6 @@ async def main(group: Group):
     img = await get_pic(ran)
     await safeSendGroupMessage(
         group, MessageChain.create("你需要的头像已经生成好了哦~", Image(data_bytes=img)))
-    pass
 
 
 @channel.use(
