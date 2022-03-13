@@ -8,9 +8,11 @@ from graia.ariadne.message.element import At, Plain, Source,Element
 
 async def safeSendGroupMessage(
     target: Union[Group, int],
-    message: MessageChain,
+    message: Union[MessageChain,Iterable[Element], Element, str],
     quote: Optional[Union[Source, int]] = None,
 ) -> BotMessage:  # sourcery skip: assign-if-exp
+    if not isinstance(message,MessageChain):
+        message=MessageChain.create(message)
     app = ariadne_ctx.get()
     try:
         return await app.sendGroupMessage(target, message, quote=quote)

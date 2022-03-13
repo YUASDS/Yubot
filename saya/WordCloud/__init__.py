@@ -66,7 +66,7 @@ async def wordcloud(group: Group, member: Member, message: MessageChain):
                 talk_list = await get_group_talk(str(group.id), before_week)
             if len(talk_list) < 10:
                 await safeSendGroupMessage(
-                    group, MessageChain.create([Plain("当前样本量较少，无法制作")])
+                    group, MessageChain.create([Plain("当前样本量太少了哦~等多一点再来吧~")])
                 )
                 RUNNING -= 1
                 return RUNNING_LIST.remove(member.id)
@@ -81,14 +81,14 @@ async def wordcloud(group: Group, member: Member, message: MessageChain):
             await safeSendGroupMessage(
                 group,
                 MessageChain.create(
-                    [At(member.id), Plain(f" 已成功制作{mode}词云"), Image(data_bytes=image)]
+                    [At(member.id), Plain(f" 前辈需要的{mode}词云已经做好了哦~"), Image(data_bytes=image)]
                 ),
             )
             RUNNING -= 1
             RUNNING_LIST.remove(member.id)
         else:
             await safeSendGroupMessage(
-                group, MessageChain.create([Plain("词云生成进程正忙，请稍后")])
+                group, MessageChain.create([Plain("呜....忙...忙不过来了....")])
             )
 
 

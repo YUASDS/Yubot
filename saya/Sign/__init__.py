@@ -40,7 +40,7 @@ channel = Channel.current()
 async def main(group: Group,  member: Member):
     mid=member.id
     if not await is_sign(str(mid)):
-        return await safeSendGroupMessage(group, MessageChain.create("你今天已经签到过了哦，等明天再来吧~"))
+        return await safeSendGroupMessage(group, MessageChain.create("前辈今天已经签到过了哦，等明天再来吧~"))
     info=await get_info(str(mid)) # 获取信息
     uid=info.id
     favors=info.favor

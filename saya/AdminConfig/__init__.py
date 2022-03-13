@@ -82,7 +82,7 @@ async def funchelp(group: Group, func: WildcardMatch):
             if func_id >= len(funcList):
                 return await safeSendGroupMessage(
                     group,
-                    MessageChain.create("没有这个功能，请输入菜单查看所有功能"),
+                    MessageChain.create("千音没有找到这个功能哦~，请输入菜单查看所有功能"),
                 )
         elif num in funcHelp:
             func_id = [*funcHelp].index(num)

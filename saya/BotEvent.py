@@ -98,11 +98,7 @@ async def get_BotNewFriend(app: Ariadne, events: NewFriendRequestEvent):
     sourceGroup: Optional[int] = events.sourceGroup
     if sourceGroup:
         groupname = await app.getGroup(sourceGroup)
-        if groupname:
-            groupname = groupname.name
-        else:
-            groupname = "未知"
-
+        groupname = groupname.name if groupname else "未知"
     if yaml_data["Basic"]["Event"]["NewFriend"]:
             qq = yaml_data["Basic"]["Permission"]["Master"]
             await app.sendFriendMessage(

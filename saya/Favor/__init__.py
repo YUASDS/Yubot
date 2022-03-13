@@ -157,5 +157,5 @@ async def main(head: RegexMatch, event: MessageEvent,Source_msg:Source):
     if not result :
         return
     for reply in result[1]:
-        await autoSendMessage(source,MessageChain.create(reply),quote=Source_msg)
+        await autoSendMessage(source,reply,Source_msg)
     return
