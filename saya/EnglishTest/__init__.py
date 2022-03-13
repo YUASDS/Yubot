@@ -111,14 +111,13 @@ async def group_learn(group: Group, member: Member):
             waiter_saying = waiter_message.asDisplay()
             if waiter_saying == "取消":
                 return False
-            else:
-                try:
-                    bookid = int(waiter_saying)
-                    if 1 <= bookid <= 15:
-                        return bookid
-                except Exception:
-                    await safeSendGroupMessage(
-                        group, MessageChain.create([Plain("请输入1-15以内的数字")]))
+            try:
+                bookid = int(waiter_saying)
+                if 1 <= bookid <= 15:
+                    return bookid
+            except Exception:
+                await safeSendGroupMessage(
+                    group, MessageChain.create([Plain("请输入1-15以内的数字")]))
 
     @Waiter.create_using_function(listening_events=[GroupMessage],
                                   using_decorators=[Permission.require()])
@@ -242,14 +241,13 @@ async def friend_learn(app: Ariadne, friend: Friend):
             waiter_saying = waiter_message.asDisplay()
             if waiter_saying == "取消":
                 return False
-            else:
-                try:
-                    bookid = int(waiter_saying)
-                    if 1 <= bookid <= 15:
-                        return bookid
-                except Exception:
-                    await app.sendFriendMessage(
-                        friend, MessageChain.create([Plain("请输入1-15以内的数字")]))
+            try:
+                bookid = int(waiter_saying)
+                if 1 <= bookid <= 15:
+                    return bookid
+            except Exception:
+                await app.sendFriendMessage(
+                    friend, MessageChain.create([Plain("请输入1-15以内的数字")]))
 
     @Waiter.create_using_function([FriendMessage])
     async def waiter(waiter_friend: Friend, waiter_message: MessageChain):

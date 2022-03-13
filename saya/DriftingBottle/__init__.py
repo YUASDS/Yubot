@@ -237,24 +237,22 @@ async def pick_bottle_handler(group: Group):
     if bottle is None:
         return await safeSendGroupMessage(group,
                                           MessageChain.create("没有漂流瓶可以捡哦！"))
-    else:
-        bottle_score = get_bottle_score_avg(bottle["id"])
-        score_msg = f"瓶子的评分为：{bottle_score}" if bottle_score else "本漂流瓶目前还没有评分"
-        times = bottle["fishing_times"]
-        times_msg = "本漂流瓶已经被捞了" + str(
-            times) + "次" if times > 0 else "本漂流瓶还没有被捞到过"
-        msg = [
-            Plain(
-                f"你捡到了一个漂流瓶！\n瓶子编号为：{bottle['id']}\n{times_msg}\n{score_msg}\n"
-                #  f"漂流瓶来自 {bottle['group']} 群的 {bottle['member']}\n"
-                "漂流瓶内容为：\n")
-        ]
-        if bottle["text"] is not None:
-            image = await create_image(bottle["text"])
-            msg.append(Image(data_bytes=image))
-        if bottle["image"] is not None:
-            msg.append(Image(path=IMAGE_PATH.joinpath(bottle["image"])))
-        await safeSendGroupMessage(group, MessageChain.create(msg))
+    bottle_score = get_bottle_score_avg(bottle["id"])
+    score_msg = f"瓶子的评分为：{bottle_score}" if bottle_score else "本漂流瓶目前还没有评分"
+    times = bottle["fishing_times"]
+    times_msg = f"本漂流瓶已经被捞了{str(times)}次" if times > 0 else "本漂流瓶还没有被捞到过"
+    msg = [
+        Plain(
+            f"你捡到了一个漂流瓶！\n瓶子编号为：{bottle['id']}\n{times_msg}\n{score_msg}\n"
+            #  f"漂流瓶来自 {bottle['group']} 群的 {bottle['member']}\n"
+            "漂流瓶内容为：\n")
+    ]
+    if bottle["text"] is not None:
+        image = await create_image(bottle["text"])
+        msg.append(Image(data_bytes=image))
+    if bottle["image"] is not None:
+        msg.append(Image(path=IMAGE_PATH.joinpath(bottle["image"])))
+    await safeSendGroupMessage(group, MessageChain.create(msg))
 
 
 @channel.use(
@@ -305,13 +303,13 @@ async def drifting_bottle_handler(group: Group, member: Member,
             msg.append(Image(data_bytes=image))
         if bottle.image is not None:
             msg.append(Image(path=IMAGE_PATH.joinpath(bottle.image)))
-        await safeSendGroupMessage(group, MessageChain.create(msg))
     else:
         count = count_bottle()
         msg = f"目前有 {count} 个漂流瓶在漂流" if count > 0 else "目前没有漂流瓶在漂流"
         msg += "\n漂流瓶可以使用“捞漂流瓶”命令捞到，也可以使用“丢漂流瓶”命令丢出”\n可以使用“漂流瓶评分”为漂流瓶添加评分"
 
-        await safeSendGroupMessage(group, MessageChain.create(msg))
+
+    await safeSendGroupMessage(group, MessageChain.create(msg))
 
 
 @channel.use(
@@ -375,21 +373,21 @@ async def bottle_score_handler(group: Group, member: Member,
             saying = anythings.result.asDisplay().split(" ", 2)
             if message.has(Quote):
                 reply = message.getFirst(Quote)
-                if reply.senderId == yaml_data["Basic"]["MAH"]["BotQQ"]:
-                    reg_search = re.search(r"瓶子编号为：(.*)\n",
-                                           reply.origin.asDisplay())
-                    if reg_search:
-                        bottle_id = reg_search.group(1)
-                        score = anythings.result.asDisplay()
-                    else:
-                        return await safeSendGroupMessage(
-                            group,
-                            MessageChain.create(At(member.id),
-                                                " 请正确回复漂流瓶，并输入分数"))
-                else:
+                if reply.senderId != yaml_data["Basic"]["MAH"]["BotQQ"]:
                     return await safeSendGroupMessage(
                         group,
                         MessageChain.create(At(member.id), " 请正确回复漂流瓶，并输入分数"))
+                if not (
+                    reg_search := re.search(
+                        r"瓶子编号为：(.*)\n", reply.origin.asDisplay()
+                    )
+                ):
+                    return await safeSendGroupMessage(
+                        group,
+                        MessageChain.create(At(member.id),
+                                            " 请正确回复漂流瓶，并输入分数"))
+                bottle_id = reg_search.group(1)
+                score = anythings.result.asDisplay()
             else:
                 bottle_id = saying[0]
                 score = saying[1]

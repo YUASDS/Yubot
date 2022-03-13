@@ -36,21 +36,22 @@ channel = Channel.current()
     ))
 async def main(group: Group, member: Member, keys: RegexMatch):
 
-    if keys.matched:
+    if not keys.matched:
 
-        keys = keys.result.asDisplay()
-        try:
-            for key, contain in DATA.items():
-                if key == keys:
+        return
+    keys = keys.result.asDisplay()
+    try:
+        for key, contain in DATA.items():
+            if key == keys:
 
-                    s = contain
-                    for SCkey in s:
-                        await asyncio.sleep(0.5)
-                        await autoSendMessage(
-                            group, MessageChain.create(s[SCkey]))
+                s = contain
+                for SCkey in s:
+                    await asyncio.sleep(0.5)
+                    await autoSendMessage(
+                        group, MessageChain.create(s[SCkey]))
 
-        except IndexError:
-            pass
+    except IndexError:
+        pass
 
 
 # if "get" in group_key:
