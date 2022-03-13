@@ -48,6 +48,8 @@ Saya:
     Disabled: false
   Favor:
     Disabled: false
+  Filter:
+    Disabled: false
   GroupConfig:
     Disabled: false
   GroupSend:
