@@ -42,8 +42,8 @@ async def main(group: Group,  member: Member):
     if not await is_sign(str(mid)):
         return await safeSendGroupMessage(group, MessageChain.create("你今天已经签到过了哦，等明天再来吧~"))
     info=await get_info(str(mid)) # 获取信息
-    uid=info["id"]
-    favors=info["favor"]
+    uid=info.id
+    favors=info.favor
     gold_add=randint(1,15)
     favor_add=1
     await add_gold(qq=str(mid),num=gold_add)
@@ -63,7 +63,7 @@ async def main(group: Group,  member: Member):
                         name=member.name,
                         uuid=uid,
                         level=fav.level,exp=exp,
-                        total_days=info["sign_num"],
+                        total_days=info.sign_num,
                         rewards=rewards,
                         font_path=font_file,
                         mahojin_path=mahojin_path

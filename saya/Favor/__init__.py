@@ -42,7 +42,7 @@ async def get_reply(order:str,qq:int):
     with open (file=COUNT_PATH,mode="r",encoding="utf-8") as c:
         count:int=int(c.read())
     info=await get_info(str(qq))
-    info_favor=favor(info["favor"])
+    info_favor=favor(info.favor)
     level_min=favor_data[order]["min"]
     level_max=favor_data[order]["max"]
     reply=[]

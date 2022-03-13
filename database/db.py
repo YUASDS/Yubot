@@ -31,6 +31,19 @@ class User(BaseModel):
         table_name = "user_info"
 
 
+class User_info():
+    qq : str
+    id : int
+    is_sign : int
+    sign_num : int
+    english_answer : int
+    gold : int
+    talk_num : int
+    favor: int
+    favor_data: int
+    class Meta:
+        table_name = "user_info"
+
 db.create_tables([User], safe=True)
 
 
@@ -44,7 +57,7 @@ def init_user(qq: str):
 
 async def is_sign(qq: str):
     init_user(qq)
-    user = User.get(qq=qq)
+    user:User = User.get(qq=qq)
     if user.is_sign:
         return False
     p = User.update(is_sign=1,
@@ -54,12 +67,10 @@ async def is_sign(qq: str):
 
 
 async def get_info(qq: str):
+    # sourcery skip: inline-immediately-returned-variable
     init_user(qq)
-    user = User.get(qq=qq)
-    return {"id":user.id, "is_sign":user.is_sign, "sign_num":user.sign_num, 
-            "gold":user.gold, "talk_num":user.talk_num,"favor":user.favor,
-            "favor_data":user.favor_data
-            }
+    user:User_info = User.get(qq=qq)
+    return user
 
 
 async def add_gold(qq: str, num: int):
@@ -75,9 +86,9 @@ async def reset_favor_data():
 async def add_favor(qq: str, num: int,force: bool = False):
     init_user(qq)
     user_info=await get_info(qq=qq)
-    user_favor=user_info["favor"]
+    user_favor=user_info.favor
     total=user_favor+ num
-    today=user_info["favor_data"]
+    today=user_info.favor_data
     if not force:
         if today>=5 or user_favor >=62:
             return
@@ -184,7 +195,7 @@ class favor:
         return 2**self.level
 
 async def get_ranking():
-    user_list = User.select().order_by(User.gold.desc())
+    user_list:list[User_info]= User.select().order_by(User.gold.desc())
     user_num = len(user_list)
     gold_rank = PrettyTable()
     gold_rank.field_names = [

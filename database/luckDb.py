@@ -57,11 +57,10 @@ async def sign(id):  # 切换是否打捞状态
     luck = Luck.get(id=id)
     if luck.is_sign:
         return False
-    else:
-        p = Luck.update(is_sign=1).where(Luck.id == id)
-        p.execute()
-        logger.info("已转换状态")
-        return True
+    p = Luck.update(is_sign=1).where(Luck.id == id)
+    p.execute()
+    logger.info("已转换状态")
+    return True
 
 
 async def get_luck_info(id):
@@ -122,8 +121,7 @@ async def get_luck_id():  # 随机取一个符合条件的瓶子
     for p in un_sign:
         num = int(p.id)
         s.append(num)
-    id_get = random.choice(s)
-    return id_get
+    return random.choice(s)
 
 
 async def get_luck_gold(id: int):
@@ -138,10 +136,7 @@ async def get_user_change(qq: str):  # 返回本次变化
     user = User.get(qq=qq)
     line = user.gold_raw
     gold_change = line[-1]
-    if len(line) > 0:
-        new_raw = line[:-1]
-    else:
-        new_raw = "0"
+    new_raw = line[:-1] if len(line) > 0 else "0"
     User.update(gold_raw=new_raw,
                 res_time=user.res_time - 1).where(User.qq == qq).execute()
     return gold_dic[gold_change]
