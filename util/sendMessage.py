@@ -35,15 +35,17 @@ async def safeSendGroupMessage(
         except UnknownTarget:
             return await app.sendGroupMessage(target, MessageChain.create(msg))
 
-async def autoSendMessage(target:Union[Member, Friend],
+async def autoSendMessage(target:Union[Member, Friend,str],
     message: Union[MessageChain,Iterable[Element], Element, str],
     quote: Optional[Union[Source, int]] = None,
     ) -> BotMessage:
     '''根据输入的目标类型自动选取发送好友信息或是群组信息'''
     app=ariadne_ctx.get()
+    if isinstance(target,str):
+        target=int(target)
     if not isinstance(message,MessageChain):
         message=MessageChain.create(message)
     if isinstance(target,Member):
         return await app.sendGroupMessage(target,message,quote=quote)
-    elif isinstance(target,Friend):
+    elif isinstance(target, (Friend, int)):
         return await app.sendFriendMessage(target,message,quote=quote)
