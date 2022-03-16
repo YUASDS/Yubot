@@ -12,7 +12,7 @@ from graia.broadcast.interrupt import InterruptControl
 from graia.ariadne.event.message import GroupMessage
 from graia.ariadne.message.chain import MessageChain
 from graia.saya.builtins.broadcast.schema import ListenerSchema
-from graia.ariadne.message.parser.twilight import Twilight, RegexMatch
+from graia.ariadne.message.parser.twilight import Twilight, RegexMatch, RegexResult
 
 from util.sendMessage import safeSendGroupMessage
 from util.control import Permission, Interval, Rest
@@ -42,7 +42,7 @@ async def get_pic(pic_id) -> bytes:
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight({"head": RegexMatch("Waifu|头像生成|获取头像|随机头像")})],
+        inline_dispatchers=[Twilight(["head" @ RegexMatch("Waifu|头像生成|获取头像|随机头像")])],
         decorators=[
             Permission.require(),
             Permission.restricter(func),
@@ -64,10 +64,10 @@ async def main(group: Group):
         listening_events=[GroupMessage],
         inline_dispatchers=[
             Twilight(
-                {
-                    "head": RegexMatch("WaifuLab|Lab头像生成|Lab获取头像|Lab头像"),
-                    "water": RegexMatch("无水印", optional=True),
-                }
+                [
+                    "head" @ RegexMatch("WaifuLab|Lab头像生成|Lab获取头像|Lab头像"),
+                    "water" @ RegexMatch("无水印", optional=True),
+                ]
             )
         ],
         decorators=[
@@ -78,7 +78,7 @@ async def main(group: Group):
         ],
     )
 )
-async def WaifuLab(group: Group, member: Member, water: RegexMatch):
+async def WaifuLab(group: Group, member: Member, water: RegexResult):
     global BROWER
     if BROWER > 2:
         return await safeSendGroupMessage(group, MessageChain.create("当前进程过多，等一会再来哦~"))
@@ -108,14 +108,14 @@ async def WaifuLab(group: Group, member: Member, water: RegexMatch):
         listening_events=[GroupMessage],
         using_dispatchers=[
             Twilight(
-                {
-                    "head": RegexMatch("选择|继续|返回|退出"),
-                    "choose": RegexMatch("[0-9]+", optional=True),
-                }
+                [
+                    "head" @ RegexMatch("选择|继续|返回|退出"),
+                    "choose" @ RegexMatch("[0-9]+", optional=True),
+                ]
             )
         ],
     )
-    async def get_waifu(waiter_member: Member, head: RegexMatch, choose: RegexMatch):
+    async def get_waifu(waiter_member: Member, head: RegexResult, choose: RegexResult):
         if member.id == waiter_member.id:
             head = head.result.asDisplay()
             if choose.matched:
@@ -147,7 +147,6 @@ async def WaifuLab(group: Group, member: Member, water: RegexMatch):
                             "头像获取成功~", Image(data_bytes=img.getvalue())
                         ),
                     )
-
                     return False
         return
 
@@ -158,8 +157,7 @@ async def WaifuLab(group: Group, member: Member, water: RegexMatch):
         except asyncio.TimeoutError:
             await page.close()
             BROWER -= 1
-            return await safeSendGroupMessage(group, MessageChain.create("等待超时~"))
+            return await safeSendGroupMessage(group, "等待超时~")
     BROWER -= 1
 
-    await safeSendGroupMessage(group, MessageChain.create("你需要的头像已经生成好了哦~"))
-    pass
+    await safeSendGroupMessage(group, "你需要的头像已经生成好了哦~")

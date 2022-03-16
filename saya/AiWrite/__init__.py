@@ -7,7 +7,12 @@ from graia.broadcast.interrupt import InterruptControl
 from graia.ariadne.message.element import Plain, At
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.event.message import GroupMessage
-from graia.ariadne.message.parser.twilight import Twilight, FullMatch, WildcardMatch
+from graia.ariadne.message.parser.twilight import (
+    Twilight,
+    FullMatch,
+    WildcardMatch,
+    RegexResult,
+)
 
 from util.control import Permission, Interval, Rest
 from util.sendMessage import safeSendGroupMessage
@@ -54,7 +59,7 @@ templete = {"iter": 3, "model": "小梦0号", "token": ""}
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[
-            Twilight({"heads": FullMatch("续写"), "text": WildcardMatch()})
+            Twilight(["heads" @ FullMatch("续写"), "text" @ WildcardMatch()])
         ],
         decorators=[
             Permission.restricter(func),
@@ -64,7 +69,7 @@ templete = {"iter": 3, "model": "小梦0号", "token": ""}
         ],
     )
 )
-async def main(group: Group, member: Member, text: WildcardMatch):
+async def main(group: Group, member: Member, text: RegexResult):
 
     gid = str(group.id)
     if gid not in config:
@@ -117,7 +122,7 @@ async def main(group: Group, member: Member, text: WildcardMatch):
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[
-            Twilight({"heads": FullMatch("设置续写apikey"), "text": WildcardMatch()})
+            Twilight(["heads" @ FullMatch("设置续写apikey"), "text" @ WildcardMatch()])
         ],
         decorators=[
             Permission.restricter(func),
@@ -127,7 +132,7 @@ async def main(group: Group, member: Member, text: WildcardMatch):
         ],
     )
 )
-async def APIKEY(group: Group, member: Member, text: WildcardMatch):
+async def APIKEY(group: Group, member: Member, text: RegexResult):
 
     if text.matched:
         gid = str(group.id)
@@ -167,7 +172,7 @@ async def APIKEY(group: Group, member: Member, text: WildcardMatch):
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[
-            Twilight({"heads": FullMatch("默认续写迭代"), "text": WildcardMatch()})
+            Twilight(["heads" @ FullMatch("默认续写迭代"), "text" @ WildcardMatch()])
         ],
         decorators=[
             Permission.restricter(func),
@@ -177,7 +182,7 @@ async def APIKEY(group: Group, member: Member, text: WildcardMatch):
         ],
     )
 )
-async def novel_iteration(group: Group, member: Member, text: WildcardMatch):
+async def novel_iteration(group: Group, member: Member, text: RegexResult):
     gid = str(group.id)
     if text.matched:
         if gid not in config:
@@ -219,7 +224,7 @@ async def novel_iteration(group: Group, member: Member, text: WildcardMatch):
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[
-            Twilight({"heads": FullMatch("默认续写模型"), "text": WildcardMatch()})
+            Twilight(["heads" @ FullMatch("默认续写模型"), "text" @ WildcardMatch()])
         ],
         decorators=[
             Permission.restricter(func),
@@ -229,7 +234,7 @@ async def novel_iteration(group: Group, member: Member, text: WildcardMatch):
         ],
     )
 )
-async def on_prefix(group: Group, member: Member, text: WildcardMatch):
+async def on_prefix(group: Group, member: Member, text: RegexResult):
 
     gid = str(group.id)
     if text.matched:

@@ -64,13 +64,10 @@ def getCutStr(str, cut):
     si = 0
     i = 0
     for s in str:
-        if "\u4e00" <= s <= "\u9fff":
-            si += 2
-        else:
-            si += 1
+        si += 2 if "\u4e00" <= s <= "\u9fff" else 1
         i += 1
         if si > cut:
-            cutStr = str[:i] + "...."
+            cutStr = f"{str[:i]}...."
             break
         else:
             cutStr = str

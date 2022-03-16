@@ -1,5 +1,4 @@
 import os
-import re
 import asyncio
 
 from pathlib import Path
@@ -14,6 +13,7 @@ from graia.ariadne.message.parser.twilight import (
     FullMatch,
     RegexMatch,
     WildcardMatch,
+    RegexResult,
 )
 
 from util.sendMessage import safeSendGroupMessage
@@ -24,7 +24,15 @@ func = os.path.dirname(__file__).split("\\")[-1]
 bg = os.path.join(os.path.dirname(__file__), "bg.jpg")
 CONFIG_FILE = Path(__file__).parent.joinpath("config.json")
 MAP = {}
-
+msg = [
+    "功能([]内为可选参数，|为同一个指令,【】内为必须参数,()内为解释说明)：\n"
+    "制作地图|制造地图|创建地图|刷新地图 [格子数（默认为6x6）][背景图片]\n使用方式：制造地图 8 [图片]\n\n"
+    "加入地图【x】【分割符(任意非数字即可)】【y】\n使用方法：加入地图3 3\n\n"
+    "移动【x】【分割符(任意非数字即可)】【y】\n使用方法：移动3 3（需要先加入地图）\n\n"
+    "添加角色|增加角色|添加NPC【空格分割】【NPC名】【空格分割】【x】"
+    "【分割符(任意非数字即可)】【y】[NPC立绘]\n使用方法：添加角色 白千音 3 3[图片]\n\n"
+    "移动NPC|移动角色 【NPC名】【x】【分割符(任意非数字即可)】【y】\n使用方法：移动角色 白千音 3 5"
+]
 # if not os.path.exists(config_path):
 #     with open(config_path, 'w', encoding='utf8') as f:
 #         f.write("{}")
@@ -40,9 +48,9 @@ channel = Channel.current()
         listening_events=[GroupMessage],
         inline_dispatchers=[
             Twilight(
-                {
-                    "head": RegexMatch("地图|地图帮助|地图功能"),
-                }
+                [
+                    "head" @ RegexMatch("地图|地图帮助|地图功能"),
+                ]
             )
         ],
         decorators=[
@@ -54,14 +62,8 @@ channel = Channel.current()
     )
 )
 async def main(group: Group):
-    msg = "功能([]内为可选参数，|为同一个指令,【】内为必须参数,()内为解释说明)：\n"
-    part1 = "制作地图|制造地图|创建地图|刷新地图 [格子数（默认为6x6）][背景图片]\n使用方式：制造地图 8 [图片]\n\n"
-    part2 = "加入地图【x】【分割符(任意非数字即可)】【y】\n使用方法：加入地图3 3\n\n"
-    part3 = "移动【x】【分割符(任意非数字即可)】【y】\n使用方法：移动3 3（需要先加入地图）\n\n"
-    part4 = "添加角色|增加角色|添加NPC【空格分割】【NPC名】【空格分割】【x】"
-    part5 = "【分割符(任意非数字即可)】【y】[NPC立绘]\n使用方法：添加角色 白千音 3 3[图片]\n\n"
-    part6 = "移动NPC|移动角色 【NPC名】【x】【分割符(任意非数字即可)】【y】\n使用方法：移动角色 白千音 3 5"
-    message = msg + part1 + part2 + part3 + part4 + part5 + part6
+
+    message = msg[0]
 
     return await safeSendGroupMessage(group, MessageChain.create(message))
 
@@ -72,12 +74,12 @@ async def main(group: Group):
         listening_events=[GroupMessage],
         inline_dispatchers=[
             Twilight(
-                {
-                    "head": RegexMatch("制作地图|制造地图|创建地图|刷新地图"),
-                    "space": RegexMatch("[\s]+", optional=True),
-                    "num": RegexMatch("[0-9]+", optional=True),
-                    "anythings": WildcardMatch(flags=re.DOTALL),
-                }
+                [
+                    "head" @ RegexMatch("制作地图|制造地图|创建地图|刷新地图"),
+                    "space" @ RegexMatch("[\\s]+", optional=True),
+                    "num" @ RegexMatch("[0-9]+", optional=True),
+                    "anythings" @ WildcardMatch(True),
+                ]
             )
         ],
         decorators=[
@@ -88,9 +90,9 @@ async def main(group: Group):
         ],
     )
 )
-async def make(group: Group, anythings: RegexMatch, num: RegexMatch):
+async def make(group: Group, anythings: RegexResult, num: RegexResult):
     if num.matched:
-        num = num.result.asDisplay()
+        num: str = num.result.asDisplay()
         num = int(num) if num.isdigit else 6
     else:
         num = 6
@@ -131,14 +133,15 @@ async def make(group: Group, anythings: RegexMatch, num: RegexMatch):
         listening_events=[GroupMessage],
         inline_dispatchers=[
             Twilight(
-                {
-                    "head": FullMatch("加入地图"),
-                    "x": RegexMatch(
+                [
+                    "head" @ FullMatch("加入地图"),
+                    "x"
+                    @ RegexMatch(
                         "[0-9]+",
                     ),
-                    "space": RegexMatch("\D+"),
-                    "y": RegexMatch("[0-9]+"),
-                }
+                    "space" @ RegexMatch("\\D+"),
+                    "y" @ RegexMatch("[0-9]+"),
+                ]
             )
         ],
         decorators=[
@@ -149,7 +152,7 @@ async def make(group: Group, anythings: RegexMatch, num: RegexMatch):
         ],
     )
 )
-async def join(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
+async def join(group: Group, x: RegexResult, y: RegexResult, member: Member):
     if not x.matched and y.matched:
         return await safeSendGroupMessage(
             group, MessageChain.create("加入地图的时候需要带上两个位置哦~")
@@ -187,12 +190,12 @@ async def join(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
         listening_events=[GroupMessage],
         inline_dispatchers=[
             Twilight(
-                {
-                    "head": FullMatch("移动"),
-                    "x": RegexMatch("[0-9]+"),
-                    "space": RegexMatch("\D+"),
-                    "y": RegexMatch("[0-9]+"),
-                }
+                [
+                    "head" @ FullMatch("移动"),
+                    "x" @ RegexMatch("[0-9]+"),
+                    "space" @ RegexMatch("\\D+"),
+                    "y" @ RegexMatch("[0-9]+"),
+                ]
             )
         ],
         decorators=[
@@ -203,7 +206,7 @@ async def join(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
         ],
     )
 )
-async def change(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
+async def change(group: Group, x: RegexResult, y: RegexResult, member: Member):
     if not x.matched and y.matched:
         return await safeSendGroupMessage(group, MessageChain.create("移动地图的时候需要带上位置哦~"))
     x: str = x.result.asDisplay()
@@ -253,17 +256,17 @@ async def change(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
         listening_events=[GroupMessage],
         inline_dispatchers=[
             Twilight(
-                {
-                    "head": RegexMatch("添加角色|增加角色|添加NPC"),
-                    "space1": RegexMatch("[\s]+", optional=True),
-                    "npc": RegexMatch("[\S]+"),
-                    "space2": RegexMatch("[\s]+", optional=True),
-                    "x": RegexMatch("[0-9]+"),
-                    "space": RegexMatch("\D+"),
-                    "y": RegexMatch("[0-9]+"),
-                    "enter": FullMatch("\n", optional=True),
-                    "anythings1": WildcardMatch(optional=True),
-                }
+                [
+                    "head" @ RegexMatch("添加角色|增加角色|添加NPC"),
+                    "space1" @ RegexMatch("[\\s]+", optional=True),
+                    "npc" @ RegexMatch("[\\S]+"),
+                    "space2" @ RegexMatch("[\\s]+", optional=True),
+                    "x" @ RegexMatch("[0-9]+"),
+                    "space" @ RegexMatch("\\D+"),
+                    "y" @ RegexMatch("[0-9]+"),
+                    "enter" @ FullMatch("\n", optional=True),
+                    "anythings1" @ WildcardMatch(optional=True),
+                ]
             )
         ],
         decorators=[
@@ -276,10 +279,10 @@ async def change(group: Group, x: RegexMatch, y: RegexMatch, member: Member):
 )
 async def joinImage(
     group: Group,
-    npc: RegexMatch,
-    x: RegexMatch,
-    y: RegexMatch,
-    anythings1: WildcardMatch,
+    npc: RegexResult,
+    x: RegexResult,
+    y: RegexResult,
+    anythings1: RegexResult,
     member: Member,
 ):
 
@@ -325,15 +328,15 @@ async def joinImage(
         listening_events=[GroupMessage],
         inline_dispatchers=[
             Twilight(
-                {
-                    "head": RegexMatch("移动NPC|移动角色"),
-                    "space1": RegexMatch("[\s]+", optional=True),
-                    "npc": RegexMatch("[\S]+"),
-                    "space2": RegexMatch("[\s]+", optional=True),
-                    "x": RegexMatch("[0-9]+"),
-                    "space": RegexMatch("\D+", optional=True),
-                    "y": RegexMatch("[0-9]"),
-                }
+                [
+                    "head" @ RegexMatch("移动NPC|移动角色"),
+                    "space1" @ RegexMatch("[\\s]+", optional=True),
+                    "npc" @ RegexMatch("[\\S]+"),
+                    "space2" @ RegexMatch("[\\s]+", optional=True),
+                    "x" @ RegexMatch("[0-9]+"),
+                    "space" @ RegexMatch("\\D+", optional=True),
+                    "y" @ RegexMatch("[0-9]"),
+                ]
             )
         ],
         decorators=[
@@ -344,9 +347,7 @@ async def joinImage(
         ],
     )
 )
-async def change_npc(
-    group: Group, x: RegexMatch, y: RegexMatch, member: Member, npc: RegexMatch
-):
+async def change_npc(group: Group, x: RegexResult, y: RegexResult, npc: RegexResult):
     if not x.matched and y.matched:
         return await safeSendGroupMessage(group, MessageChain.create("移动角色的时候需要带上位置哦~"))
     if not npc.matched:

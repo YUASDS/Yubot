@@ -40,7 +40,7 @@ RUNNING_LIST = []
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight({"head": RegexMatch(r"^查看(个人|本群)词云")})],
+        inline_dispatchers=[Twilight(["head" @ RegexMatch(r"^查看(个人|本群)词云")])],
         decorators=[
             Permission.restricter(FUNC),
             Permission.require(),

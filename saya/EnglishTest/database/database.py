@@ -6,7 +6,6 @@ db = SqliteDatabase("./saya/EnglishTest/database/WordData.db")
 
 
 class BaseModel(Model):
-
     class Meta:
         database = db
 

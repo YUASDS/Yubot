@@ -19,9 +19,7 @@ def calc_time_total(t):
 
     timedelta = datetime.timedelta(seconds=int(t / 1000))
     day = timedelta.days
-    hour, mint, sec = tuple(
-        int(n) for n in str(timedelta).split(",")[-1].split(":")
-    )
+    hour, mint, sec = tuple(int(n) for n in str(timedelta).split(",")[-1].split(":"))
 
     total = ""
     if day:

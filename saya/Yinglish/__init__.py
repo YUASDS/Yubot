@@ -1,5 +1,4 @@
 import random
-import re
 import os
 
 import jieba
@@ -8,7 +7,12 @@ from graia.saya import Saya, Channel
 from graia.ariadne.message.element import Source
 from graia.ariadne.event.message import GroupMessage, FriendMessage, MessageEvent
 from graia.saya.builtins.broadcast.schema import ListenerSchema
-from graia.ariadne.message.parser.twilight import Twilight, FullMatch, WildcardMatch
+from graia.ariadne.message.parser.twilight import (
+    Twilight,
+    FullMatch,
+    WildcardMatch,
+    RegexResult,
+)
 
 from util.sendMessage import autoSendMessage
 from util.control import Permission, Interval, Rest
@@ -50,10 +54,10 @@ def chs2yin(s, 淫乱度=0.6):
         listening_events=[GroupMessage, FriendMessage],
         inline_dispatchers=[
             Twilight(
-                {
-                    "head": FullMatch("千音说淫语"),
-                    "anythings": WildcardMatch(flags=re.DOTALL),
-                }
+                [
+                    "head" @ FullMatch("千音说淫语"),
+                    "anythings" @ WildcardMatch(True),
+                ]
             )
         ],
         decorators=[
@@ -64,7 +68,7 @@ def chs2yin(s, 淫乱度=0.6):
         ],
     )
 )
-async def main(event: MessageEvent, anythings: WildcardMatch, source: Source):
+async def main(event: MessageEvent, anythings: RegexResult, source: Source):
     sender = event.sender
     info = await get_info(str(sender.id))
     favor_info = favor(info.favor)

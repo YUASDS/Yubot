@@ -13,6 +13,8 @@ from graia.ariadne.message.parser.twilight import (
     RegexMatch,
     ArgumentMatch,
     WildcardMatch,
+    RegexResult,
+    ArgResult,
 )
 
 from util.text2image import create_image
@@ -66,11 +68,11 @@ Agreement = {
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight([FullMatch("功能")], {"func": WildcardMatch()})],
+        inline_dispatchers=[Twilight([FullMatch("功能"), "func" @ WildcardMatch()])],
         decorators=[Permission.require(), Interval.require(5)],
     )
 )
-async def funchelp(group: Group, func: WildcardMatch):
+async def funchelp(group: Group, func: RegexResult):
     # sourcery skip: use-fstring-for-concatenation
     if func.matched:
         num = func.result.asDisplay().strip()
@@ -116,7 +118,9 @@ async def funchelp(group: Group, func: WildcardMatch):
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight({"head": RegexMatch(r"^[。\./]?help$|^帮助$|^菜单$")})],
+        inline_dispatchers=[
+            Twilight(["head" @ RegexMatch(r"^[。\./]?help$|^帮助$|^菜单$")])
+        ],
         decorators=[Permission.require(), Interval.require()],
     )
 )
@@ -157,21 +161,22 @@ async def help(group: Group):
         listening_events=[GroupMessage],
         inline_dispatchers=[
             Twilight(
-                {
-                    "head": FullMatch("开启功能"),
-                    "all": ArgumentMatch(
+                [
+                    "head" @ FullMatch("开启功能"),
+                    "all"
+                    @ ArgumentMatch(
                         "-all",
                         action="store_true",
                         optional=True,
                     ),
-                    "func": WildcardMatch(optional=True),
-                }
+                    "func" @ WildcardMatch(optional=True),
+                ]
             )
         ],
         decorators=[Permission.require(Permission.GROUP_ADMIN), Interval.require(5)],
     )
 )
-async def on_func(group: Group, func: WildcardMatch, all: ArgumentMatch):
+async def on_func(group: Group, func: RegexResult, all: ArgResult):
     if func.matched:
         say = func.result.asDisplay().strip()
         if say.isdigit():
@@ -230,21 +235,22 @@ async def on_func(group: Group, func: WildcardMatch, all: ArgumentMatch):
         listening_events=[GroupMessage],
         inline_dispatchers=[
             Twilight(
-                {
-                    "head": FullMatch("关闭功能"),
-                    "all": ArgumentMatch(
+                [
+                    "head" @ FullMatch("关闭功能"),
+                    "all"
+                    @ ArgumentMatch(
                         "-all",
                         action="store_true",
                         optional=True,
                     ),
-                    "func": WildcardMatch(optional=True),
-                }
+                    "func" @ WildcardMatch(optional=True),
+                ]
             )
         ],
         decorators=[Permission.require(Permission.GROUP_ADMIN), Interval.require(5)],
     )
 )
-async def off_func(group: Group, func: WildcardMatch, all: ArgumentMatch):
+async def off_func(group: Group, func: RegexResult, all: ArgResult):
     if func.matched:
         say = func.result.asDisplay().strip()
         if say.isdigit():
@@ -301,21 +307,22 @@ async def off_func(group: Group, func: WildcardMatch, all: ArgumentMatch):
         listening_events=[GroupMessage],
         inline_dispatchers=[
             Twilight(
-                [FullMatch("群功能")],
-                {
-                    "reg1": RegexMatch("修改|查看|关闭|开启", optional=True),
-                    "reg2": RegexMatch(
+                [
+                    FullMatch("群功能"),
+                    "reg1" @ RegexMatch("修改|查看|关闭|开启", optional=True),
+                    "reg2"
+                    @ RegexMatch(
                         "|".join(x["name"] for x in configList), optional=True
                     ),
-                    "reg3": WildcardMatch(optional=True),
-                },
+                    "reg3" @ WildcardMatch(optional=True),
+                ],
             )
         ],
         decorators=[Permission.require(Permission.GROUP_ADMIN), Interval.require(5)],
     )
 )
 async def group_func(
-    group: Group, reg1: RegexMatch, reg2: RegexMatch, reg3: WildcardMatch
+    group: Group, reg1: RegexResult, reg2: RegexResult, reg3: RegexResult
 ):
 
     if reg1.matched:

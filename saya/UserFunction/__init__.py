@@ -28,7 +28,7 @@ FUNC = os.path.dirname(__file__).split("\\")[-1]
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight({"head": FullMatch("查看排行榜")})],
+        inline_dispatchers=[Twilight(["head" @ FullMatch("查看排行榜")])],
         decorators=[
             Permission.restricter(FUNC),
             Permission.require(),
@@ -62,7 +62,7 @@ async def bot_Launched():
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight({"head": FullMatch("查看个人信息")})],
+        inline_dispatchers=[Twilight(["head" @ FullMatch("查看个人信息")])],
         decorators=[Permission.require(), Interval.require()],
     )
 )

@@ -23,6 +23,8 @@ from graia.ariadne.message.parser.twilight import (
     RegexMatch,
     ArgumentMatch,
     WildcardMatch,
+    RegexResult,
+    ArgResult,
 )
 
 from database.db import reduce_gold
@@ -61,12 +63,12 @@ func = os.path.dirname(__file__).split("\\")[-1]
         listening_events=[GroupMessage],
         inline_dispatchers=[
             Twilight(
-                {
-                    "prefix": RegexMatch(r"^(扔|丢|写)(漂流瓶|瓶子)"),
-                    "enter": FullMatch("\n", optional=True),
-                    "arg_pic": ArgumentMatch("-P", action="store_true", optional=True),
-                    "anythings1": WildcardMatch(optional=True),
-                },
+                [
+                    "prefix" @ RegexMatch(r"^(扔|丢|写)(漂流瓶|瓶子)"),
+                    "enter" @ FullMatch("\n", optional=True),
+                    "arg_pic" @ ArgumentMatch("-P", action="store_true", optional=True),
+                    "anythings1" @ WildcardMatch(optional=True),
+                ],
             )
         ],
         decorators=[
@@ -80,8 +82,8 @@ async def throw_bottle_handler(
     group: Group,
     member: Member,
     source: Source,
-    arg_pic: ArgumentMatch,
-    anythings1: WildcardMatch,
+    arg_pic: ArgResult,
+    anythings1: RegexResult,
 ):
     @Waiter.create_using_function(
         listening_events=[GroupMessage], using_decorators=[Permission.require()]
@@ -226,7 +228,7 @@ async def throw_bottle_handler(
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight({"head": RegexMatch(r"^(捡|打?捞)(漂流瓶|瓶子)$")})],
+        inline_dispatchers=[Twilight(["head" @ RegexMatch(r"^(捡|打?捞)(漂流瓶|瓶子)$")])],
         decorators=[
             Permission.restricter(func),
             Permission.require(),
@@ -262,7 +264,7 @@ async def pick_bottle_handler(group: Group):
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight({"head": FullMatch("清空漂流瓶")})],
+        inline_dispatchers=[Twilight(["head" @ FullMatch("清空漂流瓶")])],
         decorators=[Permission.require(Permission.MASTER), Interval.require()],
     )
 )
@@ -277,7 +279,7 @@ async def clear_bottle_handler(group: Group):
         listening_events=[GroupMessage],
         inline_dispatchers=[
             Twilight(
-                {"head": FullMatch("查漂流瓶"), "bottleid": WildcardMatch(optional=True)}
+                ["head" @ FullMatch("查漂流瓶"), "bottleid" @ WildcardMatch(optional=True)]
             )
         ],
         decorators=[
@@ -287,9 +289,7 @@ async def clear_bottle_handler(group: Group):
         ],
     )
 )
-async def drifting_bottle_handler(
-    group: Group, member: Member, bottleid: WildcardMatch
-):
+async def drifting_bottle_handler(group: Group, member: Member, bottleid: RegexResult):
     if bottleid.matched and member.id == yaml_data["Basic"]["Permission"]["Master"]:
         bottle_id = int(bottleid.result.asDisplay())
         bottle = get_bottle_by_id(bottle_id)
@@ -323,13 +323,13 @@ async def drifting_bottle_handler(
         listening_events=[GroupMessage],
         inline_dispatchers=[
             Twilight(
-                {"head": FullMatch("删漂流瓶"), "anything": WildcardMatch(optional=True)}
+                ["head" @ FullMatch("删漂流瓶"), "anything" @ WildcardMatch(optional=True)]
             )
         ],
         decorators=[Permission.require(Permission.MASTER), Interval.require()],
     )
 )
-async def delete_bottle_handler(group: Group, anything: WildcardMatch):
+async def delete_bottle_handler(group: Group, anything: RegexResult):
 
     if anything.matched:
         if anything.result.asDisplay().isdigit():
@@ -359,11 +359,11 @@ async def delete_bottle_handler(group: Group, anything: WildcardMatch):
         listening_events=[GroupMessage],
         inline_dispatchers=[
             Twilight(
-                {
-                    "at": ElementMatch(At, optional=True),
-                    "head": FullMatch("漂流瓶评分"),
-                    "anythings": WildcardMatch(optional=True),
-                }
+                [
+                    "at" @ ElementMatch(At, optional=True),
+                    "head" @ FullMatch("漂流瓶评分"),
+                    "anythings" @ WildcardMatch(optional=True),
+                ]
             )
         ],
         decorators=[
@@ -374,7 +374,7 @@ async def delete_bottle_handler(group: Group, anything: WildcardMatch):
     )
 )
 async def bottle_score_handler(
-    group: Group, member: Member, message: MessageChain, anythings: WildcardMatch
+    group: Group, member: Member, message: MessageChain, anythings: RegexResult
 ):
 
     if anythings.matched:

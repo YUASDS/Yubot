@@ -26,7 +26,7 @@ channel = Channel.current()
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight({"head": FullMatch("签到")})],
+        inline_dispatchers=[Twilight(["head" @ FullMatch("签到")])],
         decorators=[
             Permission.require(),
             Permission.restricter(func),

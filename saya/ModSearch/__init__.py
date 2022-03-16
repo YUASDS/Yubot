@@ -8,7 +8,12 @@ from graia.broadcast.interrupt import InterruptControl
 from graia.ariadne.message.element import Plain, At, Forward, ForwardNode
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.event.message import GroupMessage
-from graia.ariadne.message.parser.twilight import Twilight, FullMatch, WildcardMatch
+from graia.ariadne.message.parser.twilight import (
+    Twilight,
+    FullMatch,
+    WildcardMatch,
+    RegexResult,
+)
 
 from util.control import Permission, Interval, Rest
 from util.sendMessage import safeSendGroupMessage
@@ -29,7 +34,7 @@ func = os.path.dirname(__file__).split("\\")[-1]
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[
-            Twilight({"heads": FullMatch("模组搜索"), "mod": WildcardMatch()})
+            Twilight(["heads" @ FullMatch("模组搜索"), "mod" @ WildcardMatch()])
         ],
         decorators=[
             Permission.restricter(func),
@@ -39,7 +44,7 @@ func = os.path.dirname(__file__).split("\\")[-1]
         ],
     )
 )
-async def main(group: Group, member: Member, mod: WildcardMatch):
+async def main(group: Group, member: Member, mod: RegexResult):
 
     if not mod.matched:
         return
@@ -73,7 +78,7 @@ async def main(group: Group, member: Member, mod: WildcardMatch):
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[
-            Twilight({"heads": FullMatch("魔都搜索"), "mod": WildcardMatch()})
+            Twilight(["heads" @ FullMatch("魔都搜索"), "mod" @ WildcardMatch()])
         ],
         decorators=[
             Permission.restricter(func),
@@ -83,7 +88,7 @@ async def main(group: Group, member: Member, mod: WildcardMatch):
         ],
     )
 )
-async def CnmodsSearch(group: Group, member: Member, mod: WildcardMatch):
+async def CnmodsSearch(group: Group, member: Member, mod: RegexResult):
 
     if not mod.matched:
         return
@@ -116,7 +121,7 @@ async def CnmodsSearch(group: Group, member: Member, mod: WildcardMatch):
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight({"heads": FullMatch("随机模组")})],
+        inline_dispatchers=[Twilight(["heads" @ FullMatch("随机模组")])],
         decorators=[
             Permission.restricter(func),
             Permission.require(),
@@ -143,7 +148,7 @@ async def GroupRandomSearch(group: Group, member: Member):
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight({"heads": FullMatch("随机贴贴模组")})],
+        inline_dispatchers=[Twilight(["heads" @ FullMatch("随机贴贴模组")])],
         decorators=[
             Permission.restricter(func),
             Permission.require(),

@@ -1,5 +1,5 @@
 from typing import Optional, Union, Iterable
-from graia.ariadne.app import Ariadne
+from graia.ariadne import get_running
 from graia.ariadne.exception import UnknownTarget
 from graia.ariadne.model import BotMessage, Group, Member, Friend
 from graia.ariadne.message.chain import MessageChain
@@ -13,7 +13,7 @@ async def safeSendGroupMessage(
 ) -> BotMessage:  # sourcery skip: assign-if-exp
     if not isinstance(message, MessageChain):
         message = MessageChain.create(message)
-    app: Ariadne = Ariadne.get_running()
+    app = get_running()
     try:
         return await app.sendGroupMessage(target, message, quote=quote)
     except UnknownTarget:
@@ -42,7 +42,7 @@ async def autoSendMessage(
     quote: Optional[Union[Source, int]] = None,
 ) -> BotMessage:
     """根据输入的目标类型自动选取发送好友信息或是群组信息"""
-    app: Ariadne = Ariadne.get_running()
+    app = get_running()
     if isinstance(target, str):
         target = int(target)
     if not isinstance(message, MessageChain):

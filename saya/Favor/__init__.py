@@ -13,7 +13,7 @@ from graia.broadcast.exceptions import ExecutionStop
 from graia.ariadne.event.message import MessageEvent, FriendMessage, GroupMessage
 from graia.ariadne.message.chain import MessageChain, Source
 from graia.saya.builtins.broadcast.schema import ListenerSchema
-from graia.ariadne.message.parser.twilight import Twilight, RegexMatch
+from graia.ariadne.message.parser.twilight import Twilight, RegexMatch, RegexResult
 
 from util.sendMessage import autoSendMessage
 from util.control import Permission, Rest
@@ -143,7 +143,7 @@ async def cd_check(
 @channel.use(
     ListenerSchema(
         listening_events=[FriendMessage, GroupMessage],
-        inline_dispatchers=[Twilight({"head": RegexMatch(key_word)})],
+        inline_dispatchers=[Twilight(["head" @ RegexMatch(key_word)])],
         decorators=[
             Permission.require(),
             Permission.restricter(func),
@@ -151,7 +151,7 @@ async def cd_check(
         ],
     )
 )
-async def main(head: RegexMatch, event: MessageEvent, Source_msg: Source):
+async def main(head: RegexResult, event: MessageEvent, Source_msg: Source):
     await cd_check(event)
     order = head.result.asDisplay()
     source = event.sender

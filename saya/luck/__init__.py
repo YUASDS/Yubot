@@ -7,7 +7,12 @@ from graia.broadcast.interrupt import InterruptControl
 from graia.ariadne.message.element import Plain, At
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.event.message import GroupMessage
-from graia.ariadne.message.parser.twilight import Twilight, FullMatch, RegexMatch
+from graia.ariadne.message.parser.twilight import (
+    Twilight,
+    FullMatch,
+    RegexMatch,
+    RegexResult,
+)
 
 from util.control import Permission, Interval, Rest
 from util.sendMessage import safeSendGroupMessage
@@ -27,7 +32,7 @@ func = os.path.dirname(__file__).split("\\")[-1]
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[
-            Twilight({"heads": FullMatch("放乌帕"), "number": RegexMatch("\d+")})
+            Twilight(["heads" @ FullMatch("放乌帕"), "number" @ RegexMatch("\\d+")])
         ],
         decorators=[
             Permission.restricter(func),
@@ -37,7 +42,7 @@ func = os.path.dirname(__file__).split("\\")[-1]
         ],
     )
 )
-async def main(group: Group, member: Member, number: RegexMatch):
+async def main(group: Group, member: Member, number: RegexResult):
     if number.matched:
         number = int(number.result.asDisplay())
         if number > 10:
@@ -64,7 +69,7 @@ async def main(group: Group, member: Member, number: RegexMatch):
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight({"heads": FullMatch("抽乌帕")})],
+        inline_dispatchers=[Twilight(["heads" @ FullMatch("抽乌帕")])],
         decorators=[
             Permission.restricter(func),
             Permission.require(),
@@ -96,7 +101,7 @@ async def luck_draw(group: Group, member: Member):
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight({"heads": FullMatch("乌帕抽奖")})],
+        inline_dispatchers=[Twilight(["heads" @ FullMatch("乌帕抽奖")])],
         decorators=[
             Permission.restricter(func),
             Permission.require(),
@@ -109,9 +114,7 @@ async def luck(group: Group):
 
     await safeSendGroupMessage(
         group,
-        MessageChain.create(
-            "——————乌帕抽奖————\n通过放下一个乌帕然后捡起一个乌帕的简单"
-            "抽奖~\n指令：\n放乌帕+数字（如：放乌帕15）（放乌帕会收取2手续费哦~）"
-            "\n抽乌帕"
-        ),
+        "——————乌帕抽奖————\n通过放下一个乌帕然后捡起一个乌帕的简单"
+        "抽奖~\n指令：\n放乌帕+数字（如：放乌帕15）（放乌帕会收取2手续费哦~）"
+        "\n抽乌帕",
     )
