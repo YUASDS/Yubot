@@ -18,14 +18,17 @@ from graia.ariadne.message.parser.twilight import (
 from util.text2image import create_image
 from util.control import Permission, Interval
 from util.sendMessage import safeSendGroupMessage
-from config import save_config, yaml_data, group_data, COIN_NAME,change_config
+from config import save_config, yaml_data, group_data, COIN_NAME, change_config
 
 saya = Saya.current()
 channel = Channel.current()
 
 data = json.loads(
-    Path(__file__).parent.joinpath("func.json").read_text(
-        encoding="utf-8").replace("$COIN_NAME", COIN_NAME))
+    Path(__file__)
+    .parent.joinpath("func.json")
+    .read_text(encoding="utf-8")
+    .replace("$COIN_NAME", COIN_NAME)
+)
 funcList = data["funcList"]
 funcHelp = data["funcHelp"]
 configList = data["configList"]
@@ -36,16 +39,12 @@ for func in funcList:
         DisabledFunc.append(func["key"])
 
 groupInitData = {
-    "DisabledFunc":
-    DisabledFunc,
-    "EventBroadcast": {
-        "Enabled": True,
-        "Message": None
-    }}
-    
-Agreement={
-    "Agreement":
-    "0. 本协议是 骰娘白千音（下统称“千音”）默认服务协议。如果你看到了这句话，意味着你或你的群友应用默认协议，请注意。该协议仅会出现一次。\n"
+    "DisabledFunc": DisabledFunc,
+    "EventBroadcast": {"Enabled": True, "Message": None},
+}
+
+Agreement = {
+    "Agreement": "0. 本协议是 骰娘白千音（下统称“千音”）默认服务协议。如果你看到了这句话，意味着你或你的群友应用默认协议，请注意。该协议仅会出现一次。\n"
     "1. 邀请千音、使用千音服务和在群内阅读此协议视为同意并承诺遵守此协议，否则请持有管理员或管理员以上权限的用户使用 .dismiss 移出千音。"
     "邀请千音入群请关闭群内每分钟消息发送限制的设置。\n"
     "2. 不允许禁言、踢出或刷屏等千音的不友善行为，这些行为将会提高千音被制裁的风险。开关千音功能请持有管理员或管理员以上权限的用户使用相应的指令来进行操作。"
@@ -67,12 +66,10 @@ Agreement={
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[
-            Twilight([FullMatch("功能")], {"func": WildcardMatch()})
-        ],
-        decorators=[Permission.require(),
-                    Interval.require(5)],
-    ))
+        inline_dispatchers=[Twilight([FullMatch("功能")], {"func": WildcardMatch()})],
+        decorators=[Permission.require(), Interval.require(5)],
+    )
+)
 async def funchelp(group: Group, func: WildcardMatch):
     # sourcery skip: use-fstring-for-concatenation
     if func.matched:
@@ -88,40 +85,46 @@ async def funchelp(group: Group, func: WildcardMatch):
             func_id = [*funcHelp].index(num)
         else:
             return await safeSendGroupMessage(
-                group, MessageChain.create([Plain("功能编号仅可为数字或其对应的功能名")]))
+                group, MessageChain.create([Plain("功能编号仅可为数字或其对应的功能名")])
+            )
         sayfunc = funcList[func_id]["name"]
         funckey = funcList[func_id]["key"]
         funcGlobalDisabled = yaml_data["Saya"][funckey]["Disabled"]
-        funcGroupDisabledList = funckey in group_data[str(
-            group.id)]["DisabledFunc"]
+        funcGroupDisabledList = funckey in group_data[str(group.id)]["DisabledFunc"]
         if funcGlobalDisabled or funcGroupDisabledList:
             return await safeSendGroupMessage(
-                group, MessageChain.create([Plain("该功能暂不开启")]))
-        help = str(sayfunc + f"\n\n{funcHelp[sayfunc]['instruction']}" +
-                   "\n \n>>> 用法 >>>\n" + funcHelp[sayfunc]["usage"] +
-                   "\n \n>>> 注意事项 >>>\n" + funcHelp[sayfunc]["options"] +
-                   "\n \n>>> 示例 >>>\n" + funcHelp[sayfunc]["example"])
+                group, MessageChain.create([Plain("该功能暂不开启")])
+            )
+        help = str(
+            sayfunc
+            + f"\n\n{funcHelp[sayfunc]['instruction']}"
+            + "\n \n>>> 用法 >>>\n"
+            + funcHelp[sayfunc]["usage"]
+            + "\n \n>>> 注意事项 >>>\n"
+            + funcHelp[sayfunc]["options"]
+            + "\n \n>>> 示例 >>>\n"
+            + funcHelp[sayfunc]["example"]
+        )
         image = await create_image(help)
         await safeSendGroupMessage(
-            group, MessageChain.create([Image(data_bytes=image)]))
+            group, MessageChain.create([Image(data_bytes=image)])
+        )
     else:
-        await safeSendGroupMessage(group,
-                                   MessageChain.create([Plain("请输入功能编号")]))
+        await safeSendGroupMessage(group, MessageChain.create([Plain("请输入功能编号")]))
 
 
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[
-            Twilight({"head": RegexMatch(r"^[。\./]?help$|^帮助$|^菜单$")})
-        ],
-        decorators=[Permission.require(),
-                    Interval.require()],
-    ))
+        inline_dispatchers=[Twilight({"head": RegexMatch(r"^[。\./]?help$|^帮助$|^菜单$")})],
+        decorators=[Permission.require(), Interval.require()],
+    )
+)
 async def help(group: Group):
     msg = (
         f"{yaml_data['Basic']['BotName']} 群菜单 / {str(group.id)}\n{group.name}\n"
-        + "========================================================")
+        + "========================================================"
+    )
     for i, func in enumerate(funcList, start=1):
         funcname = func["name"]
         funckey = func["key"]
@@ -129,8 +132,7 @@ async def help(group: Group):
             yaml_data["Saya"][funckey] = {"Disabled": False}
             change_config(yaml_data)
         funcGlobalDisabled = yaml_data["Saya"][funckey]["Disabled"]
-        funcGroupDisabledList = func["key"] in group_data[str(
-            group.id)]["DisabledFunc"]
+        funcGroupDisabledList = func["key"] in group_data[str(group.id)]["DisabledFunc"]
         if funcGlobalDisabled:
             statu = "【全局关闭】"
         elif funcGroupDisabledList:
@@ -140,37 +142,35 @@ async def help(group: Group):
         si = f" {str(i)}" if i < 10 else str(i)
         msg += f"\n{si}  {statu}  {funcname}"
     msg += str(
-        "\n========================================================" +
-        "\n详细查看功能使用方法请发送 功能 <id>，例如：功能 1" + "\n管理员可发送 开启功能/关闭功能 <功能id> " +
-        "\n所有功能均无需@" +
-        f"\n更多功能待开发，如有特殊需求可以向 {yaml_data['Basic']['Permission']['Master']} 询问")
+        "\n========================================================"
+        + "\n详细查看功能使用方法请发送 功能 <id>，例如：功能 1"
+        + "\n管理员可发送 开启功能/关闭功能 <功能id> "
+        + "\n所有功能均无需@"
+        + f"\n更多功能待开发，如有特殊需求可以向 {yaml_data['Basic']['Permission']['Master']} 询问"
+    )
     image = await create_image(msg, 80)
-    await safeSendGroupMessage(group,
-                               MessageChain.create([Image(data_bytes=image)]))
+    await safeSendGroupMessage(group, MessageChain.create([Image(data_bytes=image)]))
 
 
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[
-            Twilight({
-                "head":
-                FullMatch("开启功能"),
-                "all":
-                ArgumentMatch(
-                    "-all",
-                    action="store_true",
-                    optional=True,
-                ),
-                "func":
-                WildcardMatch(optional=True),
-            })
+            Twilight(
+                {
+                    "head": FullMatch("开启功能"),
+                    "all": ArgumentMatch(
+                        "-all",
+                        action="store_true",
+                        optional=True,
+                    ),
+                    "func": WildcardMatch(optional=True),
+                }
+            )
         ],
-        decorators=[
-            Permission.require(Permission.GROUP_ADMIN),
-            Interval.require(5)
-        ],
-    ))
+        decorators=[Permission.require(Permission.GROUP_ADMIN), Interval.require(5)],
+    )
+)
 async def on_func(group: Group, func: WildcardMatch, all: ArgumentMatch):
     if func.matched:
         say = func.result.asDisplay().strip()
@@ -180,28 +180,31 @@ async def on_func(group: Group, func: WildcardMatch, all: ArgumentMatch):
                 func = funcList[sayfunc]
             except IndexError:
                 await safeSendGroupMessage(
-                    group, MessageChain.create([Plain("该功能编号不存在")]))
+                    group, MessageChain.create([Plain("该功能编号不存在")])
+                )
             else:
                 funcname = func["name"]
                 funckey = func["key"]
                 funcGlobalDisabled = yaml_data["Saya"][funckey]["Disabled"]
-                funcGroupDisabled = (func["key"] in group_data[str(
-                    group.id)]["DisabledFunc"])
+                funcGroupDisabled = (
+                    func["key"] in group_data[str(group.id)]["DisabledFunc"]
+                )
                 funcDisabledList = group_data[str(group.id)]["DisabledFunc"]
                 if funcGlobalDisabled:
                     await safeSendGroupMessage(
-                        group,
-                        MessageChain.create([Plain(f"{funcname} 当前处于全局禁用状态")]))
+                        group, MessageChain.create([Plain(f"{funcname} 当前处于全局禁用状态")])
+                    )
                 elif funcGroupDisabled:
                     funcDisabledList.remove(funckey)
-                    group_data[str(
-                        group.id)]["DisabledFunc"] = funcDisabledList
+                    group_data[str(group.id)]["DisabledFunc"] = funcDisabledList
                     save_config()
                     await safeSendGroupMessage(
-                        group, MessageChain.create(f"{funcname} 已开启"))
+                        group, MessageChain.create(f"{funcname} 已开启")
+                    )
                 else:
                     await safeSendGroupMessage(
-                        group, MessageChain.create(f"{funcname} 已处于开启状态"))
+                        group, MessageChain.create(f"{funcname} 已处于开启状态")
+                    )
         else:
             await safeSendGroupMessage(group, MessageChain.create("功能编号仅可为数字"))
     elif all.matched:
@@ -211,15 +214,13 @@ async def on_func(group: Group, func: WildcardMatch, all: ArgumentMatch):
             funcname = func["name"]
             funckey = func["key"]
             funcGlobalDisabled = yaml_data["Saya"][funckey]["Disabled"]
-            funcGroupDisabled = func["key"] in group_data[str(
-                group.id)]["DisabledFunc"]
+            funcGroupDisabled = func["key"] in group_data[str(group.id)]["DisabledFunc"]
             if not funcGlobalDisabled and funcGroupDisabled:
                 funcDisabledList.remove(funckey)
                 i += 1
         group_data[str(group.id)]["DisabledFunc"] = funcDisabledList
         save_config()
-        await safeSendGroupMessage(group,
-                                   MessageChain.create(f"已一键开启 {i} 个功能"))
+        await safeSendGroupMessage(group, MessageChain.create(f"已一键开启 {i} 个功能"))
     else:
         await safeSendGroupMessage(group, MessageChain.create("请输入功能编号"))
 
@@ -228,24 +229,21 @@ async def on_func(group: Group, func: WildcardMatch, all: ArgumentMatch):
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[
-            Twilight({
-                "head":
-                FullMatch("关闭功能"),
-                "all":
-                ArgumentMatch(
-                    "-all",
-                    action="store_true",
-                    optional=True,
-                ),
-                "func":
-                WildcardMatch(optional=True),
-            })
+            Twilight(
+                {
+                    "head": FullMatch("关闭功能"),
+                    "all": ArgumentMatch(
+                        "-all",
+                        action="store_true",
+                        optional=True,
+                    ),
+                    "func": WildcardMatch(optional=True),
+                }
+            )
         ],
-        decorators=[
-            Permission.require(Permission.GROUP_ADMIN),
-            Interval.require(5)
-        ],
-    ))
+        decorators=[Permission.require(Permission.GROUP_ADMIN), Interval.require(5)],
+    )
+)
 async def off_func(group: Group, func: WildcardMatch, all: ArgumentMatch):
     if func.matched:
         say = func.result.asDisplay().strip()
@@ -255,7 +253,8 @@ async def off_func(group: Group, func: WildcardMatch, all: ArgumentMatch):
                 func = funcList[sayfunc]
             except IndexError:
                 await safeSendGroupMessage(
-                    group, MessageChain.create([Plain("该功能编号不存在")]))
+                    group, MessageChain.create([Plain("该功能编号不存在")])
+                )
             else:
                 funcname = func["name"]
                 funckey = func["key"]
@@ -264,19 +263,19 @@ async def off_func(group: Group, func: WildcardMatch, all: ArgumentMatch):
                 funcGroupDisabled = func["key"] in funcDisabledList
                 if not funcCanDisabled:
                     await safeSendGroupMessage(
-                        group,
-                        MessageChain.create([Plain(f"{funcname} 无法被关闭")]))
+                        group, MessageChain.create([Plain(f"{funcname} 无法被关闭")])
+                    )
                 elif not funcGroupDisabled:
                     funcDisabledList.append(funckey)
-                    group_data[str(
-                        group.id)]["DisabledFunc"] = funcDisabledList
+                    group_data[str(group.id)]["DisabledFunc"] = funcDisabledList
                     save_config()
                     await safeSendGroupMessage(
-                        group, MessageChain.create([Plain(f"{funcname} 已关闭")]))
+                        group, MessageChain.create([Plain(f"{funcname} 已关闭")])
+                    )
                 else:
                     await safeSendGroupMessage(
-                        group,
-                        MessageChain.create([Plain(f"{funcname} 已处于关闭状态")]))
+                        group, MessageChain.create([Plain(f"{funcname} 已处于关闭状态")])
+                    )
         else:
             await safeSendGroupMessage(group, MessageChain.create("功能编号仅可为数字"))
     elif all.matched:
@@ -292,8 +291,7 @@ async def off_func(group: Group, func: WildcardMatch, all: ArgumentMatch):
                 i += 1
         group_data[str(group.id)]["DisabledFunc"] = funcDisabledList
         save_config()
-        await safeSendGroupMessage(group,
-                                   MessageChain.create(f"已一键关闭 {i} 个功能"))
+        await safeSendGroupMessage(group, MessageChain.create(f"已一键关闭 {i} 个功能"))
     else:
         await safeSendGroupMessage(group, MessageChain.create("请输入功能编号"))
 
@@ -305,23 +303,20 @@ async def off_func(group: Group, func: WildcardMatch, all: ArgumentMatch):
             Twilight(
                 [FullMatch("群功能")],
                 {
-                    "reg1":
-                    RegexMatch("修改|查看|关闭|开启", optional=True),
-                    "reg2":
-                    RegexMatch("|".join(x["name"] for x in configList),
-                               optional=True),
-                    "reg3":
-                    WildcardMatch(optional=True),
+                    "reg1": RegexMatch("修改|查看|关闭|开启", optional=True),
+                    "reg2": RegexMatch(
+                        "|".join(x["name"] for x in configList), optional=True
+                    ),
+                    "reg3": WildcardMatch(optional=True),
                 },
             )
         ],
-        decorators=[
-            Permission.require(Permission.GROUP_ADMIN),
-            Interval.require(5)
-        ],
-    ))
-async def group_func(group: Group, reg1: RegexMatch, reg2: RegexMatch,
-                     reg3: WildcardMatch):
+        decorators=[Permission.require(Permission.GROUP_ADMIN), Interval.require(5)],
+    )
+)
+async def group_func(
+    group: Group, reg1: RegexMatch, reg2: RegexMatch, reg3: WildcardMatch
+):
 
     if reg1.matched:
         ctrl = reg1.result.getFirst(Plain).text
@@ -332,64 +327,62 @@ async def group_func(group: Group, reg1: RegexMatch, reg2: RegexMatch,
                     if config["name"] == configname:
                         if config["can_edit"]:
                             if reg3.matched:
-                                config_Message = reg3.result.getFirst(
-                                    Plain).text
-                                group_data[str(group.id)][
-                                    config["key"]]["Message"] = config_Message
+                                config_Message = reg3.result.getFirst(Plain).text
+                                group_data[str(group.id)][config["key"]][
+                                    "Message"
+                                ] = config_Message
                                 save_config()
                                 return await safeSendGroupMessage(
                                     group,
-                                    MessageChain.create([
-                                        Plain(
-                                            f"{configname} 已修改为 {config_Message}"
-                                        )
-                                    ]),
+                                    MessageChain.create(
+                                        [Plain(f"{configname} 已修改为 {config_Message}")]
+                                    ),
                                 )
                             else:
                                 return await safeSendGroupMessage(
-                                    group,
-                                    MessageChain.create([Plain("请输入修改后的值")]))
+                                    group, MessageChain.create([Plain("请输入修改后的值")])
+                                )
                         else:
                             return await safeSendGroupMessage(
                                 group,
-                                MessageChain.create(
-                                    [Plain(f"{configname} 不可修改")]),
+                                MessageChain.create([Plain(f"{configname} 不可修改")]),
                             )
                 else:
                     return await safeSendGroupMessage(
-                        group,
-                        MessageChain.create([Plain(f"{configname} 不存在")]))
+                        group, MessageChain.create([Plain(f"{configname} 不存在")])
+                    )
             else:
                 return await safeSendGroupMessage(
-                    group, MessageChain.create([Plain("请输入需要修改的配置名称")]))
+                    group, MessageChain.create([Plain("请输入需要修改的配置名称")])
+                )
         elif ctrl == "查看":
             if reg2.matched:
                 configname = reg2.result.getFirst(Plain).text
                 for config in configList:
                     if config["name"] == configname:
-                        config_Message = group_data[str(
-                            group.id)][config["key"]]["Message"]
+                        config_Message = group_data[str(group.id)][config["key"]][
+                            "Message"
+                        ]
                         if config_Message:
                             return await safeSendGroupMessage(
                                 group,
-                                MessageChain.create([
-                                    Plain(
-                                        f"{configname} 当前值为 {config_Message}")
-                                ]),
+                                MessageChain.create(
+                                    [Plain(f"{configname} 当前值为 {config_Message}")]
+                                ),
                             )
                         else:
                             return await safeSendGroupMessage(
                                 group,
-                                MessageChain.create(
-                                    [Plain(f"{configname} 当前值为 空")]),
+                                MessageChain.create([Plain(f"{configname} 当前值为 空")]),
                             )
                 else:
                     return await safeSendGroupMessage(
-                        group,
-                        MessageChain.create([Plain(f"{configname} 不存在")]))
+                        group, MessageChain.create([Plain(f"{configname} 不存在")])
+                    )
             else:
                 return await safeSendGroupMessage(
-                    group, MessageChain.create([Plain("请输入需要查看的配置名称")]))
+                    group, MessageChain.create([Plain("请输入需要查看的配置名称")])
+                )
         elif ctrl == "关闭":
             if reg2.matched:
                 configname = reg2.result.getFirst(Plain).text
@@ -397,26 +390,24 @@ async def group_func(group: Group, reg1: RegexMatch, reg2: RegexMatch,
                     if config["name"] == configname:
                         configkey = config["key"]
                         if group_data[str(group.id)][configkey]["Enabled"]:
-                            group_data[str(
-                                group.id)][configkey]["Enabled"] = False
+                            group_data[str(group.id)][configkey]["Enabled"] = False
                             save_config()
                             return await safeSendGroupMessage(
-                                group,
-                                MessageChain.create(
-                                    [Plain(f"{configname} 已关闭")]))
+                                group, MessageChain.create([Plain(f"{configname} 已关闭")])
+                            )
                         else:
                             return await safeSendGroupMessage(
                                 group,
-                                MessageChain.create(
-                                    [Plain(f"{configname} 已处于关闭状态")]),
+                                MessageChain.create([Plain(f"{configname} 已处于关闭状态")]),
                             )
                 else:
                     return await safeSendGroupMessage(
-                        group,
-                        MessageChain.create([Plain(f"{configname} 不存在")]))
+                        group, MessageChain.create([Plain(f"{configname} 不存在")])
+                    )
             else:
                 return await safeSendGroupMessage(
-                    group, MessageChain.create([Plain("请输入需要关闭的配置名称")]))
+                    group, MessageChain.create([Plain("请输入需要关闭的配置名称")])
+                )
         elif ctrl == "开启":
             if reg2.matched:
                 configname = reg2.result.getFirst(Plain).text
@@ -424,29 +415,28 @@ async def group_func(group: Group, reg1: RegexMatch, reg2: RegexMatch,
                     if config["name"] == configname:
                         configkey = config["key"]
                         if not group_data[str(group.id)][configkey]["Enabled"]:
-                            group_data[str(
-                                group.id)][configkey]["Enabled"] = True
+                            group_data[str(group.id)][configkey]["Enabled"] = True
                             save_config()
                             return await safeSendGroupMessage(
-                                group,
-                                MessageChain.create(
-                                    [Plain(f"{configname} 已开启")]))
+                                group, MessageChain.create([Plain(f"{configname} 已开启")])
+                            )
                         else:
                             return await safeSendGroupMessage(
                                 group,
-                                MessageChain.create(
-                                    [Plain(f"{configname} 已处于开启状态")]),
+                                MessageChain.create([Plain(f"{configname} 已处于开启状态")]),
                             )
                 else:
                     return await safeSendGroupMessage(
-                        group,
-                        MessageChain.create([Plain(f"{configname} 不存在")]))
+                        group, MessageChain.create([Plain(f"{configname} 不存在")])
+                    )
             else:
                 return await safeSendGroupMessage(
-                    group, MessageChain.create([Plain("请输入需要开启的配置名称")]))
+                    group, MessageChain.create([Plain("请输入需要开启的配置名称")])
+                )
         else:
             return await safeSendGroupMessage(
-                group, MessageChain.create([Plain("请输入修改|查看|关闭|开启")]))
+                group, MessageChain.create([Plain("请输入修改|查看|关闭|开启")])
+            )
     else:
         msg = "当前可调整的群功能有："
 
@@ -462,4 +452,5 @@ async def group_func(group: Group, reg1: RegexMatch, reg2: RegexMatch,
 
         image = await create_image(msg, cut=80)
         return await safeSendGroupMessage(
-            group, MessageChain.create([Image(data_bytes=image)]))
+            group, MessageChain.create([Image(data_bytes=image)])
+        )

@@ -5,7 +5,6 @@ import os
 from pathlib import Path
 from graia.saya import Saya, Channel
 from graia.ariadne.model import Group, Member
-from graia.ariadne.message.element import Source
 from graia.ariadne.event.message import GroupMessage
 from graia.ariadne.message.chain import MessageChain
 from graia.saya.builtins.broadcast.schema import ListenerSchema
@@ -31,9 +30,10 @@ channel = Channel.current()
             Permission.restricter(func),
             Permission.require(),
             Rest.rest_control(),
-            Interval.require()
+            Interval.require(),
         ],
-    ))
+    )
+)
 async def main(group: Group, member: Member, keys: RegexMatch):
 
     if not keys.matched:
@@ -47,8 +47,7 @@ async def main(group: Group, member: Member, keys: RegexMatch):
                 s = contain
                 for SCkey in s:
                     await asyncio.sleep(0.5)
-                    await autoSendMessage(
-                        group, MessageChain.create(s[SCkey]))
+                    await autoSendMessage(group, MessageChain.create(s[SCkey]))
 
     except IndexError:
         pass

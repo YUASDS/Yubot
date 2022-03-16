@@ -9,7 +9,7 @@ async def RandomSearch():
     dicecho_url = api + PageSet
     async with aiohttp.ClientSession() as session:
         async with session.get(dicecho_url) as r:
-            ret = await r.json(content_type='json', encoding="utf-8-sig")
+            ret = await r.json(content_type="json", encoding="utf-8-sig")
         return getRandomRes(ret)
 
 
@@ -21,7 +21,7 @@ async def RandomLoveSearch(tag="贴贴"):
     dicecho_url = api + page + rule + tags
     async with aiohttp.ClientSession() as session:
         async with session.get(dicecho_url) as r:
-            ret = await r.json(content_type='json', encoding="utf-8-sig")
+            ret = await r.json(content_type="json", encoding="utf-8-sig")
         return getRandomRes(ret)
 
 

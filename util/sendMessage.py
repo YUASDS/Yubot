@@ -1,19 +1,19 @@
-from typing import Optional, Union,Iterable
+from typing import Optional, Union, Iterable
 from graia.ariadne.app import Ariadne
 from graia.ariadne.exception import UnknownTarget
-from graia.ariadne.model import BotMessage, Group,Member,Friend
+from graia.ariadne.model import BotMessage, Group, Member, Friend
 from graia.ariadne.message.chain import MessageChain
-from graia.ariadne.message.element import At, Plain, Source,Element
+from graia.ariadne.message.element import At, Plain, Source, Element
 
 
 async def safeSendGroupMessage(
     target: Union[Group, int],
-    message: Union[MessageChain,Iterable[Element], Element, str],
+    message: Union[MessageChain, Iterable[Element], Element, str],
     quote: Optional[Union[Source, int]] = None,
 ) -> BotMessage:  # sourcery skip: assign-if-exp
-    if not isinstance(message,MessageChain):
-        message=MessageChain.create(message)
-    app:Ariadne=Ariadne.get_running()
+    if not isinstance(message, MessageChain):
+        message = MessageChain.create(message)
+    app: Ariadne = Ariadne.get_running()
     try:
         return await app.sendGroupMessage(target, message, quote=quote)
     except UnknownTarget:
@@ -35,17 +35,19 @@ async def safeSendGroupMessage(
         except UnknownTarget:
             return await app.sendGroupMessage(target, MessageChain.create(msg))
 
-async def autoSendMessage(target:Union[Member, Friend,str],
-    message: Union[MessageChain,Iterable[Element], Element, str],
+
+async def autoSendMessage(
+    target: Union[Member, Friend, str],
+    message: Union[MessageChain, Iterable[Element], Element, str],
     quote: Optional[Union[Source, int]] = None,
-    ) -> BotMessage:
-    '''根据输入的目标类型自动选取发送好友信息或是群组信息'''
-    app:Ariadne=Ariadne.get_running()
-    if isinstance(target,str):
-        target=int(target)
-    if not isinstance(message,MessageChain):
-        message=MessageChain.create(message)
-    if isinstance(target,Member):
-        return await app.sendGroupMessage(target,message,quote=quote)
+) -> BotMessage:
+    """根据输入的目标类型自动选取发送好友信息或是群组信息"""
+    app: Ariadne = Ariadne.get_running()
+    if isinstance(target, str):
+        target = int(target)
+    if not isinstance(message, MessageChain):
+        message = MessageChain.create(message)
+    if isinstance(target, Member):
+        return await app.sendGroupMessage(target, message, quote=quote)
     elif isinstance(target, (Friend, int)):
-        return await app.sendFriendMessage(target,message,quote=quote)
+        return await app.sendFriendMessage(target, message, quote=quote)

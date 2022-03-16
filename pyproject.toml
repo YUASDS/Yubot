@@ -20,6 +20,8 @@ playwright = "^1.19.0"
 wordcloud = "^1.8.1"
 graiax-silkcoder = {extras = ["ffmpeg"], version = "^0.1.6"}
 scipy = "^1.8.0"
+flake8 = "^4.0.1"
+black = "^22.1.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

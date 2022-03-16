@@ -35,8 +35,9 @@ async def update_data():
         "https://raw.fastgit.org/Kyomotoi/AnimeThesaurus/main/data.json",
         verify=False,
     ).json()
-    DATA_FILE.write_text(json.dumps(root, indent=2, ensure_ascii=False),
-                         encoding="utf-8")
+    DATA_FILE.write_text(
+        json.dumps(root, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
     DATA = root
 
 
@@ -55,8 +56,9 @@ async def updateDict():
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        decorators=[Permission.require(),
-                    Permission.restricter(func)]))
+        decorators=[Permission.require(), Permission.restricter(func)],
+    )
+)
 async def main(group: Group, member: Member, message: MessageChain):
 
     if (

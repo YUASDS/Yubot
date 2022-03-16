@@ -31,8 +31,8 @@ BASEPATH = Path(__file__).parent
 MASK = numpy.array(IMG.open(BASEPATH.joinpath("bgg.jpg")))
 FONT_PATH = Path("font").joinpath("sarasa-mono-sc-regular.ttf")
 STOPWORDS = BASEPATH.joinpath("stopwords")
-CHANGE_PATH= Path(__file__).parent.joinpath("change_words.json")
-change_words:dict=json.loads(CHANGE_PATH.read_text(encoding="utf-8"))
+CHANGE_PATH = Path(__file__).parent.joinpath("change_words.json")
+change_words: dict = json.loads(CHANGE_PATH.read_text(encoding="utf-8"))
 RUNNING = 0
 RUNNING_LIST = []
 
@@ -81,7 +81,11 @@ async def wordcloud(group: Group, member: Member, message: MessageChain):
             await safeSendGroupMessage(
                 group,
                 MessageChain.create(
-                    [At(member.id), Plain(f" 前辈需要的{mode}词云已经做好了哦~"), Image(data_bytes=image)]
+                    [
+                        At(member.id),
+                        Plain(f" 前辈需要的{mode}词云已经做好了哦~"),
+                        Image(data_bytes=image),
+                    ]
                 ),
             )
             RUNNING -= 1
@@ -92,14 +96,13 @@ async def wordcloud(group: Group, member: Member, message: MessageChain):
             )
 
 
-
 async def get_frequencies(msg_list):
     text = "\n".join(msg_list)
     words = jieba.analyse.extract_tags(text, topK=800, withWeight=True)
-    words=dict(words)
+    words = dict(words)
     for key in change_words:
         if key in words and change_words[key] not in words:
-            words[change_words[key]]=words.pop(key)
+            words[change_words[key]] = words.pop(key)
     return dict(words)
 
 

@@ -7,7 +7,7 @@ async def dicecho(mod):
     ero_url = f"https://www.dicecho.com/api/mod/?keyword={mod}"
     async with aiohttp.ClientSession() as session:
         async with session.get(ero_url) as r:
-            ret = await r.json(content_type='json', encoding="utf-8-sig")
+            ret = await r.json(content_type="json", encoding="utf-8-sig")
         res = await getRes(ret)
         return res
 

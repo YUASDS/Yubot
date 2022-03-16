@@ -3,13 +3,11 @@ import re
 import time
 import httpx
 import asyncio
-from loguru import logger
-import numpy as np
 
-from io import BytesIO
 from pathlib import Path
+
 # from pyzbar import pyzbar
-from PIL import Image as IMG
+# from PIL import Image as IMG
 from graia.saya import Saya, Channel
 from graia.ariadne.model import Group, Member
 from graia.broadcast.interrupt.waiter import Waiter
@@ -31,9 +29,10 @@ from database.db import reduce_gold
 from util.text2image import create_image
 from util.control import Permission, Interval
 from util.sendMessage import safeSendGroupMessage
+
 # from util.TextModeration import text_moderation_async
 # from util.ImageModeration import image_moderation_async
-from config import yaml_data, user_black_list, save_config, COIN_NAME
+from config import yaml_data, COIN_NAME
 
 from .db import (
     get_bottle,
@@ -63,21 +62,20 @@ func = os.path.dirname(__file__).split("\\")[-1]
         inline_dispatchers=[
             Twilight(
                 {
-                    "prefix":
-                    RegexMatch(r"^(扔|丢|写)(漂流瓶|瓶子)"),
-                    "enter":
-                    FullMatch("\n", optional=True),
-                    "arg_pic":
-                    ArgumentMatch("-P", action="store_true", optional=True),
-                    "anythings1":
-                    WildcardMatch(optional=True),
-                }, )
+                    "prefix": RegexMatch(r"^(扔|丢|写)(漂流瓶|瓶子)"),
+                    "enter": FullMatch("\n", optional=True),
+                    "arg_pic": ArgumentMatch("-P", action="store_true", optional=True),
+                    "anythings1": WildcardMatch(optional=True),
+                },
+            )
         ],
         decorators=[
             Permission.restricter(func),
             Permission.require(),
-                    Interval.require(30)],
-    ))
+            Interval.require(30),
+        ],
+    )
+)
 async def throw_bottle_handler(
     group: Group,
     member: Member,
@@ -85,11 +83,12 @@ async def throw_bottle_handler(
     arg_pic: ArgumentMatch,
     anythings1: WildcardMatch,
 ):
-
-    @Waiter.create_using_function(listening_events=[GroupMessage],
-                                  using_decorators=[Permission.require()])
-    async def image_waiter(waiter1_group: Group, waiter1_member: Member,
-                           waiter1_message: MessageChain):
+    @Waiter.create_using_function(
+        listening_events=[GroupMessage], using_decorators=[Permission.require()]
+    )
+    async def image_waiter(
+        waiter1_group: Group, waiter1_member: Member, waiter1_message: MessageChain
+    ):
         if waiter1_group.id == group.id and waiter1_member.id == member.id:
             if waiter1_message.has(Image):
                 return waiter1_message.getFirst(Image).url
@@ -104,15 +103,18 @@ async def throw_bottle_handler(
     if saying.matched:
         message_chain = saying.result
         if message_chain.has(Plain):
-            text = (MessageChain.create(
-                message_chain.get(Plain)).merge(True).asDisplay().strip())
+            text = (
+                MessageChain.create(message_chain.get(Plain))
+                .merge(True)
+                .asDisplay()
+                .strip()
+            )
             if text:
                 for i in ["magnet:", "http"]:
                     if i in text:
                         return await safeSendGroupMessage(
-                            group,
-                            MessageChain.create("链接和种子是不被允许的哦~"),
-                            quote=source)
+                            group, MessageChain.create("链接和种子是不被允许的哦~"), quote=source
+                        )
                 # moderation = await text_moderation_async(text)
                 moderation = {"status": False, "message": None}
                 if moderation["status"] == "error":
@@ -139,34 +141,33 @@ async def throw_bottle_handler(
         if message_chain.has(Image):
             if arg_pic.matched:
                 return await safeSendGroupMessage(
-                    group,
-                    MessageChain.create("使用手动发图参数后不可附带图片"),
-                    quote=source)
+                    group, MessageChain.create("使用手动发图参数后不可附带图片"), quote=source
+                )
             elif len(message_chain.get(Image)) > 1:
                 return await safeSendGroupMessage(
-                    group, MessageChain.create("丢漂流瓶只能携带一张图片哦！"), quote=source)
+                    group, MessageChain.create("丢漂流瓶只能携带一张图片哦！"), quote=source
+                )
             else:
                 image_url = message_chain.getFirst(Image).url
 
     if arg_pic.matched:
-        await safeSendGroupMessage(group,
-                                   MessageChain.create("请在 30 秒内发送你要附带的图片"),
-                                   quote=source)
+        await safeSendGroupMessage(
+            group, MessageChain.create("请在 30 秒内发送你要附带的图片"), quote=source
+        )
         try:
             image_url = await asyncio.wait_for(inc.wait(image_waiter), 30)
             if image_url:
-                await safeSendGroupMessage(group,
-                                           MessageChain.create("图片已接收，请稍等"),
-                                           quote=source)
+                await safeSendGroupMessage(
+                    group, MessageChain.create("图片已接收，请稍等"), quote=source
+                )
             else:
                 return await safeSendGroupMessage(
-                    group,
-                    MessageChain.create("你发送的不是“一张”图片，请重试"),
-                    quote=source)
+                    group, MessageChain.create("你发送的不是“一张”图片，请重试"), quote=source
+                )
         except asyncio.TimeoutError:
-            return await safeSendGroupMessage(group,
-                                              MessageChain.create("图片等待超时"),
-                                              quote=source)
+            return await safeSendGroupMessage(
+                group, MessageChain.create("图片等待超时"), quote=source
+            )
 
     if image_url:
         # moderation = await image_moderation_async(image_url)
@@ -204,39 +205,41 @@ async def throw_bottle_handler(
             in_bottle = in_bottle_text + in_bottle_and + in_bottle_image
             await safeSendGroupMessage(
                 group,
-                MessageChain.create([
-                    At(member.id),
-                    Plain(f" 成功购买漂流瓶并丢出！\n瓶子里有{in_bottle}\n瓶子编号为：{bottle}"),
-                ]),
+                MessageChain.create(
+                    [
+                        At(member.id),
+                        Plain(f" 成功购买漂流瓶并丢出！\n瓶子里有{in_bottle}\n瓶子编号为：{bottle}"),
+                    ]
+                ),
                 quote=source,
             )
         else:
             await safeSendGroupMessage(
-                group,
-                MessageChain.create(f"你的{COIN_NAME}不足，无法丢漂流瓶！"),
-                quote=source)
+                group, MessageChain.create(f"你的{COIN_NAME}不足，无法丢漂流瓶！"), quote=source
+            )
     else:
         return await safeSendGroupMessage(
-            group, MessageChain.create("丢漂流瓶请加上漂流瓶的内容！"), quote=source)
+            group, MessageChain.create("丢漂流瓶请加上漂流瓶的内容！"), quote=source
+        )
 
 
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[
-            Twilight({"head": RegexMatch(r"^(捡|打?捞)(漂流瓶|瓶子)$")})
+        inline_dispatchers=[Twilight({"head": RegexMatch(r"^(捡|打?捞)(漂流瓶|瓶子)$")})],
+        decorators=[
+            Permission.restricter(func),
+            Permission.require(),
+            Interval.require(30),
         ],
-        decorators=[Permission.restricter(func),
-                    Permission.require(),
-                    Interval.require(30)],
-    ))
+    )
+)
 async def pick_bottle_handler(group: Group):
 
     bottle = get_bottle()
 
     if bottle is None:
-        return await safeSendGroupMessage(group,
-                                          MessageChain.create("没有漂流瓶可以捡哦！"))
+        return await safeSendGroupMessage(group, MessageChain.create("没有漂流瓶可以捡哦！"))
     bottle_score = get_bottle_score_avg(bottle["id"])
     score_msg = f"瓶子的评分为：{bottle_score}" if bottle_score else "本漂流瓶目前还没有评分"
     times = bottle["fishing_times"]
@@ -245,7 +248,8 @@ async def pick_bottle_handler(group: Group):
         Plain(
             f"你捡到了一个漂流瓶！\n瓶子编号为：{bottle['id']}\n{times_msg}\n{score_msg}\n"
             #  f"漂流瓶来自 {bottle['group']} 群的 {bottle['member']}\n"
-            "漂流瓶内容为：\n")
+            "漂流瓶内容为：\n"
+        )
     ]
     if bottle["text"] is not None:
         image = await create_image(bottle["text"])
@@ -259,9 +263,9 @@ async def pick_bottle_handler(group: Group):
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[Twilight({"head": FullMatch("清空漂流瓶")})],
-        decorators=[Permission.require(Permission.MASTER),
-                    Interval.require()],
-    ))
+        decorators=[Permission.require(Permission.MASTER), Interval.require()],
+    )
+)
 async def clear_bottle_handler(group: Group):
 
     clear_bottle()
@@ -272,31 +276,34 @@ async def clear_bottle_handler(group: Group):
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[
-            Twilight({
-                "head": FullMatch("查漂流瓶"),
-                "bottleid": WildcardMatch(optional=True)
-            })
+            Twilight(
+                {"head": FullMatch("查漂流瓶"), "bottleid": WildcardMatch(optional=True)}
+            )
         ],
-        decorators=[Permission.restricter(func),
-                    Permission.require(),
-                    Interval.require()],
-    ))
-async def drifting_bottle_handler(group: Group, member: Member,
-                                  bottleid: WildcardMatch):
-    if bottleid.matched and member.id == yaml_data["Basic"]["Permission"][
-            "Master"]:
+        decorators=[
+            Permission.restricter(func),
+            Permission.require(),
+            Interval.require(),
+        ],
+    )
+)
+async def drifting_bottle_handler(
+    group: Group, member: Member, bottleid: WildcardMatch
+):
+    if bottleid.matched and member.id == yaml_data["Basic"]["Permission"]["Master"]:
         bottle_id = int(bottleid.result.asDisplay())
         bottle = get_bottle_by_id(bottle_id)
         if not bottle:
-            return await safeSendGroupMessage(group,
-                                              MessageChain.create("没有这个漂流瓶！"))
+            return await safeSendGroupMessage(group, MessageChain.create("没有这个漂流瓶！"))
 
         bottle = bottle[0]
         bottle_score = get_bottle_score_avg(bottle_id)
         score_msg = f"瓶子的评分为：{bottle_score}" if bottle_score else "本漂流瓶目前还没有评分"
         msg = [
-            Plain(f"漂流瓶编号为：{bottle.id}\n"
-                  f"漂流瓶来自 {bottle.group} 群的 {bottle.member}\n{score_msg}\n")
+            Plain(
+                f"漂流瓶编号为：{bottle.id}\n"
+                f"漂流瓶来自 {bottle.group} 群的 {bottle.member}\n{score_msg}\n"
+            )
         ]
         if bottle.text is not None:
             image = await create_image(bottle.text)
@@ -308,7 +315,6 @@ async def drifting_bottle_handler(group: Group, member: Member,
         msg = f"目前有 {count} 个漂流瓶在漂流" if count > 0 else "目前没有漂流瓶在漂流"
         msg += "\n漂流瓶可以使用“捞漂流瓶”命令捞到，也可以使用“丢漂流瓶”命令丢出”\n可以使用“漂流瓶评分”为漂流瓶添加评分"
 
-
     await safeSendGroupMessage(group, MessageChain.create(msg))
 
 
@@ -316,14 +322,13 @@ async def drifting_bottle_handler(group: Group, member: Member,
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[
-            Twilight({
-                "head": FullMatch("删漂流瓶"),
-                "anything": WildcardMatch(optional=True)
-            })
+            Twilight(
+                {"head": FullMatch("删漂流瓶"), "anything": WildcardMatch(optional=True)}
+            )
         ],
-        decorators=[Permission.require(Permission.MASTER),
-                    Interval.require()],
-    ))
+        decorators=[Permission.require(Permission.MASTER), Interval.require()],
+    )
+)
 async def delete_bottle_handler(group: Group, anything: WildcardMatch):
 
     if anything.matched:
@@ -332,12 +337,12 @@ async def delete_bottle_handler(group: Group, anything: WildcardMatch):
             bottle = get_bottle_by_id(bottle_id)
             if not bottle:
                 return await safeSendGroupMessage(
-                    group, MessageChain.create("没有这个漂流瓶！"))
+                    group, MessageChain.create("没有这个漂流瓶！")
+                )
             delete_bottle(bottle_id)
             await safeSendGroupMessage(group, MessageChain.create("漂流瓶已经删除！"))
         else:
-            await safeSendGroupMessage(group,
-                                       MessageChain.create("漂流瓶编号必须是数字！"))
+            await safeSendGroupMessage(group, MessageChain.create("漂流瓶编号必须是数字！"))
     else:
         await safeSendGroupMessage(group, MessageChain.create("请输入要删除的漂流瓶编号！"))
 
@@ -353,20 +358,24 @@ async def delete_bottle_handler(group: Group, anything: WildcardMatch):
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[
-            Twilight({
-                "at": ElementMatch(At, optional=True),
-                "head": FullMatch("漂流瓶评分"),
-                "anythings": WildcardMatch(optional=True),
-            })
+            Twilight(
+                {
+                    "at": ElementMatch(At, optional=True),
+                    "head": FullMatch("漂流瓶评分"),
+                    "anythings": WildcardMatch(optional=True),
+                }
+            )
         ],
-        decorators=[Permission.restricter(func),
-                    Permission.require(),
-                    Interval.require(5)],
-    ))
-async def bottle_score_handler(group: Group, member: Member,
-                               message: MessageChain,
-                               anythings: WildcardMatch):
-
+        decorators=[
+            Permission.restricter(func),
+            Permission.require(),
+            Interval.require(5),
+        ],
+    )
+)
+async def bottle_score_handler(
+    group: Group, member: Member, message: MessageChain, anythings: WildcardMatch
+):
 
     if anythings.matched:
         try:
@@ -375,17 +384,14 @@ async def bottle_score_handler(group: Group, member: Member,
                 reply = message.getFirst(Quote)
                 if reply.senderId != yaml_data["Basic"]["MAH"]["BotQQ"]:
                     return await safeSendGroupMessage(
-                        group,
-                        MessageChain.create(At(member.id), " 请正确回复漂流瓶，并输入分数"))
-                if not (
-                    reg_search := re.search(
-                        r"瓶子编号为：(.*)\n", reply.origin.asDisplay()
+                        group, MessageChain.create(At(member.id), " 请正确回复漂流瓶，并输入分数")
                     )
+                if not (
+                    reg_search := re.search(r"瓶子编号为：(.*)\n", reply.origin.asDisplay())
                 ):
                     return await safeSendGroupMessage(
-                        group,
-                        MessageChain.create(At(member.id),
-                                            " 请正确回复漂流瓶，并输入分数"))
+                        group, MessageChain.create(At(member.id), " 请正确回复漂流瓶，并输入分数")
+                    )
                 bottle_id = reg_search.group(1)
                 score = anythings.result.asDisplay()
             else:
@@ -401,32 +407,34 @@ async def bottle_score_handler(group: Group, member: Member,
                             await safeSendGroupMessage(
                                 group,
                                 MessageChain.create(
-                                    At(member.id),
-                                    f" 漂流瓶评分成功，当前评分{bottle_score}"),
+                                    At(member.id), f" 漂流瓶评分成功，当前评分{bottle_score}"
+                                ),
                             )
                         else:
                             await safeSendGroupMessage(
                                 group,
-                                MessageChain.create(At(member.id),
-                                                    " 你已对该漂流瓶评过分，请勿重复评分"),
+                                MessageChain.create(
+                                    At(member.id), " 你已对该漂流瓶评过分，请勿重复评分"
+                                ),
                             )
                     else:
                         await safeSendGroupMessage(
-                            group,
-                            MessageChain.create(At(member.id), " 评分仅可为1-5分"))
+                            group, MessageChain.create(At(member.id), " 评分仅可为1-5分")
+                        )
                 else:
                     await safeSendGroupMessage(
-                        group, MessageChain.create(At(member.id), " 没有这个漂流瓶"))
+                        group, MessageChain.create(At(member.id), " 没有这个漂流瓶")
+                    )
 
             else:
                 await safeSendGroupMessage(
-                    group,
-                    MessageChain.create(At(member.id), " 请输入正确的漂流瓶编号和分数！"))
+                    group, MessageChain.create(At(member.id), " 请输入正确的漂流瓶编号和分数！")
+                )
         except Exception:
             await safeSendGroupMessage(
-                group,
-                MessageChain.create(At(member.id), " 使用方式：漂流瓶评分 <漂流瓶编号> <分数>"))
+                group, MessageChain.create(At(member.id), " 使用方式：漂流瓶评分 <漂流瓶编号> <分数>")
+            )
     else:
         await safeSendGroupMessage(
-            group,
-            MessageChain.create(At(member.id), " 使用方式：漂流瓶评分 <漂流瓶编号> <分数>"))
+            group, MessageChain.create(At(member.id), " 使用方式：漂流瓶评分 <漂流瓶编号> <分数>")
+        )

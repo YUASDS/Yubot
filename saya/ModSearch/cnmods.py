@@ -6,7 +6,7 @@ async def cnmods(mod):
     url = f"https://www.cnmods.net/index/moduleListPage.do?title={mod}"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as r:
-            ret = await r.json(content_type='json', encoding="utf-8")
+            ret = await r.json(content_type="json", encoding="utf-8")
 
             totalDes = []
             ele = ret["data"]["totalElements"]

@@ -14,7 +14,7 @@ from graia.ariadne.message.parser.twilight import Twilight, FullMatch
 
 from config import COIN_NAME
 from util.text2image import create_image
-from database.db import get_ranking, get_info,favor
+from database.db import get_ranking, get_info
 from util.control import Permission, Interval
 from util.sendMessage import safeSendGroupMessage
 
@@ -24,11 +24,16 @@ channel = Channel.current()
 RANK_LIST = None
 FUNC = os.path.dirname(__file__).split("\\")[-1]
 
+
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[Twilight({"head": FullMatch("查看排行榜")})],
-        decorators=[Permission.restricter(FUNC),Permission.require(), Interval.require()],
+        decorators=[
+            Permission.restricter(FUNC),
+            Permission.require(),
+            Interval.require(),
+        ],
     )
 )
 async def main(group: Group):
@@ -71,7 +76,7 @@ async def get_user_info(group: Group, member: Member):
                 Plain(f"UID：{user_info.id}"),
                 Plain(f"\n你已累计签到 {user_info.sign_num} 天"),
                 Plain(f"\n当前共有 {user_info.gold} 个{COIN_NAME}"),
-                Plain(f"\n从有记录以来你共有 {user_info.talk_num} 次发言")
+                Plain(f"\n从有记录以来你共有 {user_info.talk_num} 次发言"),
             ]
         ),
     )

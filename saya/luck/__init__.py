@@ -1,18 +1,17 @@
 import os
-from loguru import logger
 
 from graia.saya import Saya, Channel
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.model import Group, Member
 from graia.broadcast.interrupt import InterruptControl
-from graia.ariadne.message.element import Source, Plain, At
+from graia.ariadne.message.element import Plain, At
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.event.message import GroupMessage
 from graia.ariadne.message.parser.twilight import Twilight, FullMatch, RegexMatch
 
 from util.control import Permission, Interval, Rest
 from util.sendMessage import safeSendGroupMessage
-from config import yaml_data, group_data, COIN_NAME
+from config import COIN_NAME
 from database.db import reduce_gold, add_gold
 import database.luckDb as luckDB
 
@@ -23,22 +22,21 @@ inc = InterruptControl(bcc)
 
 func = os.path.dirname(__file__).split("\\")[-1]
 
+
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[
-            Twilight({
-                "heads": FullMatch("放乌帕"),
-                "number": RegexMatch("\d+")
-            })
+            Twilight({"heads": FullMatch("放乌帕"), "number": RegexMatch("\d+")})
         ],
         decorators=[
             Permission.restricter(func),
             Permission.require(),
             Rest.rest_control(),
-            Interval.require()
+            Interval.require(),
         ],
-    ))
+    )
+)
 async def main(group: Group, member: Member, number: RegexMatch):
     if number.matched:
         number = int(number.result.asDisplay())
@@ -46,24 +44,21 @@ async def main(group: Group, member: Member, number: RegexMatch):
             if not await reduce_gold(str(member.id), number + 2):
                 await safeSendGroupMessage(
                     group,
-                    MessageChain.create(
-                        [At(member.id),
-                         Plain(f" 你的{COIN_NAME}不足。")]),
+                    MessageChain.create([At(member.id), Plain(f" 你的{COIN_NAME}不足。")]),
                 )
             else:
                 num = await luckDB.add_luck(str(member.id), number)
                 await safeSendGroupMessage(
                     group,
-                    MessageChain.create([
-                        At(member.id),
-                        Plain(
-                            f" 收取2乌帕后~\n你成功放下{number}{COIN_NAME},下次拿起的增益为{num}"
-                        )
-                    ]),
+                    MessageChain.create(
+                        [
+                            At(member.id),
+                            Plain(f" 收取2乌帕后~\n你成功放下{number}{COIN_NAME},下次拿起的增益为{num}"),
+                        ]
+                    ),
                 )
         else:
-            await safeSendGroupMessage(group,
-                                       MessageChain.create("一次性至少放下10乌帕哦~"))
+            await safeSendGroupMessage(group, MessageChain.create("一次性至少放下10乌帕哦~"))
 
 
 @channel.use(
@@ -74,9 +69,10 @@ async def main(group: Group, member: Member, number: RegexMatch):
             Permission.restricter(func),
             Permission.require(),
             Rest.rest_control(),
-            Interval.require()
+            Interval.require(),
         ],
-    ))
+    )
+)
 async def luck_draw(group: Group, member: Member):
     qq = str(member.id)
     if await luckDB.get_user_time(qq=qq):
@@ -90,11 +86,11 @@ async def luck_draw(group: Group, member: Member):
             group,
             MessageChain.create(
                 f"你抽到了id为{luck_id}的盒装乌帕，其中有{gold}个乌帕，计算增益{change},共获得{total}个乌帕"
-            ))
+            ),
+        )
 
     else:
-        await safeSendGroupMessage(group,
-                                   MessageChain.create("你还没有放下乌帕,因此无法抽取哦~"))
+        await safeSendGroupMessage(group, MessageChain.create("你还没有放下乌帕," "因此无法抽取哦~"))
 
 
 @channel.use(
@@ -105,13 +101,17 @@ async def luck_draw(group: Group, member: Member):
             Permission.restricter(func),
             Permission.require(),
             Rest.rest_control(),
-            Interval.require()
+            Interval.require(),
         ],
-    ))
+    )
+)
 async def luck(group: Group):
 
     await safeSendGroupMessage(
         group,
         MessageChain.create(
-            "——————乌帕抽奖————\n通过放下一个乌帕然后捡起一个乌帕的简单抽奖~\n指令：\n放乌帕+数字（如：放乌帕15）（放乌帕会收取2手续费哦~）\n抽乌帕"
-        ))
+            "——————乌帕抽奖————\n通过放下一个乌帕然后捡起一个乌帕的简单"
+            "抽奖~\n指令：\n放乌帕+数字（如：放乌帕15）（放乌帕会收取2手续费哦~）"
+            "\n抽乌帕"
+        ),
+    )
