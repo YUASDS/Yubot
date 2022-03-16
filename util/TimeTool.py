@@ -13,6 +13,22 @@ class TimeRecorder:
         return calc_time_total(self._rec())
 
 
+def date_today():
+    """
+    "%Y年%m月%d日
+    """
+    now_time = time.localtime()
+    return time.strftime("%Y年%m月%d日", now_time)
+
+
+def time_now():
+    """
+    "%H时%M分%S秒
+    """
+    now_time = time.localtime()
+    return time.strftime("%H时%M分%S秒", now_time)
+
+
 def calc_time_total(t):
     if t < 5000:
         return f"{t}毫秒"
