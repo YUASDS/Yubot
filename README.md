@@ -13,7 +13,6 @@
  （感谢[Abot](https://github.com/djkcyl/ABot-Graia)的基础架构）
 
 ## Yubot的功能
->- `涩涩词库`
 
 >- `你画我猜`
 
