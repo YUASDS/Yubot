@@ -1,0 +1,72 @@
+Basic:
+  API:
+    AliYuncs:
+      accessKeyId: xxxxx
+      accessKeySecret: xxxxx
+    Server: xxxxx
+    Tencent:
+      Cos:
+        bucket: xxxxx
+        region: xxxxx
+      secretId: xxxxx
+      secretKey: xxxxx
+  BotName: xxxxx
+  CoinName: xxxxx
+  Event:
+    JoinGroup: true
+    KickGroup: true
+    LeaveGroup: true
+    Mute: true
+    NewFriend: true
+    PermissionChange: true
+  MAH:
+    BotQQ: xxxxx
+    MiraiAuthKey: xxxxx
+    MiraiHost: http://localhost:8080
+  Permission:
+    Admin:
+    - xxxxx
+    Debug: false
+    DebugGroup: xxxxx
+    DefaultAcceptInvite: true
+    Master: xxxxx
+    MasterName: xxxx
+    Rest: false
+Final: true
+Saya:
+  AiWaifu:
+    Disabled: false
+  AiWrite:
+    Disabled: false
+  AiWriter:
+    Disabled: false
+  DrawSomething:
+    Disabled: false
+  DriftingBottle:
+    Disabled: false
+  EnglishTest:
+    Disabled: false
+  FutureLetter:
+    Disabled: false
+  GroupConfig:
+    Disabled: false
+  GroupSend:
+    Disabled: false
+  Luck:
+    Disabled: false
+  MapMaker:
+    Disabled: false
+  ModSearch:
+    Disabled: false
+  Sign:
+    Disabled: false
+  StorySend:
+    Disabled: false
+  UserFunction:
+    Disabled: false
+  WordCloud:
+    Disabled: false
+  Yinglish:
+    Disabled: false
+  luck:
+    Disabled: false
