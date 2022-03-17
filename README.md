@@ -1,6 +1,6 @@
 <div align="center">
 
-<a href="https://github.com/YUASDS/Yubot/LICENSE"><img src="https://img.shields.io/github/license/YUASDS/Yubot" alt="Licence" /></a>
+<a href="https://github.com/YUASDS/Yubot/blob/master/LICENSE"><img src="https://img.shields.io/github/license/YUASDS/Yubot" alt="Licence" /></a>
 <p align="center">
 <img src="https://count.getloli.com/get/@YUASDS-Yubot?theme=rule34" alt="访问次数" />
 </p>
