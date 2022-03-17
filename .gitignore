@@ -32,3 +32,4 @@ saya/StoryTeller
 saya/StoryTeller/__init__.py
 saya/Filter
 2.py
+config/config.yaml
