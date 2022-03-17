@@ -2,6 +2,8 @@ from io import BytesIO
 
 import aiohttp
 
+
+bg = "https://s2.loli.net/2022/03/15/ZPBOy4UoihuNAxL.jpg"
 headers = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
     "Cache-Control": "max-age=0",
@@ -19,4 +21,10 @@ async def get(url: str, type: str = "JSON", headers=headers, encoding="utf-8"):
             return await resp.json(encoding=encoding)
         if type in {"img", "IMG"}:
             return await BytesIO(resp.content).getvalue()
+        return await resp.text(encoding=encoding)
+
+
+async def post(url, data, headers=headers, encoding="utf-8"):
+    async with aiohttp.ClientSession() as session:
+        resp = await session.post(url=url, data=data, headers=headers)
         return await resp.text(encoding=encoding)

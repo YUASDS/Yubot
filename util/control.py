@@ -182,8 +182,8 @@ class Permission:
             if group.id == yaml_data["Basic"]["Permission"]["DebugGroup"]:
                 return
 
-            if group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]:  # 本处用于测试
-                raise ExecutionStop()
+            # if group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]:  # 本处用于测试
+            #     raise ExecutionStop()
             if func not in yaml_data["Saya"]:
                 yaml_data["Saya"][func] = {"Disabled": False}
                 change_config(yaml_data)
