@@ -1,9 +1,11 @@
 Basic:
   API:
+  # 这里是阿里云的配置,用于掉线发送邮件的,（需要域名）
     AliYuncs:
       accessKeyId: xxxxx
       accessKeySecret: xxxxx
     Server: xxxxx
+  #下面为腾讯云的配置 （暂未用到）
     Tencent:
       Cos:
         bucket: xxxxx
@@ -12,6 +14,7 @@ Basic:
       secretKey: xxxxx
   BotName: xxxxx
   CoinName: xxxxx
+  # 基本事件
   Event:
     JoinGroup: true
     KickGroup: true
@@ -19,6 +22,7 @@ Basic:
     Mute: true
     NewFriend: true
     PermissionChange: true
+  # mirai-api-http配置
   MAH:
     BotQQ: xxxxx
     MiraiAuthKey: xxxxx
@@ -26,13 +30,12 @@ Basic:
   Permission:
     Admin:
     - xxxxx
-    Debug: false
-    DebugGroup: xxxxx
-    DefaultAcceptInvite: true
     Master: xxxxx
     MasterName: xxxx
-    Rest: false
-Final: true
+    DebugGroup: xxxxx
+    Debug: false
+    Rest: false               # 是否开启睡眠休息模式
+    DefaultAcceptInvite: true # 是否默认接受邀请
 Saya:
   AiWaifu:
     Disabled: false
@@ -70,3 +73,4 @@ Saya:
     Disabled: false
   luck:
     Disabled: false
+Final: false
