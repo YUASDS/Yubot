@@ -1,5 +1,4 @@
 import os
-import asyncio
 
 from pathlib import Path
 from graia.saya import Saya, Channel
@@ -78,7 +77,7 @@ async def main(group: Group):
                     "head" @ RegexMatch("制作地图|制造地图|创建地图|刷新地图"),
                     "space" @ RegexMatch("[\\s]+", optional=True),
                     "num" @ RegexMatch("[0-9]+", optional=True),
-                    "anythings" @ WildcardMatch(True),
+                    "anythings" @ WildcardMatch(optional=True),
                 ]
             )
         ],
@@ -111,10 +110,13 @@ async def make(group: Group, anythings: RegexResult, num: RegexResult):
                     group, MessageChain.create("图片获取失败，换张图片吧~")
                 )
             imgs = line_maker(back, part=num)
-            img = await asyncio.to_thread(imgs.map_pice(option=1))
+            img = imgs.map_pice(option=1)
+        else:
+            imgs = line_maker(bg, part=num)
+            img = imgs.map_pice()
     else:
         imgs = line_maker(bg, part=num)
-        img = await asyncio.to_thread(imgs.map_pice())
+        img = imgs.map_pice()
     cell_size = imgs.cell_size
     gid = str(group.id)
     MAP[gid] = {"pet": {}}
