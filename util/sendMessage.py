@@ -37,7 +37,13 @@ async def safeSendGroupMessage(
 
 
 async def autoSendMessage(
-    target: Union[Member, Friend, str],
+    target: Union[
+        Member,
+        Friend,
+        Group,
+        str,
+        int,
+    ],
     message: Union[MessageChain, Iterable[Element], Element, str],
     quote: Optional[Union[Source, int]] = None,
 ) -> BotMessage:
@@ -47,7 +53,11 @@ async def autoSendMessage(
         target = int(target)
     if not isinstance(message, MessageChain):
         message = MessageChain.create(message)
-    if isinstance(target, Member):
+    if isinstance(target, (Member, Group)):
         return await app.sendGroupMessage(target, message, quote=quote)
     elif isinstance(target, (Friend, int)):
         return await app.sendFriendMessage(target, message, quote=quote)
+
+
+def get_name(taget: Union[Member, Friend, Group]) -> str:
+    return taget.nickname if isinstance(taget, Friend) else taget.name
