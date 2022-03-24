@@ -23,6 +23,7 @@ flake8 = "^4.0.1"
 black = "^22.1.0"
 graia-ariadne = {extras = ["full"], version = "^0.6.10"}
 alibabacloud-dm20151123 = "1.0.0"
+ujson = "^5.1.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
