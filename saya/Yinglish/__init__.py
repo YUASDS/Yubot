@@ -35,14 +35,10 @@ def _词转换(x, y, 淫乱度):
     if x in {"!", "！"}:
         return "♡"
     if len(x) > 1 and random.random() < 0.5:
-        if random.random() < 0.5:
-            return f"{x[0]}……{x}♡"
-        else:
-            return f"{x[0]}……{x}"
-    else:
-        if y == "n" and random.random() < 0.5:
-            x = "〇" * len(x)
-        return f"……{x}"
+        return f"{x[0]}……{x}♡" if random.random() < 0.5 else f"{x[0]}……{x}"
+    if y == "n" and random.random() < 0.5:
+        x = "〇" * len(x)
+    return f"……{x}"
 
 
 def chs2yin(s, 淫乱度=0.6):
@@ -56,7 +52,7 @@ def chs2yin(s, 淫乱度=0.6):
             Twilight(
                 [
                     "head" @ FullMatch("千音说淫语"),
-                    "anythings" @ WildcardMatch(True),
+                    "anythings" @ WildcardMatch(),
                 ]
             )
         ],
