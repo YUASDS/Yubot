@@ -29,6 +29,10 @@ def time_now():
     return time.strftime("%H时%M分%S秒", now_time)
 
 
+def time_hour():
+    return time.localtime().tm_hour
+
+
 def calc_time_total(t):
     if t < 5000:
         return f"{t}毫秒"
