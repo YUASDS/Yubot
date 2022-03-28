@@ -1,9 +1,19 @@
+from datetime import datetime
+from random import randint
+
 from typing import Optional, Union, Iterable
 from graia.ariadne import get_running
 from graia.ariadne.exception import UnknownTarget
 from graia.ariadne.model import BotMessage, Group, Member, Friend
 from graia.ariadne.message.chain import MessageChain
-from graia.ariadne.message.element import At, Plain, Source, Element
+from graia.ariadne.message.element import (
+    At,
+    Plain,
+    Source,
+    Element,
+    ForwardNode,
+    Forward,
+)
 
 
 async def safeSendGroupMessage(
@@ -57,6 +67,45 @@ async def autoSendMessage(
         return await app.sendGroupMessage(target, message, quote=quote)
     elif isinstance(target, (Friend, int)):
         return await app.sendFriendMessage(target, message, quote=quote)
+
+
+async def autoForwMessage(
+    target: Union[
+        Member,
+        Friend,
+        Group,
+        str,
+        int,
+    ],
+    message: Union[Iterable[Element], Element, str],
+):
+    """_summary_
+
+    Args:
+        target (Union[ Member, Friend, Group, str, int, ]): _description_
+        message (Union[Iterable[Element], Element, str]): _description_
+        quote (Optional[Union[Source, int]], optional): _description_. Defaults to None.
+
+    Returns:
+        _type_: _description_
+    """
+    if isinstance(target, str):
+        target = int(target)
+    if isinstance(target, Group):
+        target = randint(999999, 2147483647)
+    if isinstance(message, (str, Element)):
+        message = [message]
+    if len(message) > 0:
+        fwd_nodeList = [
+            ForwardNode(
+                target=target,
+                time=datetime.now(),
+                message=MessageChain.create("".join(i)),
+            )
+            for i in message
+        ]
+        message = MessageChain.create(Forward(nodeList=fwd_nodeList))
+    return await autoSendMessage(target, message)
 
 
 def get_name(taget: Union[Member, Friend, Group]) -> str:
