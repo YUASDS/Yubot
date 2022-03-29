@@ -14,7 +14,7 @@ from graia.scheduler.timers import crontabify
 from typing import DefaultDict, Set, Tuple, Union
 from graia.broadcast.exceptions import ExecutionStop
 from graia.ariadne.message.chain import MessageChain
-from graia.ariadne.event.message import MessageEvent, GroupMessage
+from graia.ariadne.event.message import MessageEvent
 from graia.broadcast.builtin.decorators import Depend
 from graia.scheduler.saya.schema import SchedulerSchema
 from graia.ariadne.message.element import Plain, Source
@@ -29,7 +29,7 @@ from config import (
 )
 from database.db import all_sign_num, reset_sign, reset_favor_data
 
-from .sendMessage import safeSendGroupMessage
+from .sendMessage import autoSendMessage
 
 channel = Channel.current()
 
@@ -58,7 +58,7 @@ class Rest:
         SLEEP = set
 
     def rest_control(zzzz: bool = True):
-        async def sleep(event: GroupMessage):
+        async def sleep(event: MessageEvent):
             if (
                 SLEEP
                 and yaml_data["Basic"]["Permission"]["Rest"]
@@ -66,8 +66,8 @@ class Rest:
                 != yaml_data["Basic"]["Permission"]["DebugGroup"]
             ):
                 if zzzz:
-                    await safeSendGroupMessage(
-                        event.sender.group,
+                    await autoSendMessage(
+                        event.sender,
                         MessageChain.create(
                             f"Z{'z'*random.randint(3,8)}{'.'*random.randint(2,6)}"
                         ),
@@ -243,24 +243,11 @@ class Interval:
                     return
                 if eid not in cls.sent_alert:
                     if not silent:
-                        if isinstance(event.sender, Member):
-                            await safeSendGroupMessage(
-                                event.sender.group,
-                                MessageChain.create(
-                                    "前辈不要心急哦~心急的孩子可是要被做成玩具的哦~（当前功能正处于冷却哦~）"
-                                ),
-                                quote=event.messageChain.getFirst(Source).id,
-                            )
-
-                        elif isinstance(event.sender, Friend):
-                            app: Ariadne = Ariadne.get_running()
-                            await app.sendFriendMessage(
-                                event.sender,
-                                MessageChain.create(
-                                    "前辈不要心急哦~心急的孩子可是要被做成玩具的哦~（当前功能正处于冷却哦~）"
-                                ),
-                                quote=event.messageChain.getFirst(Source).id,
-                            )
+                        await autoSendMessage(
+                            event.sender,
+                            "前辈不要心急哦~心急的孩子可是要被做成玩具的哦~（当前功能正处于冷却哦~）",
+                            event.messageChain.getFirst(Source).id,
+                        )
 
                     cls.sent_alert.add(eid)
                 raise ExecutionStop()
