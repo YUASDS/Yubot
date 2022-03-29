@@ -1,5 +1,6 @@
 import os
 import json
+import random
 
 from pathlib import Path
 from graia.saya import Saya, Channel
@@ -51,5 +52,6 @@ inc = InterruptControl(bcc)
     )
 )
 async def main(event: MessageEvent, source: Source):
-    await autoSendMessage(event.sender, "前辈不要哭泣哦~哭泣可是会让幸福溜走的哦~", source)
+    if random.random() < 0.5:
+        await autoSendMessage(event.sender, "前辈不要哭泣哦~哭泣可是会让幸福溜走的哦~", source)
     """"""
