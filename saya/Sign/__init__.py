@@ -41,7 +41,7 @@ async def main(event: MessageEvent):
         return await autoSendMessage(target, MessageChain.create("前辈今天已经签到过了哦，等明天再来吧~"))
     favor_add = 1
     gold_add = randint(1, 15)
-    await add_gold(qq=str(mid), num=gold_add)
+    add_gold(qq=str(mid), num=gold_add)
     await add_favor(qq=str(mid), num=favor_add)
     info = await get_info(str(mid))  # 获取信息
     uid = info.id
@@ -50,7 +50,7 @@ async def main(event: MessageEvent):
     exp = [fav.res, fav.next]
     mahojin_path = os.path.join(path, "imgs", "mahojin.png")
     rewards = [
-        Reward(name="乌帕", num=gold_add, ico=os.path.join(path, "imgs", "原石.png")),
+        Reward(name="乌帕", num=gold_add, ico=os.path.join(path, "imgs", "蓝2.png")),
         Reward(name="好感度", num=favor_add, ico=os.path.join(path, "imgs", "纠缠之缘.png")),
     ]  # 奖励信息
     if isinstance(target, Friend):

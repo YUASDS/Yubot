@@ -86,7 +86,7 @@ async def luck_draw(group: Group, member: Member):
         await luckDB.sign(luck_id)
         gold = await luckDB.get_luck_gold(luck_id)
         total = gold + change
-        await add_gold(qq=qq, num=total)
+        add_gold(qq=qq, num=total)
         await safeSendGroupMessage(
             group,
             MessageChain.create(

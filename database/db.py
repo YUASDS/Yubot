@@ -73,7 +73,7 @@ async def get_info(qq: str):
     return user
 
 
-async def add_gold(qq: str, num: int):
+def add_gold(qq: str, num: int):
     init_user(qq)
     p = User.update(gold=User.gold + num).where(User.qq == qq)
     p.execute()
@@ -141,7 +141,7 @@ async def trans_all_gold(from_qq: str, to_qq: str) -> int:
     init_user(to_qq)
     from_user_gold = User.get(qq=from_qq).gold
     await reduce_gold(from_qq, from_user_gold)
-    await add_gold(to_qq, from_user_gold)
+    add_gold(to_qq, from_user_gold)
     return from_user_gold
 
 

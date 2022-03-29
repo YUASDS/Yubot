@@ -97,7 +97,7 @@ async def echarge(app: Ariadne, friend: Friend, anything: RegexResult):
     if anything.matched:
         saying = anything.result.asDisplay().split()
         if len(saying) == 2:
-            await add_gold(saying[0], int(saying[1]))
+            add_gold(saying[0], int(saying[1]))
             await app.sendFriendMessage(
                 friend,
                 MessageChain.create(f"已向 {saying[0]} 充值 {saying[1]} 个{COIN_NAME}"),

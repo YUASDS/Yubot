@@ -220,8 +220,8 @@ async def main(app: Ariadne, group: Group, member: Member, source: Source):
                         )
                         if result:
                             owner = owner = str(GROUP_GAME_PROCESS[group.id]["owner"])
-                            await add_gold(owner, 2)
-                            await add_gold(str(result[0].id), 1)
+                            add_gold(owner, 2)
+                            add_gold(str(result[0].id), 1)
                             await add_answer(str(result[0].id))
                             GROUP_RUNING_LIST.remove(group.id)
                             del GROUP_GAME_PROCESS[group.id]
@@ -240,7 +240,7 @@ async def main(app: Ariadne, group: Group, member: Member, source: Source):
                             )
                         else:
                             owner = str(GROUP_GAME_PROCESS[group.id]["owner"])
-                            await add_gold(owner, 1)
+                            add_gold(owner, 1)
                             GROUP_RUNING_LIST.remove(group.id)
                             del GROUP_GAME_PROCESS[group.id]
                             await safeSendGroupMessage(
@@ -252,7 +252,7 @@ async def main(app: Ariadne, group: Group, member: Member, source: Source):
                     except asyncio.TimeoutError:
                         owner = str(GROUP_GAME_PROCESS[group.id]["owner"])
                         question = GROUP_GAME_PROCESS[group.id]["question"]
-                        await add_gold(owner, 1)
+                        add_gold(owner, 1)
                         GROUP_RUNING_LIST.remove(group.id)
                         del GROUP_GAME_PROCESS[group.id]
                         await safeSendGroupMessage(
@@ -357,7 +357,7 @@ async def remove_word(app: Ariadne, friend: Friend, anything: RegexResult):
 async def groupDataInit():
     for game_group in GROUP_RUNING_LIST:
         if game_group in GROUP_GAME_PROCESS:
-            await add_gold(str(GROUP_GAME_PROCESS[game_group]["owner"]), 4)
+            add_gold(str(GROUP_GAME_PROCESS[game_group]["owner"]), 4)
             await safeSendGroupMessage(
                 game_group,
                 MessageChain.create(
