@@ -117,22 +117,6 @@ async def throw_bottle_handler(
                         return await safeSendGroupMessage(
                             group, MessageChain.create("链接和种子是不被允许的哦~"), quote=source
                         )
-                # moderation = await text_moderation_async(text)
-                moderation = {"status": False, "message": None}
-                if moderation["status"] == "error":
-                    return await safeSendGroupMessage(
-                        group,
-                        MessageChain.create("漂流瓶内容审核失败，请稍后重新丢漂流瓶！"),
-                        quote=source,
-                    )
-                elif not moderation["status"]:
-                    return await safeSendGroupMessage(
-                        group,
-                        MessageChain.create(
-                            f"你的漂流瓶内可能包含违规内容{moderation['message']}，请检查后重新丢漂流瓶！"
-                        ),
-                        quote=source,
-                    )
             elif len(text) > 400:
                 return await safeSendGroupMessage(
                     group,
@@ -172,29 +156,10 @@ async def throw_bottle_handler(
             )
 
     if image_url:
-        # moderation = await image_moderation_async(image_url)
-        # moderation = {"status": False, "message": None}
-        # if not moderation["status"]:
-        #     return await safeSendGroupMessage(
-        #         group,
-        #         MessageChain.create(
-        #             f"你的漂流瓶包含违规内容 {moderation['message']}，请检查后重新丢漂流瓶！"),
-        #     )
-        # elif moderation["status"] == "error":
-        #     return await safeSendGroupMessage(
-        #         group, MessageChain.create("图片审核失败，请稍后重试！"))
         async with httpx.AsyncClient() as client:
             resp = await client.get(image_url)
             image_type = resp.headers["Content-Type"]
             image = resp.content
-        #     if qrdecode(image):
-        #         if member.id in user_black_list:
-        #             pass
-        #         else:
-        #             user_black_list.append(member.id)
-        #             save_config()
-        #         return await safeSendGroupMessage(
-        #             group, MessageChain.create("漂流瓶不能携带二维码哦！你已被拉黑"))
         image_name = str(time.time()) + "." + image_type.split("/")[1]
         IMAGE_PATH.joinpath(image_name).write_bytes(image)
 
@@ -248,9 +213,7 @@ async def pick_bottle_handler(group: Group):
     times_msg = f"本漂流瓶已经被捞了{str(times)}次" if times > 0 else "本漂流瓶还没有被捞到过"
     msg = [
         Plain(
-            f"你捡到了一个漂流瓶！\n瓶子编号为：{bottle['id']}\n{times_msg}\n{score_msg}\n"
-            #  f"漂流瓶来自 {bottle['group']} 群的 {bottle['member']}\n"
-            "漂流瓶内容为：\n"
+            f"你捡到了一个漂流瓶！\n瓶子编号为：{bottle['id']}\n{times_msg}\n{score_msg}\n" "漂流瓶内容为：\n"
         )
     ]
     if bottle["text"] is not None:
@@ -345,13 +308,6 @@ async def delete_bottle_handler(group: Group, anything: RegexResult):
             await safeSendGroupMessage(group, MessageChain.create("漂流瓶编号必须是数字！"))
     else:
         await safeSendGroupMessage(group, MessageChain.create("请输入要删除的漂流瓶编号！"))
-
-
-# def qrdecode(img):
-#     image = IMG.open(BytesIO(img))
-#     image_array = np.array(image)
-#     image_data = pyzbar.decode(image_array)
-#     return len(image_data)
 
 
 @channel.use(
