@@ -1,5 +1,6 @@
 import random
 import os
+import re
 
 import jieba
 import jieba.posseg as pseg
@@ -52,7 +53,7 @@ def chs2yin(s, 淫乱度=0.6):
             Twilight(
                 [
                     "head" @ FullMatch("千音说淫语"),
-                    "anythings" @ WildcardMatch(),
+                    "anythings" @ WildcardMatch().flags(re.DOTALL),
                 ]
             )
         ],
