@@ -51,7 +51,7 @@ async def offline_handle(qq=bot_qq, error=""):
     try:
         info = await Sample.main_async(**args)
         logger.warning(info)
-    except:
+    except Exception:
         info = await post(url=api, headers=headers, data=data)
         logger.warning(info)
 
@@ -83,7 +83,7 @@ async def except_handle(event: ExceptionThrowed):
         global send
         send = True
         return
-    except:
+    except Exception:
         return await offline_handle(error="")
 
 

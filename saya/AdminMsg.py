@@ -1,6 +1,7 @@
 import time
 import random
 import asyncio
+import contextlib
 
 from graia.saya import Saya, Channel
 from graia.ariadne.app import Ariadne
@@ -53,11 +54,9 @@ funcList = funcList
 async def get_botQueue(app: Ariadne, message: MessageChain, source: Source):
     if message.has(Quote):
         messageid = message.getFirst(Quote).id
-        try:
+        with contextlib.suppress(PermissionError):
             await app.recallMessage(messageid)
             await app.recallMessage(source)
-        except PermissionError:
-            pass
 
 
 @channel.use(
@@ -220,14 +219,12 @@ async def remove_white_group(app: Ariadne, friend: Friend, groupid: RegexResult)
             else:
                 group_list["white"].remove(int(say))
                 save_config()
-                try:
+                with contextlib.suppress(UnknownTarget):
                     await safeSendGroupMessage(
                         int(say), MessageChain.create("该群已被移出白名单，将在3秒后退出")
                     )
                     await asyncio.sleep(3)
                     await app.quitGroup(int(say))
-                except UnknownTarget:
-                    pass
                 await app.sendFriendMessage(friend, MessageChain.create("成功将该群移出白名单"))
         else:
             await app.sendFriendMessage(friend, MessageChain.create("群号仅可为数字"))
@@ -649,30 +646,29 @@ async def clean_group(app: Ariadne, friend: Friend):
     i = 0
     for group in group_list:
         member_count = len(await app.getMemberList(group))
-        if member_count < 15:
-            if group.id not in group_list["white"]:
-                try:
-                    await safeSendGroupMessage(
-                        group,
-                        MessageChain.create(
-                            f'{yaml_data["Basic"]["BotName"]} 当前暂不加入群人数低于 15 的群，正在退出'
-                        ),
-                    )
-                    await app.quitGroup(group)
-                except Exception as e:
-                    await app.sendFriendMessage(
-                        yaml_data["Basic"]["Permission"]["Master"],
-                        MessageChain.create(f"群 {group.name}({group.id}) 退出失败\n{e}"),
-                    )
-                else:
-                    await app.sendFriendMessage(
-                        yaml_data["Basic"]["Permission"]["Master"],
-                        MessageChain.create(
-                            f"群 {group.name}({group.id}) 退出成功\n当前群人数 {member_count}"
-                        ),
-                    )
-                i += 1
-                await asyncio.sleep(0.3)
+        if member_count < 15 and group.id not in group_list["white"]:
+            try:
+                await safeSendGroupMessage(
+                    group,
+                    MessageChain.create(
+                        f'{yaml_data["Basic"]["BotName"]} 当前暂不加入群人数低于 15 的群，正在退出'
+                    ),
+                )
+                await app.quitGroup(group)
+            except Exception as e:
+                await app.sendFriendMessage(
+                    yaml_data["Basic"]["Permission"]["Master"],
+                    MessageChain.create(f"群 {group.name}({group.id}) 退出失败\n{e}"),
+                )
+            else:
+                await app.sendFriendMessage(
+                    yaml_data["Basic"]["Permission"]["Master"],
+                    MessageChain.create(
+                        f"群 {group.name}({group.id}) 退出成功\n当前群人数 {member_count}"
+                    ),
+                )
+            i += 1
+            await asyncio.sleep(0.3)
     await app.sendFriendMessage(
         yaml_data["Basic"]["Permission"]["Master"],
         MessageChain.create(f"本次共清理了 {i}/{len(group_list)} 个群"),
