@@ -2,6 +2,9 @@ import re
 import string
 
 
+正 = ["一", "丄", "上", "止", "正"]
+
+
 def numf(num: int):
     if num < 10000:
         return str(num)
@@ -73,3 +76,14 @@ def getCutStr(str, cut):
             cutStr = str
 
     return cutStr
+
+
+def changeCount(num: int):
+
+    res = ""
+    while num >= 5:
+        num -= 5
+        res += 正[4]
+    if num > 0:
+        res += 正[num - 1]
+    return res
