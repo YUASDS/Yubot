@@ -1,17 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# 来源 https://github.com/Redlnn/signin-image-generator 
-# 有所修改
-# import time
+# https://github.com/Redlnn/signin-image-generator
+
+
 from io import BytesIO
-# from os.path import dirname, join
-# from typing import Optional, Union
-# from uuid import UUID, uuid4
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
-from .util import (Ink, Reward, cut_text, exp_bar, get_qlogo, get_time,
-                  get_hotokoto)
+from .util import Ink, Reward, cut_text, exp_bar, get_qlogo, get_time, get_hotokoto
 
 placeholder = "占位符+123"  # 用于获取字符高度
 
@@ -27,7 +23,7 @@ async def get_signin_img(
     # is_signin_consecutively: bool,
     rewards: list[Reward],
     font_path: str,
-    mahojin_path:str,
+    mahojin_path: str,
     text_color: Ink = "white",
     exp_bar_fg_color: Ink = "#80d0f1",
     exp_bar_bg_color: Ink = "#00000055",
@@ -63,14 +59,14 @@ async def get_signin_img(
 
     # 背景
     if size[1] > size[0]:
-        qlogo1 = qlogo.resize(
-            (size[1], size[1]),
-            Image.LANCZOS).filter(ImageFilter.GaussianBlur(radius=50))
+        qlogo1 = qlogo.resize((size[1], size[1]), Image.LANCZOS).filter(
+            ImageFilter.GaussianBlur(radius=50)
+        )
         canvas.paste(qlogo1, ((size[0] - size[1]) // 2, 0))
     else:
-        qlogo1 = qlogo.resize(
-            (size[0], size[0]),
-            Image.LANCZOS).filter(ImageFilter.GaussianBlur(radius=50))
+        qlogo1 = qlogo.resize((size[0], size[0]), Image.LANCZOS).filter(
+            ImageFilter.GaussianBlur(radius=50)
+        )
         canvas.paste(qlogo1, (0, (size[1] - size[0]) // 2))
 
     # 背景加一层黑
@@ -85,29 +81,39 @@ async def get_signin_img(
     canvas.paste(
         mahojin,
         (avatar_xy - mahojin_size_offset, avatar_xy - mahojin_size_offset),
-        mask=mahojin.split()[3])
+        mask=mahojin.split()[3],
+    )
 
     # 头像描边
     stroke_width = 5  # 描边厚度
-    stroke = Image.new("RGBA", ((avatar_size + 2 * stroke_width) * 4,
-                                (avatar_size + 2 * stroke_width) * 4),
-                       "#00000000")
+    stroke = Image.new(
+        "RGBA",
+        ((avatar_size + 2 * stroke_width) * 4, (avatar_size + 2 * stroke_width) * 4),
+        "#00000000",
+    )
     stroke_draw = ImageDraw.Draw(stroke)
-    stroke_draw.ellipse((0, 0, (avatar_size + 2 * stroke_width) * 4,
-                         (avatar_size + 2 * stroke_width) * 4),
-                        fill="#000000bb")
+    stroke_draw.ellipse(
+        (
+            0,
+            0,
+            (avatar_size + 2 * stroke_width) * 4,
+            (avatar_size + 2 * stroke_width) * 4,
+        ),
+        fill="#000000bb",
+    )
     stroke = stroke.resize(
-        (avatar_size + 2 * stroke_width, avatar_size + 2 * stroke_width),
-        Image.LANCZOS)
-    canvas.paste(stroke, (avatar_xy - stroke_width, avatar_xy - stroke_width),
-                 mask=stroke.split()[3])
+        (avatar_size + 2 * stroke_width, avatar_size + 2 * stroke_width), Image.LANCZOS
+    )
+    canvas.paste(
+        stroke,
+        (avatar_xy - stroke_width, avatar_xy - stroke_width),
+        mask=stroke.split()[3],
+    )
 
     # 圆形头像蒙版
-    avatar_mask = Image.new("RGBA", (avatar_size * 4, avatar_size * 4),
-                            "#00000000")
+    avatar_mask = Image.new("RGBA", (avatar_size * 4, avatar_size * 4), "#00000000")
     avatar_mask_draw = ImageDraw.Draw(avatar_mask)
-    avatar_mask_draw.ellipse((0, 0, avatar_size * 4, avatar_size * 4),
-                             fill="#000000ff")
+    avatar_mask_draw.ellipse((0, 0, avatar_size * 4, avatar_size * 4), fill="#000000ff")
     avatar_mask = avatar_mask.resize((avatar_size, avatar_size), Image.LANCZOS)
 
     # 圆形头像
@@ -123,41 +129,31 @@ async def get_signin_img(
 
     y = avatar_xy + 25
 
-    draw.text((2 * avatar_xy + avatar_size, y),
-              name,
-              font=font_1,
-              fill=text_color)
+    draw.text((2 * avatar_xy + avatar_size, y), name, font=font_1, fill=text_color)
     y += font_1.getsize(name)[1] + 50
-    draw.text((2 * avatar_xy + avatar_size, y),
-              qq_text,
-              font=font_2,
-              fill=text_color)
+    draw.text((2 * avatar_xy + avatar_size, y), qq_text, font=font_2, fill=text_color)
     y += font_2.getsize(qq_text)[1] + 30
     if uid is not None:
-        draw.text((2 * avatar_xy + avatar_size, y),
-                  uid,
-                  font=font_2,
-                  fill=text_color)
+        draw.text((2 * avatar_xy + avatar_size, y), uid, font=font_2, fill=text_color)
         y += font_2.getsize(uid)[1] + 30
-    draw.text((2 * avatar_xy + avatar_size, y),
-              impression,
-              font=font_2,
-              fill=text_color)
-    bar = exp_bar(font_2.getsize(impression)[0],
-                  6,
-                  exp[0] / exp[1],
-                  fg=exp_bar_fg_color,
-                  bg=exp_bar_bg_color)
+    draw.text(
+        (2 * avatar_xy + avatar_size, y), impression, font=font_2, fill=text_color
+    )
+    bar = exp_bar(
+        font_2.getsize(impression)[0],
+        6,
+        exp[0] / exp[1],
+        fg=exp_bar_fg_color,
+        bg=exp_bar_bg_color,
+    )
     canvas.paste(
         bar,
         (2 * avatar_xy + avatar_size, y + font_2.getsize(impression)[1] + 10),
-        mask=bar.split()[3])
+        mask=bar.split()[3],
+    )
 
     y = avatar_xy + avatar_size + 100
-    draw.text((avatar_xy + 30, y),
-              f"共签到 {total_days} 天",
-              font=font_3,
-              fill=text_color)
+    draw.text((avatar_xy + 30, y), f"共签到 {total_days} 天", font=font_3, fill=text_color)
 
     # if is_signin_consecutively:
     #     y += font_3.getsize(placeholder)[1] + 20
@@ -172,20 +168,21 @@ async def get_signin_img(
         x_offset = avatar_xy + 30
         if reward.ico is not None:
             ico = Image.open(reward.ico).convert("RGBA")
-            ico = ico.resize((font_2.getsize(placeholder)[1],
-                              font_2.getsize(placeholder)[1]), Image.LANCZOS)
+            ico = ico.resize(
+                (font_2.getsize(placeholder)[1], font_2.getsize(placeholder)[1]),
+                Image.LANCZOS,
+            )
             canvas.paste(ico, (x_offset, y + 5), mask=ico.split()[3])
             x_offset = x_offset + 20 + ico.size[0]
         if reward.name is not None:
-            draw.text((x_offset, y),
-                      f"{reward.name} +{reward.num}",
-                      font=font_2,
-                      fill=text_color)
+            draw.text(
+                (x_offset, y),
+                f"{reward.name} +{reward.num}",
+                font=font_2,
+                fill=text_color,
+            )
         else:
-            draw.text((x_offset, y),
-                      f"+{reward.num}",
-                      font=font_2,
-                      fill=text_color)
+            draw.text((x_offset, y), f"+{reward.num}", font=font_2, fill=text_color)
         y += font_2.getsize(placeholder)[1] + 30
 
     # 一言背景
@@ -193,9 +190,11 @@ async def get_signin_img(
     hitokoto_bg_draw = ImageDraw.Draw(hitokoto_bg)
     hitokoto_bg_draw.rounded_rectangle((0, 0, 1045, 390), 20, fill="#00000030")
     hitokoto_bg = hitokoto_bg.resize((1045, 390), Image.LANCZOS)
-    canvas.paste(hitokoto_bg,
-                 (2 * avatar_xy + avatar_size, avatar_xy + avatar_size + 55),
-                 mask=hitokoto_bg.split()[3])
+    canvas.paste(
+        hitokoto_bg,
+        (2 * avatar_xy + avatar_size, avatar_xy + avatar_size + 55),
+        mask=hitokoto_bg.split()[3],
+    )
 
     # 获取一言
     hotokoto = await get_hotokoto()
@@ -215,10 +214,9 @@ async def get_signin_img(
 
     # footer
     font_5 = ImageFont.truetype(font_path, size=15)
-    draw.text((15, size[1] - 55),
-              f"白千音 ©2022\n{get_time()}",
-              font=font_5,
-              fill="#cccccc")
+    draw.text(
+        (15, size[1] - 55), f"白千音 ©2022\n{get_time()}", font=font_5, fill="#cccccc"
+    )
 
     # canvas.show()  # 直接展示生成结果（保存为临时文件）
 
