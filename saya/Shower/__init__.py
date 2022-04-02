@@ -1,6 +1,7 @@
 import os
 import asyncio
 
+from loguru import logger
 from graia.saya import Saya, Channel
 from graia.ariadne.model import Member
 from graia.broadcast.interrupt.waiter import Waiter
@@ -44,13 +45,18 @@ async def shower_reset():
     save_data()
 
 
-@channel.use(SchedulerSchema(crontabify("1 * * * *")))
+@channel.use(SchedulerSchema(crontabify("* * * * *")))
 async def shower_scheduled():
     """"""
-    group_lis = ShowerGroup.shower_event()
-    for group in group_lis:
-        for user in group:
-            await safeSendGroupMessage(int(group), (At(int(user), group[user])))
+    flag, group_lis = ShowerGroup.shower_event()
+    if flag:
+        logger.info(group_lis)
+        for group in group_lis:
+            for user in group_lis[group]:
+                await safeSendGroupMessage(
+                    int(group), (At(int(user)), group_lis[group][user])
+                )
+        save_data()
 
 
 @channel.use(
