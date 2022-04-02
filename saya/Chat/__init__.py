@@ -16,7 +16,7 @@ from graia.ariadne.message.parser.twilight import (
 
 
 from util.sendMessage import autoSendMessage
-from util.control import Permission, Interval, Rest
+from util.control import Permission, Rest
 
 path = Path(__file__).parent.joinpath("chat.json")
 data: dict = json.loads(path.read_text(encoding="utf-8"))
@@ -47,7 +47,6 @@ inc = InterruptControl(bcc)
             Permission.require(),
             Permission.restricter(func),
             Rest.rest_control(),
-            Interval.require(),
         ],
     )
 )
