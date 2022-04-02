@@ -4,7 +4,7 @@ from typing import Union
 
 import ujson
 from pathlib import Path
-from util.strings import changeCount
+from util.strings import changeCountL
 
 BASEPATH = Path(__file__).parent
 USER_PATH = BASEPATH.joinpath("user_data.json")
@@ -60,7 +60,7 @@ class ShowerGroup:
 
     @staticmethod
     def group_init(group: str) -> None:
-        GROUP_DATA[group] = {"bash": Bath.get_bash(), "num": 0, "user": []}
+        GROUP_DATA[group] = {"bash": Bath.get_bash(), "user": []}
         return
 
     @staticmethod
@@ -69,31 +69,31 @@ class ShowerGroup:
         {group:{uid:reply},{},{}}
         """
         reply_list = {}
+        flag = False
         for group in GROUP_DATA:
             reply_list[group] = {}
-            for user in group["user"]:
+            for user in GROUP_DATA[group]["user"].copy():
                 interval = time.time() - USER_DATA[user]["time"]
                 if interval > 3600:
-                    gift = Bath.get_gift(group["bash"])
+                    flag = True
+                    gift = Bath.get_gift(GROUP_DATA[group]["bash"])
                     User.add_gift(user, gift)
+                    User.typechange(user)
                     end_reply = Bath.get_end_reply(USER_DATA[user]["shower"])
 
-                    reply_list[group][user] = (
-                        f"{end_reply}你已经泡了1个小时，这是浴场主送来的礼盘,里面放着{gift}",
-                    )
+                    reply_list[group][
+                        user
+                    ] = f"\n{end_reply}\n你已经泡了1个小时，这是浴场主送来的礼盘,里面放着【{gift}】。"
 
-        return reply_list
+                    GROUP_DATA[group]["user"].remove(user)
+        return flag, reply_list
 
     def get_num(self, user) -> int:
-        self.add_num()
         GROUP_DATA[self.group]["user"].append(user)
-        return GROUP_DATA[self.group]["num"]
+        return len(GROUP_DATA[self.group]["user"])
 
     def get_bash(self) -> str:
         return GROUP_DATA[self.group]["bash"]
-
-    def add_num(self) -> str:
-        GROUP_DATA[self.group]["num"] += 1
 
     @staticmethod
     def set_bash(group, bashName) -> None:
@@ -117,6 +117,11 @@ class User:
     def reset() -> None:
         for user in USER_DATA:
             user["today"] = 0
+            user["type"] = 0
+
+    @staticmethod
+    def typechange(user: str) -> None:
+        USER_DATA[user]["type"] = 0
 
     @staticmethod
     def add_gift(qq: str, gift):
@@ -134,6 +139,8 @@ class User:
             return True
         else:
             interval = time.time() - USER_DATA[self.qq]["time"]
+            if USER_DATA[self.qq]["type"] != 0:
+                return False
             if interval > 7200 and USER_DATA[self.qq]["today"] <= 3:
                 USER_DATA[self.qq]["time"] = time.time()
                 USER_DATA[self.qq]["today"] += 1
@@ -148,11 +155,11 @@ class User:
         groupObj = ShowerGroup(group)
         bash = groupObj.get_bash()
         self.set_bash(bash)
-        count = changeCount(groupObj.get_num(self.qq))
+        count = changeCountL(groupObj.get_num(self.qq))
         des = Bath.get_des(bash)
         brand = Bath.get_brand(bash)
         tempu = Bath.get_tem(bash)
-        return f"你抵达了【{bash}】浴场,\n你的浴牌是【{brand}{count}】,\n当前温度为:【{tempu}】\n{des}"
+        return f"你抵达了【{bash}】浴场,\n你的浴牌是【{brand}[{count}]】,\n当前温度为:【{tempu}】\n{des}"
 
     def get_reply_two(self, group: Union[int, str]):
         return
