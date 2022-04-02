@@ -3,6 +3,7 @@ import string
 
 
 正 = ["一", "丄", "上", "止", "正"]
+L = ["Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ", "Ⅵ", "Ⅶ", "Ⅷ", "Ⅸ", "Ⅹ"]
 
 
 def numf(num: int):
@@ -86,4 +87,14 @@ def changeCount(num: int):
         res += 正[4]
     if num > 0:
         res += 正[num - 1]
+    return res
+
+
+def changeCountL(num: int):
+    res = ""
+    while num >= 10:
+        num -= 10
+        res += L[9]
+    if num > 0:
+        res += L[num - 1]
     return res
