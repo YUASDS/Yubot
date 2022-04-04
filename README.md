@@ -51,6 +51,10 @@
 >- `简单好感度`
 
 >- [waifulab](https://waifulabs.com/generate)
+
+>- `群入浴（？）`
+
+>- `一些抽卡模拟`
 ## TODO
 
 
