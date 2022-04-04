@@ -6,7 +6,7 @@ Xenon 管理 https://github.com/McZoo/Xenon/blob/master/lib/control.py
 import time
 import random
 
-from asyncio import Lock
+from asyncio import Lock, create_task
 from graia.saya import Channel
 from collections import defaultdict
 from graia.ariadne.app import Ariadne
@@ -165,7 +165,7 @@ class Permission:
     @classmethod
     def restricter(cls, func: str) -> Depend:
         """func 当前模块名字"""
-        add_count(func)
+        create_task(add_count(func))
 
         def res(event: MessageEvent):
             member_level = cls.get(event.sender)
