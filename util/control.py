@@ -28,7 +28,7 @@ from config import (
     change_config,
 )
 from database.db import all_sign_num, reset_sign, reset_favor_data
-
+from database.funcdb import add_count
 from .sendMessage import autoSendMessage
 
 channel = Channel.current()
@@ -165,6 +165,7 @@ class Permission:
     @classmethod
     def restricter(cls, func: str) -> Depend:
         """func 当前模块名字"""
+        add_count(func)
 
         def res(event: MessageEvent):
             member_level = cls.get(event.sender)

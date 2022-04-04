@@ -62,7 +62,7 @@ async def bot_Launched():
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight(["head" @ FullMatch("查看个人信息")])],
+        inline_dispatchers=[Twilight(["head" @ FullMatch("/查看个人信息")])],
         decorators=[Permission.require(), Interval.require()],
     )
 )

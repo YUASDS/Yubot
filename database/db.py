@@ -4,7 +4,7 @@ import httpx
 
 from loguru import logger
 from prettytable import PrettyTable
-from peewee import SqliteDatabase, Model, CharField, IntegerField
+from peewee import SqliteDatabase, Model, CharField, IntegerField, DoesNotExist
 
 from config import COIN_NAME
 
@@ -56,8 +56,38 @@ def init_user(qq: str):
         logger.info(f"已初始化{qq}")
 
 
+def Decorator(func):
+    def init(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except DoesNotExist:
+            if args:
+                init_user(args[0])
+            if kwargs:
+                init_user(kwargs["qq"])
+            return func(*args, **kwargs)
+
+    return init
+
+
+def Updata_Decorator(func):
+    def init(*args, **kwargs):
+        try:
+            if s := func(*args, **kwargs):
+                return s
+            if args:
+                init_user(args[0])
+            if kwargs:
+                init_user(kwargs["qq"])
+            return func(*args, **kwargs)
+        except ValueError:
+            return 0
+
+    return init
+
+
+@Decorator
 async def is_sign(qq: str):
-    init_user(qq)
     user: User = User.get(qq=qq)
     if user.is_sign:
         return False
@@ -66,15 +96,15 @@ async def is_sign(qq: str):
     return True
 
 
+@Decorator
 async def get_info(qq: str):
     # sourcery skip: inline-immediately-returned-variable
-    init_user(qq)
     user: User_info = User.get(qq=qq)
     return user
 
 
+@Updata_Decorator
 def add_gold(qq: str, num: int):
-    init_user(qq)
     p = User.update(gold=User.gold + num).where(User.qq == qq)
     p.execute()
     return True
@@ -85,8 +115,8 @@ async def reset_favor_data():
     return
 
 
+@Decorator
 async def add_favor(qq: str, num: int, force: bool = False):
-    init_user(qq)
     user_info = await get_info(qq=qq)
     user_favor = user_info.favor
     total = user_favor + num
@@ -100,40 +130,37 @@ async def add_favor(qq: str, num: int, force: bool = False):
         else:
             today = today + num
         total = min(total, 62)
-    p = User.update(favor=total, favor_data=today).where(User.qq == qq)
-    p.execute()
-    return True
+    return User.update(favor=total, favor_data=today).where(User.qq == qq).execute()
 
 
+@Updata_Decorator
 async def reduce_favor(qq: str, num: int, force: bool = False):
-    init_user(qq)
-    # favor_num = User.get(qq=qq).favor
-    # if favor_num < num:
-    #     if force:
-    #         p = User.update(favor=0).where(User.qq == qq)
-    #         p.execute()
-    #         return
-    #     else:
-    #         return False
-    # else:
-    p = User.update(favor=User.favor - num).where(User.qq == qq)
-    p.execute()
-    return True
+    return User.update(favor=User.favor - num).where(User.qq == qq).execute()
 
 
+@Decorator
 async def reduce_gold(qq: str, num: int, force: bool = False):
+    """_summary_
+
+    Args:
+        qq (str): qq
+        num (int): _description_
+        force (bool, optional): _description_. Defaults to False.
+
+    Returns:
+        bool: _description_
+    """
     init_user(qq)
     gold_num = User.get(qq=qq).gold
     if gold_num < num:
         if not force:
             return False
         p = User.update(gold=0).where(User.qq == qq)
-        p.execute()
-        return
     else:
         p = User.update(gold=User.gold - num).where(User.qq == qq)
-        p.execute()
-        return True
+
+    p.execute()
+    return True
 
 
 async def trans_all_gold(from_qq: str, to_qq: str) -> int:

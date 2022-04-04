@@ -17,7 +17,7 @@ from graia.ariadne.message.element import (
 
 
 async def safeSendGroupMessage(
-    target: Union[Group, int],
+    target: Union[Group, int, Member],
     message: Union[MessageChain, Iterable[Element], Element, str],
     quote: Optional[Union[Source, int]] = None,
 ) -> BotMessage:  # sourcery skip: assign-if-exp
