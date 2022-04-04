@@ -78,7 +78,7 @@ class ShowerGroup:
                     flag = True
                     gift = Bath.get_gift(GROUP_DATA[group]["bash"])
                     User.add_gift(user, gift)
-                    User.typechange(user)
+                    User.type_change(user)
                     end_reply = Bath.get_end_reply(USER_DATA[user]["shower"])
 
                     reply_list[group][
@@ -120,18 +120,26 @@ class User:
             user["type"] = 0
 
     @staticmethod
-    def typechange(user: str) -> None:
+    def type_change(user: str) -> None:
         USER_DATA[user]["type"] = 0
+
+    @staticmethod
+    def add_today(user: str) -> None:
+        USER_DATA[user]["today"] += 1
 
     @staticmethod
     def add_gift(qq: str, gift):
         if qq in USER_DATA:
             USER_DATA[qq]["gift"].append(gift)
 
+    def finish(self) -> None:
+        self.add_today(self.qq)
+        self.type_change(self.qq)
+
     def check_time(self) -> bool:
         if self.qq not in USER_DATA:
             USER_DATA[self.qq] = {
-                "type": 1,
+                "type": 0,
                 "time": time.time(),
                 "today": 1,
                 "gift": [],
@@ -143,7 +151,6 @@ class User:
                 return False
             if interval > 7200 and USER_DATA[self.qq]["today"] <= 3:
                 USER_DATA[self.qq]["time"] = time.time()
-                USER_DATA[self.qq]["today"] += 1
                 return True
             return False
 
@@ -152,6 +159,7 @@ class User:
         return bash
 
     def get_reply(self, group: Union[int, str]) -> str:
+        self.finish()
         groupObj = ShowerGroup(group)
         bash = groupObj.get_bash()
         self.set_bash(bash)
@@ -161,8 +169,17 @@ class User:
         tempu = Bath.get_tem(bash)
         return f"你抵达了【{bash}】浴场,\n你的浴牌是【{brand}[{count}]】,\n当前温度为:【{tempu}】\n{des}"
 
-    def get_reply_two(self, group: Union[int, str]):
-        return
+    def get_reply_two(self, target, group: Union[int, str]):
+        self.finish()
+        target.finish()
+        groupObj = ShowerGroup(group)
+        bash = groupObj.get_bash()
+        self.set_bash(bash)
+        count = changeCountL(groupObj.get_num(self.qq))
+        des = Bath.get_des(bash)
+        brand = Bath.get_brand(bash)
+        tempu = Bath.get_tem(bash)
+        return f"你抵达了【{bash}】浴场,\n你的浴牌是【{brand}[{count}]】,\n当前温度为:【{tempu}】\n{des}"
 
 
 def save_data() -> None:

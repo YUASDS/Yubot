@@ -68,7 +68,7 @@ async def shower_scheduled():
                     FullMatch("/"),
                     "head" @ RegexMatch("入浴|申请入浴|邀请共浴|共浴|共浴邀请"),
                     "at" @ ElementMatch(At, optional=True),
-                    "taget" @ RegexMatch("[0-9]+", optional=True),
+                    "target" @ RegexMatch("[0-9]+", optional=True),
                 ]
             )
         ],
@@ -83,24 +83,26 @@ async def shower_scheduled():
 async def main(
     member: Member,
     head: RegexResult,
-    taget: RegexResult,
+    target: RegexResult,
     source: Source,
     at: ElementResult,
 ):
 
     head = head.result.asDisplay()
     shower = User(member.id)
+    gid = member.group.id
     if not shower.check_time():
         return await safeSendGroupMessage(member, "前辈已经入浴，或是超过最大入浴次数了哦~", source)
 
     if head in ["入浴", "申请入浴"]:
-        reply = shower.get_reply(member.group.id)
+        reply = shower.get_reply(gid)
         save_data()
         return await safeSendGroupMessage(member, reply, source)
     if at.matched:
-        taget = at.result.target
+        targetqq = at.result.target
     else:
-        taget = int(taget.result.asDisplay())
+        targetqq = int(target.result.asDisplay())
+    await safeSendGroupMessage(member, (At(targetqq), "\n你已经被邀请了~"))
 
     @Waiter.create_using_function(
         listening_events=[GroupMessage],
@@ -112,19 +114,21 @@ async def main(
     async def reply_ling(
         water_member: Member, water_source: Source, choose: RegexResult
     ):
-        if member.id != taget or member.group.id != water_member.group.id:
+        if water_member.id != targetqq or water_member.group.id != member.group.id:
             return
         if choose.result.asDisplay() == "接受邀请":
-            await safeSendGroupMessage(
-                member, shower.get_reply_two(member.group.id, taget), water_source
-            )
+            await safeSendGroupMessage(member, "你接受了对方的邀请", water_source)
             return True
         else:
             await safeSendGroupMessage(member, "对方拒绝了你的邀请", source)
             return False
 
     try:
-        await asyncio.wait_for(inc.wait(reply_ling), 500)
+        res = await asyncio.wait_for(inc.wait(reply_ling), 60)
     except asyncio.TimeoutError:
         return
+    if res:
+        shower2 = User(targetqq)
+        await safeSendGroupMessage(member, shower.get_reply_two(shower2, gid))
+
     """"""
