@@ -24,7 +24,12 @@ async def get(url: str, type: str = "JSON", headers=headers, encoding="utf-8"):
         return await resp.text(encoding=encoding)
 
 
-async def post(url, data, headers=headers, encoding="utf-8"):
+async def post(url, data, type="json", headers=headers, encoding="utf-8") -> dict:
+    """ """
     async with aiohttp.ClientSession() as session:
         resp = await session.post(url=url, data=data, headers=headers)
+        if type in {"JSON", "json"}:
+            return await resp.json(encoding=encoding, content_type="text/html")
+        if type in {"img", "IMG"}:
+            return await BytesIO(resp.content).getvalue()
         return await resp.text(encoding=encoding)
