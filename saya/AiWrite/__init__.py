@@ -149,7 +149,7 @@ async def APIKEY(group: Group, member: Member, text: RegexResult):
             if len(text) != 24:
                 raise
             int(text, base=16)
-        except:
+        except Exception:
             return await safeSendGroupMessage(
                 group,
                 MessageChain.create([At(member.id), Plain("\napikey格式有误!")]),

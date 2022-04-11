@@ -19,7 +19,7 @@ def load_config(path):
     try:
         with open(path, "r", encoding="utf8") as f:
             return json.load(f)
-    except:
+    except Exception:
         return {}
 
 
