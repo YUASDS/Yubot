@@ -5,8 +5,6 @@ from peewee import CharField, SqliteDatabase, Model, DoesNotExist
 
 from util.TimeTool import date_today
 
-path = Path(__file__).parent.joinpath("shop.json")
-data: dict = ujson.loads(path.read_text(encoding="utf-8"))
 
 db = SqliteDatabase(Path(__file__).parent.joinpath("funcData.db"))
 
@@ -18,7 +16,7 @@ class BaseModel(Model):
 
 class Func(BaseModel):
     date = CharField(default=date_today())
-    data = CharField(max_length=8000, default="")
+    data = CharField(max_length=8000, default="{}")
 
     class Meta:
         db_table = "user_info"
@@ -72,7 +70,7 @@ def get_data(date: str = None) -> dict:
     return ujson.loads(Func.get(date=date).data.replace("'", '"'))
 
 
-def add_count(func: str):
+async def add_count(func: str):
     func_data = get_data(date_today())
     if func not in func_data:
         func_data[func] = 1
@@ -86,5 +84,5 @@ def Func_update(date: str, data: dict):
     return Func.update(data=data).where(Func.date == date).execute()
 
 
-# if __name__ == "__main__":
-#     pass
+if __name__ == "__main__":
+    add_count("Wo")
