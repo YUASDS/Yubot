@@ -211,7 +211,7 @@ class SayaManager:
         inline_dispatchers=[
             Twilight(
                 [
-                    "head" @ RegexMatch("加载|卸载|重载"),
+                    "head" @ RegexMatch("加载|卸载|重载|强制加载"),
                     FullMatch("插件"),
                     "target" @ WildcardMatch(),
                 ]
@@ -232,6 +232,8 @@ async def Saya_Manager(
     name = target.result.asDisplay().strip()
     if order == "加载":
         res = SayaManager.loaded_channels(name)
+    elif order == "强制加载":
+        res = SayaManager.load_channel(name)
     else:
         res = SayaManager.unload_reload_channels(name, order)
     return await autoSendMessage(event.sender, res, source)
