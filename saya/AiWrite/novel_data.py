@@ -91,7 +91,9 @@ async def submit_to_ai(
             )
         else:
             raise Exception(rsp_json["msg"])
-    return rsp_json["data"]["nodes"]
+    return rsp_json["data"]["nodes"] or submit_to_ai(
+        text, token, novel_id, branchid, firstnode, title, model_id
+    )
 
 
 # async def poll_for_result(nid: str, xid: str, token):
