@@ -95,10 +95,14 @@ async def main(group: Group, member: Member, text: RegexResult):
         if not await reduce_gold(str(member.id), 5):
             await safeSendGroupMessage(
                 group,
-                MessageChain.create([At(member.id), Plain(f" 你的{COIN_NAME}不足。")]),
+                MessageChain.create([At(member.id), Plain(f" 前辈似乎没有足够的{COIN_NAME}哦。")]),
             )
         else:
             try:
+                await safeSendGroupMessage(
+                    group,
+                    MessageChain.create([At(member.id), Plain("\n稍等片刻，千音这就开始哦~")]),
+                )
                 res = await get_cont_continuation(
                     text, token, title=title, iter=iter, mid=mid
                 )
