@@ -4,7 +4,7 @@ import os
 import asyncio
 from io import BytesIO
 
-import httpx
+import aiohttp
 from PIL import Image
 import numpy as np
 
@@ -144,33 +144,24 @@ async def save_config(config: dict, path):
         return False
 
 
-async def load_config(path):
+def load_config(path):
 
     try:
         with open(path, "r", encoding="utf8") as f:
             return json.load(f)
-    except:
+    except Exception:
         return {}
 
 
-async def get_pet(member_id: str = None, image_url=None, msgchain=False) -> np.array:
-    if member_id:
-        url = f"http://q1.qlogo.cn/g?b=qq&nk={member_id}&s=640"
-        async with httpx.AsyncClient() as client:
-            resp = await client.get(url=url)
-        byt = BytesIO(resp.content)
-        avatar = Image.open(byt).convert("RGBA")
-        return np.array(avatar)
-    elif msgchain:
-        resp = msgchain.get_bytes()
-        image = Image.open(BytesIO(resp)).convert("RGBA")
-        return np.array(image)
-    else:
-        async with httpx.AsyncClient() as client:
-            resp = await client.get(image_url)
-        byt = BytesIO(resp.content)
-        image = Image.open(byt).convert("RGBA")
-        return np.array(image)
+async def get_pet(member_id: str = None, image_url: str = None) -> np.array:
+    if image_url is None and member_id:
+        image_url = f"http://q1.qlogo.cn/g?b=qq&nk={member_id}&s=640"
+    async with aiohttp.ClientSession() as session:
+        resp = await session.get(url=image_url)
+        res = await resp.content.read()
+    byt = BytesIO(res)
+    avatar = Image.open(byt).convert("RGBA")
+    return np.array(avatar)
 
 
 if __name__ == "__main__":

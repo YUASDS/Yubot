@@ -1,5 +1,7 @@
 import os
+import re
 
+from PIL import UnidentifiedImageError
 from pathlib import Path
 from graia.saya import Saya, Channel
 from graia.ariadne.model import Group, Member
@@ -17,7 +19,7 @@ from graia.ariadne.message.parser.twilight import (
 
 from util.sendMessage import safeSendGroupMessage
 from util.control import Permission, Interval, Rest
-from .LineMaker import line_maker, save_config, load_config, get_pet
+from .LineMaker import line_maker, get_pet
 
 func = os.path.dirname(__file__).split("\\")[-1]
 bg = os.path.join(os.path.dirname(__file__), "bg.jpg")
@@ -39,6 +41,67 @@ msg = [
 
 saya = Saya.current()
 channel = Channel.current()
+channel.name(func)
+
+IndexError
+
+
+async def now_map(gid: str):
+
+    if gid not in MAP:
+        maker = line_maker(bg, part=6)
+        maker.map_pice()
+        lis = [[0 for _ in range(maker.rg1)] for _ in range(maker.rg2)]
+        MAP[gid] = {
+            "pet": {},
+            "array": lis,
+            "bg": maker.Img,
+            "size": maker.cell_size,
+            "part": 6,
+        }
+    else:
+        maker = line_maker(MAP[gid]["bg"], part=MAP[gid]["part"])
+        maker.map_pice(1)
+        MAP[gid]["size"] = maker.cell_size
+        MAP[gid]["bg"] = maker.Img
+    file = MAP[gid]["bg"].copy()
+    maker = line_maker(file=file, cell_size=MAP[gid]["size"])
+
+    return maker.post_array(pet_dict=MAP[gid]["pet"], bg_array=MAP[gid]["array"])
+
+
+async def join_map(x: int, y: int, gid: str, mid: str, npc_url=False):
+    if gid not in MAP:
+        maker = line_maker(bg, part=6)
+        maker.map_pice()
+        lis = [[0 for _ in range(maker.rg1)] for _ in range(maker.rg2)]
+        MAP[gid] = {
+            "pet": {},
+            "array": lis,
+            "bg": maker.Img,
+            "size": maker.cell_size,
+            "part": 6,
+        }
+
+    if mid not in MAP[gid]["pet"]:
+        pet = await get_pet(image_url=npc_url) if npc_url else await get_pet(mid)
+        MAP[gid]["pet"][mid] = pet
+
+    file = MAP[gid]["bg"].copy()
+    if True not in [mid in i for i in MAP[gid]["array"]]:
+        MAP[gid]["array"][x][y] = mid
+
+    else:
+        for w, i in enumerate(MAP[gid]["array"]):
+            for h, j in enumerate(i):
+                if j == mid:
+                    MAP[gid]["array"][w][h] = 0
+                    MAP[gid]["array"][x][y] = mid
+                    # print(w, h)
+                    # print(MAP[gid]["array"])
+    maker = line_maker(file=file, cell_size=MAP[gid]["size"])
+    # logger.info(MAP[gid]["array"])
+    return maker.post_array(pet_dict=MAP[gid]["pet"], bg_array=MAP[gid]["array"])
 
 
 @channel.use(
@@ -76,7 +139,7 @@ async def main(group: Group):
                 [
                     "head" @ RegexMatch("制作地图|制造地图|创建地图|刷新地图"),
                     "space" @ RegexMatch("[\\s]+", optional=True),
-                    "num" @ RegexMatch("[0-9]+", optional=True),
+                    "size" @ RegexMatch("[0-9]+", optional=True),
                     "anythings" @ WildcardMatch(optional=True),
                 ]
             )
@@ -89,45 +152,71 @@ async def main(group: Group):
         ],
     )
 )
-async def make(group: Group, anythings: RegexResult, num: RegexResult):
-    if num.matched:
-        num: str = num.result.asDisplay()
-        num = int(num) if num.isdigit else 6
-    else:
-        num = 6
+async def make(group: Group, anythings: RegexResult, size: RegexResult):
+    gid = str(group.id)
+    num = int(size.result.asDisplay()) if size.matched else 6
+    maker = line_maker(bg, part=num)
+    img = maker.map_pice()
     if anythings.matched:
         message_chain = anythings.result
         if message_chain.has(Image):
-            if len(message_chain.get(Image)) > 1:
-                return await safeSendGroupMessage(
-                    group, MessageChain.create("创建背景时只能携带一张图片哦！")
-                )
             image_url = message_chain.getFirst(Image).url
             try:
                 back = await get_pet(image_url=image_url)
-            except:
+            except Exception:
                 return await safeSendGroupMessage(
                     group, MessageChain.create("图片获取失败，换张图片吧~")
                 )
-            imgs = line_maker(back, part=num)
-            img = imgs.map_pice(option=1)
-        else:
-            imgs = line_maker(bg, part=num)
-            img = imgs.map_pice()
-    else:
-        imgs = line_maker(bg, part=num)
-        img = imgs.map_pice()
-    cell_size = imgs.cell_size
+            maker = line_maker(back, part=num)
+            img = maker.map_pice(1)
+    lis = [[0 for _ in range(maker.rg1)] for _ in range(maker.rg2)]
+    MAP[gid] = {
+        "pet": {},
+        "array": lis,
+        "bg": maker.Img,
+        "size": maker.cell_size,
+        "part": num,
+    }
+    await safeSendGroupMessage(group, "地图重置完成~")
+    await safeSendGroupMessage(group, Image(data_bytes=img))
+
+
+@channel.use(
+    ListenerSchema(
+        priority=16,  # 优先度
+        listening_events=[GroupMessage],
+        inline_dispatchers=[
+            Twilight(
+                [
+                    RegexMatch("更换背景|更换地图背景"),
+                    "anythings" @ WildcardMatch().flags(re.DOTALL),
+                ]
+            )
+        ],
+        decorators=[
+            Permission.require(),
+            Permission.restricter(func),
+            Rest.rest_control(),
+            Interval.require(),
+        ],
+    )
+)
+async def refresh(group: Group, anythings: RegexResult):
     gid = str(group.id)
-    MAP[gid] = {"pet": {}}
-    lis = [[0 for _ in range(imgs.rg1)] for _ in range(imgs.rg2)]
-    MAP[gid]["array"] = lis
-    MAP[gid]["bg"] = imgs.Img
-    data = await load_config(CONFIG_FILE)
-    data[gid] = cell_size
-    await save_config(data, CONFIG_FILE)
-    await safeSendGroupMessage(group, MessageChain.create("地图制作完成"))
-    await safeSendGroupMessage(group, MessageChain.create(Image(data_bytes=img)))
+    if str(group.id) not in MAP:
+        return await safeSendGroupMessage(group, "地图不存在，请先制作地图~")
+    if anythings.matched:
+        message_chain = anythings.result
+        if message_chain.has(Image):
+            image_url = message_chain.getFirst(Image).url
+            try:
+                back = await get_pet(image_url=image_url)
+            except Exception:
+                return await safeSendGroupMessage(group, "图片获取失败，换张图片吧~")
+    MAP[gid]["bg"] = back
+    img = await now_map(gid)
+    await safeSendGroupMessage(group, "地图背景更换完成~")
+    await safeSendGroupMessage(group, Image(data_bytes=img))
 
 
 @channel.use(
@@ -136,12 +225,12 @@ async def make(group: Group, anythings: RegexResult, num: RegexResult):
         inline_dispatchers=[
             Twilight(
                 [
-                    "head" @ FullMatch("加入地图"),
+                    RegexMatch("加入地图|移动"),
                     "x"
                     @ RegexMatch(
                         "[0-9]+",
                     ),
-                    "space" @ RegexMatch("\\D+"),
+                    RegexMatch("\\D+"),
                     "y" @ RegexMatch("[0-9]+"),
                 ]
             )
@@ -155,36 +244,16 @@ async def make(group: Group, anythings: RegexResult, num: RegexResult):
     )
 )
 async def join(group: Group, x: RegexResult, y: RegexResult, member: Member):
-    if not x.matched and y.matched:
-        return await safeSendGroupMessage(
-            group, MessageChain.create("加入地图的时候需要带上两个位置哦~")
-        )
-    x = x.result.asDisplay()
-    y = y.result.asDisplay()
+    x = int(x.result.asDisplay()) - 1
+    y = int(y.result.asDisplay()) - 1
     gid = str(group.id)
     mid = str(member.id)
-    x = int(x) - 1
-    y = int(y) - 1
-    config = await load_config(CONFIG_FILE)
-    if gid in MAP:
-        file = MAP[gid]["bg"].copy()
-        cell_size = config[gid]
-
-        if True in [mid in i for i in MAP[gid]["array"]]:
-            return await safeSendGroupMessage(group, MessageChain.create("请使用移动"))
-        MAP[gid]["array"][x][y] = mid
-
-        maker = line_maker(file=file, cell_size=cell_size)
-        if mid not in MAP[gid]["pet"]:
-            pet = await get_pet(mid)
-            MAP[gid]["pet"][mid] = pet
-
-        img = maker.post_array(pet_dict=MAP[gid]["pet"], bg_array=MAP[gid]["array"])
-
-        await safeSendGroupMessage(group, MessageChain.create("加入地图成功"))
-        await safeSendGroupMessage(group, MessageChain.create(Image(data_bytes=img)))
-    else:
-        await safeSendGroupMessage(group, MessageChain.create("请先创建地图"))
+    try:
+        img = await join_map(x, y, gid, mid)
+    except IndexError:
+        return await safeSendGroupMessage(group, "超出范围了哦~")
+    await safeSendGroupMessage(group, f"你已成功移动到地图[{x+1}] [{y+1}]位置~")
+    await safeSendGroupMessage(group, Image(data_bytes=img))
 
 
 @channel.use(
@@ -193,80 +262,14 @@ async def join(group: Group, x: RegexResult, y: RegexResult, member: Member):
         inline_dispatchers=[
             Twilight(
                 [
-                    "head" @ FullMatch("移动"),
-                    "x" @ RegexMatch("[0-9]+"),
-                    "space" @ RegexMatch("\\D+"),
-                    "y" @ RegexMatch("[0-9]+"),
-                ]
-            )
-        ],
-        decorators=[
-            Permission.require(),
-            Permission.restricter(func),
-            Rest.rest_control(),
-            Interval.require(),
-        ],
-    )
-)
-async def change(group: Group, x: RegexResult, y: RegexResult, member: Member):
-    if not x.matched and y.matched:
-        return await safeSendGroupMessage(group, MessageChain.create("移动地图的时候需要带上位置哦~"))
-    x: str = x.result.asDisplay()
-    y: str = y.result.asDisplay()
-    gid = str(group.id)
-    mid = str(member.id)
-    if not (x.isdigit() and y.isdigit()):
-        return
-    x = int(x) - 1
-    y = int(y) - 1
-    config = await load_config(CONFIG_FILE)
-    if gid in MAP:
-        file = MAP[gid]["bg"].copy()
-        cell_size = config[gid]
-
-        if True not in [mid in i for i in MAP[gid]["array"]]:
-            return await safeSendGroupMessage(group, MessageChain.create("请先加入地图"))
-        for w, i in enumerate(MAP[gid]["array"]):
-            h = 0
-            for j in i:
-                if j == mid:
-                    try:
-                        MAP[gid]["array"][x][y] = mid
-                    except Exception:
-                        return await safeSendGroupMessage(
-                            group, MessageChain.create("当前的移动超出了地图范围哦~")
-                        )
-                    MAP[gid]["array"][w][h] = 0
-                    # print(w, h)
-                    # print(MAP[gid]["array"])
-                h += 1
-        maker = line_maker(file=file, cell_size=cell_size)
-        if mid not in MAP[gid]["pet"]:
-            pet = await get_pet(mid)
-            MAP[gid]["pet"][mid] = pet
-
-        img = maker.post_array(pet_dict=MAP[gid]["pet"], bg_array=MAP[gid]["array"])
-
-        await safeSendGroupMessage(group, MessageChain.create("移动地图成功"))
-        await safeSendGroupMessage(group, MessageChain.create(Image(data_bytes=img)))
-    else:
-        await safeSendGroupMessage(group, MessageChain.create("请先创建地图"))
-
-
-@channel.use(
-    ListenerSchema(
-        listening_events=[GroupMessage],
-        inline_dispatchers=[
-            Twilight(
-                [
-                    "head" @ RegexMatch("添加角色|增加角色|添加NPC"),
-                    "space1" @ RegexMatch("[\\s]+", optional=True),
+                    "head" @ RegexMatch("添加角色|增加角色|添加NPC|移动NPC|移动角色"),
+                    RegexMatch("[\\s]+", optional=True),
                     "npc" @ RegexMatch("[\\S]+"),
-                    "space2" @ RegexMatch("[\\s]+", optional=True),
+                    RegexMatch("[\\s]+", optional=True),
                     "x" @ RegexMatch("[0-9]+"),
-                    "space" @ RegexMatch("\\D+"),
+                    RegexMatch("\\D+"),
                     "y" @ RegexMatch("[0-9]+"),
-                    "enter" @ FullMatch("\n", optional=True),
+                    FullMatch("\n", optional=True),
                     "anythings1" @ WildcardMatch(optional=True),
                 ]
             )
@@ -289,101 +292,19 @@ async def joinImage(
 ):
 
     gid = str(group.id)
-    x = x.result.asDisplay()
-    y = y.result.asDisplay()
+    x = int(x.result.asDisplay()) - 1
+    y = int(y.result.asDisplay()) - 1
     npc = npc.result.asDisplay()
-    x = int(x) - 1
-    y = int(y) - 1
     message_chain = anythings1.result
-    config = await load_config(CONFIG_FILE)
-    if gid in MAP:
-        file = MAP[gid]["bg"].copy()
-        cell_size = config[gid]
-        MAP[gid]["array"][x][y] = npc
-
-        maker = line_maker(file=file, cell_size=cell_size)
-        if message_chain.has(Image):
-            if len(message_chain.get(Image)) > 1:
-                return await safeSendGroupMessage(
-                    group, MessageChain.create("添加角色只能携带一张图片哦！")
-                )
-            image_url = message_chain.getFirst(Image).url
-            pet = await get_pet(image_url=image_url)
-        else:
-            pet = await get_pet(member_id=str(member.id))
-        if npc not in MAP[gid]["pet"]:
-            MAP[gid]["pet"][npc] = pet
-        else:
-            return await safeSendGroupMessage(
-                group, MessageChain.create(f"当前{npc}，已经加入了地图了,请使用移动~")
-            )
-        img = maker.post_array(pet_dict=MAP[gid]["pet"], bg_array=MAP[gid]["array"])
-
-        await safeSendGroupMessage(group, MessageChain.create("添加NPC成功"))
-        await safeSendGroupMessage(group, MessageChain.create(Image(data_bytes=img)))
+    if message_chain.has(Image):
+        image_url = message_chain.getFirst(Image).url
     else:
-        await safeSendGroupMessage(group, MessageChain.create("请先创建地图"))
-
-
-@channel.use(
-    ListenerSchema(
-        listening_events=[GroupMessage],
-        inline_dispatchers=[
-            Twilight(
-                [
-                    "head" @ RegexMatch("移动NPC|移动角色"),
-                    "space1" @ RegexMatch("[\\s]+", optional=True),
-                    "npc" @ RegexMatch("[\\S]+"),
-                    "space2" @ RegexMatch("[\\s]+", optional=True),
-                    "x" @ RegexMatch("[0-9]+"),
-                    "space" @ RegexMatch("\\D+", optional=True),
-                    "y" @ RegexMatch("[0-9]"),
-                ]
-            )
-        ],
-        decorators=[
-            Permission.require(),
-            Permission.restricter(func),
-            Rest.rest_control(),
-            Interval.require(),
-        ],
-    )
-)
-async def change_npc(group: Group, x: RegexResult, y: RegexResult, npc: RegexResult):
-    if not x.matched and y.matched:
-        return await safeSendGroupMessage(group, MessageChain.create("移动角色的时候需要带上位置哦~"))
-    if not npc.matched:
-        return await safeSendGroupMessage(
-            group, MessageChain.create("移动角色的时候需要带上角色名字哦~")
-        )
-
-    x = x.result.asDisplay()
-    y = y.result.asDisplay()
-    npc = npc.result.asDisplay()
-
-    gid = str(group.id)
-    x = int(x) - 1
-    y = int(y) - 1
-    config = await load_config(CONFIG_FILE)
-    if gid in MAP:
-        file = MAP[gid]["bg"].copy()
-        cell_size = config[gid]
-        if True not in [npc in i for i in MAP[gid]["array"]]:
-            return await safeSendGroupMessage(group, MessageChain.create("请先加入地图"))
-        if npc not in MAP[gid]["pet"]:
-            return await safeSendGroupMessage(
-                group, MessageChain.create("请先将NPC加入地图再移动哦~")
-            )
-        for w, i in enumerate(MAP[gid]["array"]):
-            for h, j in enumerate(i):
-                if j == npc:
-                    MAP[gid]["array"][w][h] = 0
-                    MAP[gid]["array"][x][y] = npc
-                    # print(w, h)
-                    # print(MAP[gid]["array"])
-        maker = line_maker(file=file, cell_size=cell_size)
-        img = maker.post_array(pet_dict=MAP[gid]["pet"], bg_array=MAP[gid]["array"])
-        await safeSendGroupMessage(group, MessageChain.create("移动地图成功"))
-        await safeSendGroupMessage(group, MessageChain.create(Image(data_bytes=img)))
-    else:
-        await safeSendGroupMessage(group, MessageChain.create("请先创建地图"))
+        image_url = f"http://q1.qlogo.cn/g?b=qq&nk={member.id}&s=640"
+    try:
+        res = await join_map(x, y, gid, npc, image_url)
+    except IndexError:
+        return await safeSendGroupMessage(group, "坐标选择失败，请重新选择坐标~")
+    except UnidentifiedImageError:
+        return await safeSendGroupMessage(group, "图片获取失败~")
+    await safeSendGroupMessage(group, f"NPC【{npc}】已成功移动到[{x+1}] [{y+1}]位置~")
+    await safeSendGroupMessage(group, Image(data_bytes=res))
