@@ -165,6 +165,9 @@ class Permission:
     @classmethod
     def restricter(cls, func: str) -> Depend:
         """func 当前模块名字"""
+<<<<<<< HEAD
+=======
+>>>>>>> 50b0785e03c70bc22fcf4165c8a37f275b7647cb
 
         def res(event: MessageEvent):
             create_task(add_count(func))
