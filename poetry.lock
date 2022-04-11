@@ -569,7 +569,7 @@ reference = "custom"
 
 [[package]]
 name = "graia-ariadne"
-version = "0.6.13"
+version = "0.6.15"
 description = "Another elegant Python QQ Bot framework for mirai and mirai-api-http v2."
 category = "main"
 optional = false
@@ -2028,8 +2028,8 @@ frozenlist = [
     {file = "frozenlist-1.2.0.tar.gz", hash = "sha256:68201be60ac56aff972dc18085800b6ee07973c49103a8aba669dee3d71079de"},
 ]
 graia-ariadne = [
-    {file = "graia-ariadne-0.6.13.tar.gz", hash = "sha256:fd6bc91eeeb6686b2656471337463163e69258a7d70af8a3f69c9d3fad8ac90d"},
-    {file = "graia_ariadne-0.6.13-py3-none-any.whl", hash = "sha256:96a6007494bee72219dd44ced6a03bd990077a7df442280e072b4e6ac0f57fce"},
+    {file = "graia-ariadne-0.6.15.tar.gz", hash = "sha256:e00743ea522304b5a43a6d501a7c512cadef546ae905d2cba92eab314e346910"},
+    {file = "graia_ariadne-0.6.15-py3-none-any.whl", hash = "sha256:6a95a5e1ea1d16b48c10178711ee02a232120d91dc334d3f4bb775db12c20430"},
 ]
 graia-broadcast = [
     {file = "graia-broadcast-0.16.1.tar.gz", hash = "sha256:40d532672b35d26ae0779e13f50593d5c505d8765c8545ed5bb5648bd3f7c6c2"},
