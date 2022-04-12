@@ -13,9 +13,9 @@ from graia.ariadne.message.chain import MessageChain, Source
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import (
     Twilight,
-    RegexMatch,
     RegexResult,
     FullMatch,
+    WildcardMatch,
 )
 
 from util.sendMessage import autoSendMessage
@@ -77,7 +77,7 @@ async def cd_check(
             Twilight(
                 [
                     FullMatch("千音"),
-                    "head" @ RegexMatch(re_key_word, optional=True).flags(re.DOTALL),
+                    "head" @ WildcardMatch(optional=True).flags(re.DOTALL),
                 ],
             ),
         ],
@@ -93,7 +93,11 @@ async def main(head: RegexResult, event: MessageEvent, Source_msg: Source):
     if head.matched:
         plain = head.result.asDisplay()
         match = re.compile(re_key_word)
-        order = match.findall(plain)[0][1]
+        order = match.findall(plain)
+        if order:
+            order = order[0][1]
+        else:
+            order = None
     else:
         order = None
     source = event.sender

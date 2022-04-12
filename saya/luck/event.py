@@ -8,6 +8,7 @@ event_data = ujson.loads(base_path.joinpath("event.json").read_text(encoding="ut
 
 reduce_event = event_data["reduce"]
 add_event = event_data["add"]
+normal_event = event_data["normal"]
 special_event = event_data["special"]
 
 
@@ -16,6 +17,12 @@ def reduce(gold):
     res = max(gold - change, 1)
     replay = random.choice(reduce_event).format(gold=res).format(change=change)
     return replay, res
+
+
+def normal(gold):
+
+    replay = random.choice(normal_event).format(gold=gold)
+    return replay, gold
 
 
 def add(gold):
@@ -32,7 +39,7 @@ def special(gold):
     return replay, res
 
 
-event_list = [reduce, add, special]
+event_list = [reduce, add, normal]
 
 
 def get_reword(gold):
@@ -63,4 +70,6 @@ def get_reply(gold):
 
 
 def change_event(gold) -> tuple[str, int]:
+    if random.random() < 0.01:
+        return special(gold)
     return random.choice(event_list)(gold)
