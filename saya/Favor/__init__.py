@@ -1,29 +1,36 @@
 import os
+import re
 import time
 
 from typing import DefaultDict, Tuple
 from collections import defaultdict
-from graia.ariadne.app import Ariadne
+from graia.ariadne import get_running
 from graia.saya import Saya, Channel
 from graia.ariadne.model import Member, Friend
 from graia.broadcast.exceptions import ExecutionStop
 from graia.ariadne.event.message import MessageEvent, FriendMessage, GroupMessage
 from graia.ariadne.message.chain import MessageChain, Source
 from graia.saya.builtins.broadcast.schema import ListenerSchema
-from graia.ariadne.message.parser.twilight import Twilight, RegexMatch, RegexResult
+from graia.ariadne.message.parser.twilight import (
+    Twilight,
+    RegexMatch,
+    RegexResult,
+    FullMatch,
+)
 
 from util.sendMessage import autoSendMessage
 from util.control import Permission, Rest
-from .favor import key_word, get_reply
+from .favor import re_key_word, get_reply
 
 func = os.path.dirname(__file__).split("\\")[-1]
 
 
-last_exe = []
-
-
 saya = Saya.current()
 channel = Channel.current()
+channel.name(func)
+
+print(re_key_word)
+last_exe = []
 
 
 last_exec_favor: DefaultDict[str, Tuple[int, float]] = defaultdict(lambda: (1, 0.0))
@@ -42,7 +49,7 @@ async def cd_check(
             sent_alert.remove(eid)
         return
     if eid not in sent_alert:
-        app: Ariadne = Ariadne.running()
+        app = get_running()
         if not silent:
             if isinstance(event.sender, Member):
                 await app.sendGroupMessage(
@@ -66,7 +73,14 @@ async def cd_check(
 @channel.use(
     ListenerSchema(
         listening_events=[FriendMessage, GroupMessage],
-        inline_dispatchers=[Twilight(["head" @ RegexMatch(key_word)])],
+        inline_dispatchers=[
+            Twilight(
+                [
+                    FullMatch("千音"),
+                    "head" @ RegexMatch(re_key_word, optional=True).flags(re.DOTALL),
+                ],
+            ),
+        ],
         decorators=[
             Permission.require(),
             Permission.restricter(func),
@@ -76,10 +90,15 @@ async def cd_check(
 )
 async def main(head: RegexResult, event: MessageEvent, Source_msg: Source):
     await cd_check(event)
-    order = head.result.asDisplay()
+    if head.matched:
+        plain = head.result.asDisplay()
+        match = re.compile(re_key_word)
+        order = match.findall(plain)[0][1]
+    else:
+        order = None
     source = event.sender
-    result = await get_reply(order=order, qq=source.id)
-    if not result:
+    flags, result = await get_reply(order=order, qq=source.id)
+    if not flags:
         return
-    for reply in result[1]:
+    for reply in result:
         return await autoSendMessage(source, reply, Source_msg)

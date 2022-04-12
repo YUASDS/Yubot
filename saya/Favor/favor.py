@@ -11,13 +11,14 @@ func = os.path.dirname(__file__).split("\\")[-1]
 FAVOR_PATH = Path(__file__).parent.joinpath("favor_chat_data.json")
 COUNT_PATH = Path(__file__).parent.joinpath("count.txt")
 favor_data: dict = ujson.loads(FAVOR_PATH.read_text(encoding="utf-8"))
-key_word = "|".join(list(favor_data))
+re_key_word = f'([\\s\\S])*({"|".join(list(favor_data))})([\\s\\S])*'
 
 
 async def get_reply(order: str, qq: int):
+    if order is None:
+        return True, "千音在哦~"
     if order not in favor_data:  # 如果有这条好感度回复
-
-        return None
+        return None, None
     pun = 0
     bon = 0
     with open(file=COUNT_PATH, mode="r", encoding="utf-8") as c:
