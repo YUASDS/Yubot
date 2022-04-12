@@ -56,13 +56,13 @@ def get_reword(gold):
 
 
 def get_reply(gold):
-    if gold < 30:
+    if gold < 8:
         des = "【干瘪】"
-    elif gold < 50:
+    elif gold < 10:
         des = "【有些干瘪】"
-    elif gold < 100:
+    elif gold < 15:
         des = "【包装不错】"
-    elif gold < 200:
+    elif gold < 35:
         des = "【有着精致包装】"
     else:
         des = "【精致包装】"
