@@ -12,7 +12,6 @@ from graia.ariadne.message.parser.twilight import (
     Twilight,
     FullMatch,
     # WildcardMatch,
-    RegexResult,
 )
 
 from util.sendMessage import autoSendMessage
@@ -41,9 +40,7 @@ channel.name(func)
         ],
     )
 )
-async def main(
-    member: Member, anythings: RegexResult, source: Source, event: MessageEvent
-):
+async def main(member: Member, source: Source, event: MessageEvent):
     type = random.choice(data)
     await autoSendMessage(member, f"在千音看来，前辈是一只：\n{type}")
     """"""
