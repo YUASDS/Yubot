@@ -109,12 +109,12 @@ def get_gold_raw(qq: str) -> list:
 def add_luck(qq: str, num: int) -> int:
     Luck.insert(gold=num, qq=qq).execute()
     gold_raw: list = get_gold_raw(qq)
-    if num <= 40:
-        gold_raw.append(-15)
-    elif num < 50:
+    if num <= 10:
+        gold_raw.append(-4)
+    elif num < 15:
         gold_raw.append(0)
     else:
-        gold_raw.append(num // 50 * 10)
+        gold_raw.append(num // 5)
     User.update(gold_raw=gold_raw).where(User.qq == qq).execute()
     return gold_raw[-1]
 

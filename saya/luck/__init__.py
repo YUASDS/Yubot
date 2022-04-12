@@ -25,7 +25,7 @@ from database.luckDb import (
     get_luck_info,
     get_gold_raw,
 )
-
+from .event import get_reply, get_reword, change_event
 
 func = os.path.dirname(__file__).split("\\")[-1]
 saya = Saya.current()
@@ -33,19 +33,6 @@ channel = Channel.current()
 channel.name(func)
 bcc = saya.broadcast
 inc = InterruptControl(bcc)
-
-
-def get_reword(gold):
-    if gold < 0:
-        return "【老旧奖券】"
-    elif gold < 10:
-        return "【普通奖券】"
-    elif gold <= 20:
-        return "【精品奖券】"
-    elif gold <= 40:
-        return "【精致奖券】"
-    else:
-        return "【华丽奖券】"
 
 
 @channel.use(
@@ -120,12 +107,13 @@ async def luck_draw(event: MessageEvent, source: Source):
     sign(luck_id)
     gold = get_luck_info(luck_id).gold
     total = gold + change
+    random_event, total = change_event(total)
     add_gold(qq=qq, num=total)
     replay = get_reply(gold)
     await autoSendMessage(sender, replay, source)
     await autoSendMessage(
         sender,
-        f"打开礼盒，你发现其中有{gold}个乌帕，抽奖券变化：【{change}】,共获得【{total}】个乌帕",
+        f"拿起礼盒，你发现包装上写着其中有{gold}个乌帕，抽奖券变化：【{change}】\n{random_event}",
     )
 
 
@@ -151,17 +139,3 @@ async def draw_list(event: MessageEvent, source: Source):
     for i in change:
         reply += f"{get_reword(i)}:【{i}】\n"
     return await autoSendMessage(sender, reply.strip(), source)
-
-
-def get_reply(gold):
-    if gold < 30:
-        des = "【干瘪】"
-    elif gold < 50:
-        des = "【有些干瘪】"
-    elif gold < 100:
-        des = "【包装不错】"
-    elif gold < 200:
-        des = "【有着精致包装】"
-    else:
-        des = "【精致包装】"
-    return f"你怀揣着激动的心情将抽奖卷放入扭蛋机中，叮咚！\n从扭蛋机中掉落了一个：{des}的乌帕礼盒。"
