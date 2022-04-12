@@ -39,9 +39,12 @@ from .AdminConfig import funcList
 bot_qq = yaml_data["Basic"]["MAH"]["BotQQ"]
 
 
+func = "AdminMsg"
+
+
 saya = Saya.current()
 channel = Channel.current()
-funcList = funcList
+channel.name(func)
 
 
 @channel.use(

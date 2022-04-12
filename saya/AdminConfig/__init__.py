@@ -1,4 +1,5 @@
 import json
+import os
 
 from pathlib import Path
 from graia.saya import Saya, Channel
@@ -22,8 +23,12 @@ from util.control import Permission, Interval
 from util.sendMessage import safeSendGroupMessage
 from config import save_config, yaml_data, group_data, COIN_NAME, change_config
 
+func = os.path.dirname(__file__).split("\\")[-1]
+
+
 saya = Saya.current()
 channel = Channel.current()
+channel.name(func)
 
 data = json.loads(
     Path(__file__)

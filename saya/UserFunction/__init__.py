@@ -18,8 +18,12 @@ from database.db import get_ranking, get_info
 from util.control import Permission, Interval
 from util.sendMessage import safeSendGroupMessage
 
+func = os.path.dirname(__file__).split("\\")[-1]
+
+
 saya = Saya.current()
 channel = Channel.current()
+channel.name(func)
 
 RANK_LIST = None
 FUNC = os.path.dirname(__file__).split("\\")[-1]

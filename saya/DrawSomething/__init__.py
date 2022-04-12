@@ -27,8 +27,12 @@ from util.sendMessage import safeSendGroupMessage
 from config import yaml_data, COIN_NAME
 from database.db import add_answer, reduce_gold, add_gold
 
+func = os.path.dirname(__file__).split("\\")[-1]
+
+
 saya = Saya.current()
 channel = Channel.current()
+channel.name(func)
 bcc = saya.broadcast
 inc = InterruptControl(bcc)
 

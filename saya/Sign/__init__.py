@@ -15,11 +15,14 @@ from database.db import favor, get_info, add_favor, add_gold, is_sign
 from .util import Reward
 from .sign import get_signin_img
 
-func = os.path.dirname(__file__).split("\\")[-1]
 path = os.path.dirname(__file__)
+
+func = os.path.dirname(__file__).split("\\")[-1]
+
 
 saya = Saya.current()
 channel = Channel.current()
+channel.name(func)
 
 
 @channel.use(

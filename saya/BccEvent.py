@@ -19,8 +19,12 @@ from util.text2image import create_image
 from util.web import post
 from util.mail import Sample
 
+func = "BccEvent"
+
+
 saya = Saya.current()
 channel = Channel.current()
+channel.name(func)
 
 headers = {"Content-type": "application/x-www-form-urlencoded"}
 bot_qq = yaml_data["Basic"]["MAH"]["BotQQ"]

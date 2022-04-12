@@ -14,8 +14,12 @@ from config import group_key
 from util.sendMessage import safeSendGroupMessage
 from util.control import Permission, Interval, Rest
 
+func = "GroupSend"
+
+
 saya = Saya.current()
 channel = Channel.current()
+channel.name(func)
 
 
 @channel.use(

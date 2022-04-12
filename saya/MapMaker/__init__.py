@@ -43,8 +43,6 @@ saya = Saya.current()
 channel = Channel.current()
 channel.name(func)
 
-IndexError
-
 
 async def now_map(gid: str):
 

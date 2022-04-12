@@ -23,8 +23,12 @@ from util.sendMessage import safeSendGroupMessage
 from util.control import Permission, Interval
 from database.usertalk import get_user_talk, get_group_talk
 
+func = os.path.dirname(__file__).split("\\")[-1]
+
+
 saya = Saya.current()
 channel = Channel.current()
+channel.name(func)
 
 FUNC = os.path.dirname(__file__).split("\\")[-1]
 BASEPATH = Path(__file__).parent

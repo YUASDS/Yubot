@@ -26,6 +26,7 @@ func = os.path.dirname(__file__).split("\\")[-1]
 
 saya = Saya.current()
 channel = Channel.current()
+channel.name(func)
 
 
 def _词转换(x, y, 淫乱度):

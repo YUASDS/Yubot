@@ -23,6 +23,7 @@ func = os.path.dirname(__file__).split("\\")[-1]
 
 saya = Saya.current()
 channel = Channel.current()
+channel.name(func)
 
 
 @channel.use(

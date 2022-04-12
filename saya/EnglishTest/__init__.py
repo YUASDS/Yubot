@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 from graia.saya import Saya, Channel
 from graia.ariadne.app import Ariadne
@@ -18,8 +19,12 @@ from util.sendMessage import safeSendGroupMessage
 
 from .database.database import random_word
 
+func = os.path.dirname(__file__).split("\\")[-1]
+
+
 saya = Saya.current()
 channel = Channel.current()
+channel.name(func)
 bcc = saya.broadcast
 inc = InterruptControl(bcc)
 

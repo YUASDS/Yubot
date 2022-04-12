@@ -28,8 +28,12 @@ from config import save_config, yaml_data, group_data, group_list, user_list
 
 from .AdminConfig import groupInitData, Agreement
 
+func = "BotEvent"
+
+
 saya = Saya.current()
 channel = Channel.current()
+channel.name(func)
 bcc = saya.broadcast
 inc = InterruptControl(bcc)
 

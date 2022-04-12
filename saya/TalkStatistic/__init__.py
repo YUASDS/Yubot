@@ -1,6 +1,7 @@
 import asyncio
 import aiohttp
 import datetime
+import os
 
 from pathlib import Path
 from loguru import logger
@@ -26,9 +27,12 @@ from database.usertalk import get_message_analysis, add_talk, archive_exists
 
 from .mapping import get_mapping
 
-# silkcoder.set_ffmpeg_path("saya\\TalkStatistic\\ffmpeg.exe")
+func = os.path.dirname(__file__).split("\\")[-1]
+
+
 saya = Saya.current()
 channel = Channel.current()
+channel.name(func)
 data_path = Path("archive")
 
 if not data_path.exists():

@@ -20,10 +20,12 @@ from config import COIN_NAME
 from database.db import reduce_gold
 from .novel_data import get_cont_continuation, load_config, save_config
 
+func = os.path.dirname(__file__).split("\\")[-1]
+
+
 saya = Saya.current()
 channel = Channel.current()
-
-func = os.path.dirname(__file__).split("\\")[-1]
+channel.name(func)
 
 bcc = saya.broadcast
 inc = InterruptControl(bcc)

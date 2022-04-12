@@ -23,11 +23,14 @@ from .dicecho import dicecho
 from .RandomSearch import RandomSearch, RandomLoveSearch
 from .cnmods import cnmods
 
+func = os.path.dirname(__file__).split("\\")[-1]
+
+
 saya = Saya.current()
 channel = Channel.current()
+channel.name(func)
 bcc = saya.broadcast
 inc = InterruptControl(bcc)
-func = os.path.dirname(__file__).split("\\")[-1]
 
 
 @channel.use(
