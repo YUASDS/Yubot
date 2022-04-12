@@ -63,7 +63,7 @@ async def main(event: MessageEvent, number: RegexResult, source: Source):
             source,
         )
     number = int(number.result.asDisplay())
-    if number > 20:
+    if number > 5:
         uid = str(event.sender.id)
         if await reduce_gold(uid, number + 2):
             num = add_luck(uid, number)
@@ -75,7 +75,7 @@ async def main(event: MessageEvent, number: RegexResult, source: Source):
         else:
             await autoSendMessage(sender, f" 你的{COIN_NAME}不足。", source)
     else:
-        await autoSendMessage(sender, "一次性至少放下21乌帕哦~", source)
+        await autoSendMessage(sender, "一次性至少放下6乌帕哦~", source)
 
 
 @channel.use(
