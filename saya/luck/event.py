@@ -1,4 +1,5 @@
 import random
+
 from pathlib import Path
 import ujson
 
@@ -10,12 +11,13 @@ reduce_event = event_data["reduce"]
 add_event = event_data["add"]
 normal_event = event_data["normal"]
 special_event = event_data["special"]
+clear_event = event_data["clear"]
 
 
 def reduce(gold):
     change = random.randint(0, gold // 2)
     res = max(gold - change, 1)
-    replay = random.choice(reduce_event).format(gold=res).format(change=change)
+    replay = random.choice(reduce_event).format(gold=res, change=change)
     return replay, res
 
 
@@ -28,17 +30,24 @@ def normal(gold):
 def add(gold):
     change = random.randint(0, gold // 2)
     res = gold + change
-    replay = random.choice(add_event).format(gold=res).format(change=change)
+    replay = random.choice(add_event).format(gold=res, change=change)
     return replay, res
 
 
 def special(gold):
-    change = random.randint(0, 200)
+    change = random.randint(0, 100)
     res = gold + change
-    replay = random.choice(special_event).format(gold=res).format(change=change)
+    event = random.choice(special_event)
+    replay = event.format(gold=res, change=change)
     return replay, res
 
 
+def clear(gold):
+    replay = random.choice(clear_event)
+    return replay, 0
+
+
+special_list = [special, clear]
 event_list = [reduce, add, normal]
 
 
@@ -71,5 +80,5 @@ def get_reply(gold):
 
 def change_event(gold) -> tuple[str, int]:
     if random.random() < 0.01:
-        return special(gold)
+        return random.choice(special_list)(gold)
     return random.choice(event_list)(gold)
