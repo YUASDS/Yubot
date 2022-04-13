@@ -15,7 +15,7 @@ clear_event = event_data["clear"]
 
 
 def reduce(gold):
-    change = random.randint(0, gold // 2)
+    change = random.randint(1, gold // 2)
     res = max(gold - change, 1)
     replay = random.choice(reduce_event).format(gold=res, change=change)
     return replay, res
@@ -28,14 +28,14 @@ def normal(gold):
 
 
 def add(gold):
-    change = random.randint(0, gold // 2)
+    change = random.randint(1, gold // 2)
     res = gold + change
     replay = random.choice(add_event).format(gold=res, change=change)
     return replay, res
 
 
 def special(gold):
-    change = random.randint(0, 100)
+    change = random.randint(1, 100)
     res = gold + change
     event = random.choice(special_event)
     replay = event.format(gold=res, change=change)
