@@ -173,8 +173,8 @@ async def accept(app: Ariadne, invite: BotInvitedJoinGroupRequestEvent):
                 Image(data_bytes=await create_image(Agreement["Agreement"]))
             ),
         )
-        await app.sendGroupMessage(
-            invite.groupId,
+        await app.sendFriendMessage(
+            invite.supplicant,
             MessageChain.create(
                 "欢迎添加千音，请前往\nhttps://yuasds.gitbook.io/yin_book\n查看使用手册"
             ),
@@ -287,38 +287,16 @@ async def get_BotJoinGroup(app: Ariadne, joingroup: BotJoinGroupEvent):
                 MessageChain.create("该群未在白名单中，正在退出"),
             )
             return await app.quitGroup(joingroup.group.id)
-
-        # member_count = len(await app.getMemberList(joingroup.group))
-        # if member_count < 15:
-        #     if joingroup.group.id not in group_list["white"]:
-        #         await safeSendGroupMessage(
-        #             joingroup.group.id,
-        #             MessageChain.create(
-        #                 f"当前群人数过少 ({member_count})，暂不加入，如有需要请联系 {yaml_data['Basic']['Permission']['Master']} 申请白名单"
-        #             ),
-        #         )
-        #         await app.sendFriendMessage(
-        #             yaml_data["Basic"]["Permission"]["Master"],
-        #             MessageChain.create(f"该群人数过少 ({member_count})，正在退出"),
-        #         )
-        #         return await app.quitGroup(joingroup.group.id)
-
         if joingroup.group.id not in group_data:
             group_data[str(joingroup.group.id)] = groupInitData
             logger.info("已为该群初始化配置文件")
             save_config()
-            # await safeSendGroupMessage(
-            #     joingroup.group.id,
-            #     MessageChain.create(
-            #         f"我是 {yaml_data['Basic']['Permission']['MasterName']} "
-            #         f"的千音 {yaml_data['Basic']['BotName']}，"
-            #         f"如果有需要可以联系主人QQ”{yaml_data['Basic']['Permission']['Master']}“"
-            #         f"\n{yaml_data['Basic']['BotName']}被群禁言后会自动退出该群。"
-            #         "\n发送 <菜单> 可以查看功能列表"
-            #         "\n拥有管理员以上权限可以开关功能"
-            #         f"\n注：@{yaml_data['Basic']['BotName']}不会触发任何功能"
-            #     ),
-            # )
+            await safeSendGroupMessage(
+                joingroup.group.id,
+                MessageChain.create(
+                    "欢迎添加千音，关于详细功能请前往\nhttps://yuasds.gitbook.io/yin_book\n查看使用手册"
+                ),
+            )
             await safeSendGroupMessage(
                 joingroup.group.id,
                 MessageChain.create(
