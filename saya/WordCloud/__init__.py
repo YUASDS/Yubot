@@ -44,7 +44,7 @@ RUNNING_LIST = []
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight(["head" @ RegexMatch(r"^查看(个人|本群)词云")])],
+        inline_dispatchers=[Twilight(["head" @ RegexMatch(r"^/查看(个人|本群)词云")])],
         decorators=[
             Permission.restricter(FUNC),
             Permission.require(),
@@ -55,7 +55,7 @@ RUNNING_LIST = []
 async def wordcloud(group: Group, member: Member, message: MessageChain):
 
     global RUNNING, RUNNING_LIST
-    pattern = re.compile(r"^查看(个人|本群)词云")
+    pattern = re.compile(r"^/查看(个人|本群)词云")
     if match := pattern.match(message.asDisplay()):
         if RUNNING < 5:
             RUNNING += 1

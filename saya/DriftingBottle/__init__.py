@@ -68,6 +68,7 @@ func = os.path.dirname(__file__).split("\\")[-1]
         inline_dispatchers=[
             Twilight(
                 [
+                    FullMatch("/"),
                     "prefix" @ RegexMatch(r"^(扔|丢|写)(漂流瓶|瓶子)"),
                     "enter" @ FullMatch("\n", optional=True),
                     "arg_pic" @ ArgumentMatch("-P", action="store_true", optional=True),
@@ -197,7 +198,14 @@ async def throw_bottle_handler(
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight(["head" @ RegexMatch(r"^(捡|打?捞)(漂流瓶|瓶子)$")])],
+        inline_dispatchers=[
+            Twilight(
+                [
+                    FullMatch("/", optional=True),
+                    "head" @ RegexMatch(r"^(捡|打?捞)(漂流瓶|瓶子)$"),
+                ]
+            )
+        ],
         decorators=[
             Permission.restricter(func),
             Permission.require(),
@@ -280,7 +288,7 @@ async def drifting_bottle_handler(group: Group, member: Member, bottleid: RegexR
     else:
         count = count_bottle()
         msg = f"目前有 {count} 个漂流瓶在漂流" if count > 0 else "目前没有漂流瓶在漂流"
-        msg += "\n漂流瓶可以使用“捞漂流瓶”命令捞到，也可以使用“丢漂流瓶”命令丢出”\n可以使用“漂流瓶评分”为漂流瓶添加评分"
+        msg += "\n漂流瓶可以使用“捞漂流瓶”命令捞到，也可以使用“/丢漂流瓶”命令丢出”\n可以使用“/漂流瓶评分”为漂流瓶添加评分"
 
     await safeSendGroupMessage(group, MessageChain.create(msg))
 
@@ -321,7 +329,7 @@ async def delete_bottle_handler(group: Group, anything: RegexResult):
             Twilight(
                 [
                     "at" @ ElementMatch(At, optional=True),
-                    "head" @ FullMatch("漂流瓶评分"),
+                    FullMatch("/漂流瓶评分"),
                     "anythings" @ WildcardMatch(optional=True),
                 ]
             )

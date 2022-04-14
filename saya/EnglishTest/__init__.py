@@ -58,7 +58,7 @@ RUNNING = {}
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight(["head" @ FullMatch("背单词")])],
+        inline_dispatchers=[Twilight(["head" @ FullMatch("/背单词")])],
         decorators=[Permission.require()],
     )
 )

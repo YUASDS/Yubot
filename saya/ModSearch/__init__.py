@@ -36,9 +36,7 @@ inc = InterruptControl(bcc)
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[
-            Twilight(["heads" @ FullMatch("模组搜索"), "mod" @ WildcardMatch()])
-        ],
+        inline_dispatchers=[Twilight([FullMatch("/模组搜索"), "mod" @ WildcardMatch()])],
         decorators=[
             Permission.restricter(func),
             Permission.require(),
@@ -80,9 +78,7 @@ async def main(group: Group, member: Member, mod: RegexResult):
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[
-            Twilight(["heads" @ FullMatch("魔都搜索"), "mod" @ WildcardMatch()])
-        ],
+        inline_dispatchers=[Twilight([FullMatch("/魔都搜索"), "mod" @ WildcardMatch()])],
         decorators=[
             Permission.restricter(func),
             Permission.require(),
@@ -124,7 +120,7 @@ async def CnmodsSearch(group: Group, member: Member, mod: RegexResult):
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight(["heads" @ FullMatch("随机模组")])],
+        inline_dispatchers=[Twilight([FullMatch("/随机模组")])],
         decorators=[
             Permission.restricter(func),
             Permission.require(),
@@ -151,7 +147,7 @@ async def GroupRandomSearch(group: Group, member: Member):
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight(["heads" @ FullMatch("随机贴贴模组")])],
+        inline_dispatchers=[Twilight([FullMatch("/随机贴贴模组")])],
         decorators=[
             Permission.restricter(func),
             Permission.require(),

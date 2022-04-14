@@ -2,8 +2,7 @@ import os
 
 from loguru import logger
 from graia.saya import Saya, Channel
-from graia.ariadne.model import Group, Member
-from graia.ariadne.event.message import GroupMessage
+from graia.ariadne.event.message import GroupMessage, FriendMessage, MessageEvent
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.message.element import Image, Plain
 from graia.scheduler.timers import every_custom_minutes
@@ -16,7 +15,7 @@ from config import COIN_NAME
 from util.text2image import create_image
 from database.db import get_ranking, get_info
 from util.control import Permission, Interval
-from util.sendMessage import safeSendGroupMessage
+from util.sendMessage import safeSendGroupMessage, autoSendMessage
 
 func = os.path.dirname(__file__).split("\\")[-1]
 
@@ -31,8 +30,8 @@ FUNC = os.path.dirname(__file__).split("\\")[-1]
 
 @channel.use(
     ListenerSchema(
-        listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight(["head" @ FullMatch("查看排行榜")])],
+        listening_events=[GroupMessage, FriendMessage],
+        inline_dispatchers=[Twilight(["head" @ FullMatch("/查看排行榜")])],
         decorators=[
             Permission.restricter(FUNC),
             Permission.require(),
@@ -40,9 +39,9 @@ FUNC = os.path.dirname(__file__).split("\\")[-1]
         ],
     )
 )
-async def main(group: Group):
-    await safeSendGroupMessage(
-        group, MessageChain.create([Image(data_bytes=RANK_LIST)])
+async def main(event: MessageEvent):
+    await autoSendMessage(
+        event.sender, MessageChain.create([Image(data_bytes=RANK_LIST)])
     )
 
 
@@ -65,16 +64,16 @@ async def bot_Launched():
 
 @channel.use(
     ListenerSchema(
-        listening_events=[GroupMessage],
+        listening_events=[GroupMessage, FriendMessage],
         inline_dispatchers=[Twilight(["head" @ FullMatch("/查看个人信息")])],
         decorators=[Permission.require(), Interval.require()],
     )
 )
-async def get_user_info(group: Group, member: Member):
-    user_info = await get_info(str(member.id))
+async def get_user_info(event: MessageEvent):
+    user_info = await get_info(str(event.sender.id))
     # user_favor=favor(favors)
     await safeSendGroupMessage(
-        group,
+        event.sender,
         MessageChain.create(
             [
                 Plain(f"UID：{user_info.id}"),

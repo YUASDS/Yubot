@@ -73,7 +73,7 @@ Agreement = {
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight([FullMatch("功能"), "func" @ WildcardMatch()])],
+        inline_dispatchers=[Twilight([FullMatch("/功能"), "func" @ WildcardMatch()])],
         decorators=[Permission.require(), Interval.require(5)],
     )
 )
@@ -123,9 +123,7 @@ async def funchelp(group: Group, func: RegexResult):
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[
-            Twilight(["head" @ RegexMatch(r"^[。\./]?help$|^帮助$|^菜单$")])
-        ],
+        inline_dispatchers=[Twilight(["head" @ RegexMatch(r"/help|/帮助")])],
         decorators=[Permission.require(), Interval.require()],
     )
 )
@@ -152,8 +150,8 @@ async def help(group: Group):
         msg += f"\n{si}  {statu}  {funcname}"
     msg += str(
         "\n========================================================"
-        + "\n详细查看功能使用方法请发送 功能 <id>，例如：功能 1"
-        + "\n管理员可发送 开启功能/关闭功能 <功能id> "
+        + "\n详细查看功能使用方法请发送 [/功能 <id>]，例如：/功能 1"
+        + "\n管理员可发送 [/开启功能][/关闭功能] <功能id> "
         + "\n所有功能均无需@"
         + f"\n更多功能待开发，如有特殊需求可以向 {yaml_data['Basic']['Permission']['Master']} 询问"
     )
@@ -167,6 +165,7 @@ async def help(group: Group):
         inline_dispatchers=[
             Twilight(
                 [
+                    FullMatch("/"),
                     "head" @ FullMatch("开启功能"),
                     "all"
                     @ ArgumentMatch(
@@ -241,6 +240,7 @@ async def on_func(group: Group, func: RegexResult, all: ArgResult):
         inline_dispatchers=[
             Twilight(
                 [
+                    FullMatch("/"),
                     "head" @ FullMatch("关闭功能"),
                     "all"
                     @ ArgumentMatch(
@@ -313,6 +313,7 @@ async def off_func(group: Group, func: RegexResult, all: ArgResult):
         inline_dispatchers=[
             Twilight(
                 [
+                    FullMatch("/"),
                     FullMatch("群功能"),
                     "reg1" @ RegexMatch("修改|查看|关闭|开启", optional=True),
                     "reg2"

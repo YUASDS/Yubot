@@ -1,4 +1,5 @@
 import os
+import re
 
 from graia.saya import Saya, Channel
 from graia.ariadne.message.chain import MessageChain
@@ -39,10 +40,10 @@ config = load_config(config_path)
 
 sv_help = """
 基于彩云小梦的小说续写功能
-[续写 标题(可选)|续写内容] 人工智障续写小说
-[默认续写迭代 (迭代次数)] 修改本群默认续写迭代次数，默认为3
-[默认续写模型 (模型名)] 修改本群默认续写人工智障模型，默认为小梦0号
-[设置续写apikey] 设置本群apikey，具体指南请发送该命令查看
+[/续写 标题(可选)|续写内容] 彩云小梦续写小说
+[/默认续写迭代 (迭代次数)] 修改本群默认续写迭代次数，默认为3
+[/默认续写模型 (模型名)] 修改本群默认续写模型，默认为小梦0号
+[/设置续写apikey] 设置本群apikey，具体指南请发送该命令查看
 """.strip()
 
 model_list = {
@@ -61,7 +62,12 @@ templete = {"iter": 3, "model": "小梦0号", "token": ""}
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[
-            Twilight(["heads" @ FullMatch("续写"), "text" @ WildcardMatch()])
+            Twilight(
+                [
+                    FullMatch("/续写"),
+                    "text" @ WildcardMatch().flags(re.DOTALL),
+                ]
+            )
         ],
         decorators=[
             Permission.restricter(func),
@@ -128,7 +134,7 @@ async def main(group: Group, member: Member, text: RegexResult):
     ListenerSchema(
         listening_events=[GroupMessage],
         inline_dispatchers=[
-            Twilight(["heads" @ FullMatch("设置续写apikey"), "text" @ WildcardMatch()])
+            Twilight([FullMatch("/设置续写apikey"), "text" @ WildcardMatch()])
         ],
         decorators=[
             Permission.restricter(func),
@@ -168,7 +174,7 @@ async def APIKEY(group: Group, member: Member, text: RegexResult):
             MessageChain.create(
                 [
                     At(member.id),
-                    "要设置apikey请在此命令后加上key！\n\napikey获取教程：\n1、前往 http://if.caiyunai.com/dream 注册彩云小梦用户；\n2、注册完成后，在 chrome 浏览器地址栏输入(或者按下F12在控制台输入) javascript:alert(localStorage.cy_dream_user)，（前缀javascript需单独复制），弹出窗口中的uid即为apikey",
+                    "要设置apikey请在此命令后加上key！\n\napikey获取教程：\n1、前往 http://if.caiyunai.com/dream 注册彩云小梦用户；\n2、注册完成后，在 chrome 浏览器地址栏输入(或者按下F12在控制台输入) javascript:alert(localStorage.cy_dream_user)，（前缀javascript需单独复制），弹出窗口中的uid即为apikey\n\n或查看https://yuasds.gitbook.io/yin_book/functions/graia/xu-xie",
                 ]
             ),
         )
@@ -177,9 +183,7 @@ async def APIKEY(group: Group, member: Member, text: RegexResult):
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[
-            Twilight(["heads" @ FullMatch("默认续写迭代"), "text" @ WildcardMatch()])
-        ],
+        inline_dispatchers=[Twilight([FullMatch("/默认续写迭代"), "text" @ WildcardMatch()])],
         decorators=[
             Permission.restricter(func),
             Permission.require(Permission.GROUP_ADMIN),
@@ -229,9 +233,7 @@ async def novel_iteration(group: Group, member: Member, text: RegexResult):
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[
-            Twilight(["heads" @ FullMatch("默认续写模型"), "text" @ WildcardMatch()])
-        ],
+        inline_dispatchers=[Twilight([FullMatch("/默认续写模型"), "text" @ WildcardMatch()])],
         decorators=[
             Permission.restricter(func),
             Permission.require(Permission.GROUP_ADMIN),

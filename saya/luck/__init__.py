@@ -80,7 +80,7 @@ async def main(event: MessageEvent, number: RegexResult, source: Source):
 
 @channel.use(
     ListenerSchema(
-        listening_events=[GroupMessage],
+        listening_events=[GroupMessage, FriendMessage],
         inline_dispatchers=[Twilight(["heads" @ FullMatch("/抽乌帕")])],
         decorators=[
             Permission.restricter(func),
@@ -98,9 +98,10 @@ async def luck_draw(event: MessageEvent, source: Source):
         await autoSendMessage(sender, "你还没有抽奖卷哦~\n请先放下乌帕获取乌帕抽奖卷哦~", source)
         return await autoSendMessage(
             sender,
-            "——————乌帕抽奖————\n通过放下一个乌帕然后捡起一个乌帕的简单"
+            "————乌帕抽奖————\n通过放下一个乌帕然后捡起一个乌帕的简单"
             "抽奖~\n指令：\n/放乌帕+数字（如：放乌帕40）（放乌帕会收取2手续费哦~）"
-            "\n/抽乌帕",
+            "\n/抽乌帕\n"
+            "/奖券列表",
         )
 
     luck_id = get_luck_id()
@@ -119,7 +120,7 @@ async def luck_draw(event: MessageEvent, source: Source):
 
 @channel.use(
     ListenerSchema(
-        listening_events=[GroupMessage],
+        listening_events=[GroupMessage, FriendMessage],
         inline_dispatchers=[Twilight(["heads" @ FullMatch("/奖券列表")])],
         decorators=[
             Permission.restricter(func),

@@ -6,7 +6,7 @@ from graia.ariadne.message.element import Member, Image, Friend
 from graia.ariadne.event.message import GroupMessage, FriendMessage, MessageEvent
 from graia.ariadne.message.chain import MessageChain
 from graia.saya.builtins.broadcast.schema import ListenerSchema
-from graia.ariadne.message.parser.twilight import Twilight, FullMatch
+from graia.ariadne.message.parser.twilight import Twilight, RegexMatch
 
 from util.sendMessage import autoSendMessage
 from util.text2image import font_file
@@ -28,7 +28,7 @@ channel.name(func)
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage, FriendMessage],
-        inline_dispatchers=[Twilight(["head" @ FullMatch("签到")])],
+        inline_dispatchers=[Twilight(["head" @ RegexMatch("签到|/签到")])],
         decorators=[
             Permission.require(),
             Permission.restricter(func),

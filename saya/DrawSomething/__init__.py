@@ -46,7 +46,7 @@ GROUP_GAME_PROCESS = {}
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight(["head" @ FullMatch("你画我猜")])],
+        inline_dispatchers=[Twilight([FullMatch("/你画我猜")])],
         decorators=[
             Permission.restricter(func),
             Permission.require(),
@@ -174,7 +174,9 @@ async def main(app: Ariadne, group: Group, member: Member, source: Source):
         GROUP_RUNING_LIST.append(group.id)
         await safeSendGroupMessage(
             group,
-            MessageChain.create([Plain(f"是否确认在本群开启一场你画我猜？这将消耗你 4 个{COIN_NAME}")]),
+            MessageChain.create(
+                [Plain(f"是否确认在本群开启一场你画我猜？这将消耗你 4 个{COIN_NAME}\n请选择  是   或  否  ")]
+            ),
             quote=source.id,
         )
         try:

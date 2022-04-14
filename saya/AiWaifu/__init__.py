@@ -3,7 +3,7 @@ import random
 import asyncio
 from io import BytesIO
 
-import httpx
+import aiohttp
 from graia.saya import Saya, Channel
 from graia.ariadne.model import Group, Member
 from graia.ariadne.message.element import Image
@@ -32,19 +32,26 @@ http_proxy = {"http://127.0.0.1:33210"}
 BROWER = 0
 
 
-async def get_pic(pic_id) -> bytes:
-
+async def get_pic(pic_id: str):
     url = f"https://www.thiswaifudoesnotexist.net/example-{pic_id}.jpg"
-    async with httpx.AsyncClient(verify=False) as client:
-        resp = await client.get(url=url)
-    byt = BytesIO(resp.content)
-    return byt.getvalue()
+    async with aiohttp.ClientSession() as session:
+        resp = await session.get(url=url)
+        res = await resp.content.read()
+
+    return BytesIO(res).getvalue()
 
 
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight(["head" @ RegexMatch("Waifu|头像生成|获取头像|随机头像")])],
+        inline_dispatchers=[
+            Twilight(
+                [
+                    RegexMatch("/"),
+                    "head" @ RegexMatch("Waifu|头像生成|获取头像|随机头像"),
+                ]
+            )
+        ],
         decorators=[
             Permission.require(),
             Permission.restricter(func),
@@ -67,6 +74,7 @@ async def main(group: Group):
         inline_dispatchers=[
             Twilight(
                 [
+                    RegexMatch("/"),
                     "head" @ RegexMatch("WaifuLab|Lab头像生成|Lab获取头像|Lab头像"),
                     "water" @ RegexMatch("无水印", optional=True),
                 ]
@@ -82,7 +90,7 @@ async def main(group: Group):
 )
 async def WaifuLab(group: Group, member: Member, water: RegexResult):
     global BROWER
-    if BROWER > 2:
+    if BROWER > 5:
         return await safeSendGroupMessage(group, MessageChain.create("当前进程过多，等一会再来哦~"))
     else:
         BROWER += 1
@@ -90,6 +98,10 @@ async def WaifuLab(group: Group, member: Member, water: RegexResult):
         page = waifu(water_mark=False)
     else:
         page = waifu()
+    await safeSendGroupMessage(
+        group,
+        "开始获取头像了哦~\n请耐心等待~",
+    )
     stat = await page.gey_browser()
     if not stat:
         BROWER -= 1
@@ -97,7 +109,8 @@ async def WaifuLab(group: Group, member: Member, water: RegexResult):
     pic = await page.first_shot()
     pic = pic.getvalue()
     await safeSendGroupMessage(
-        group, MessageChain.create("连接成功，请选择下一步哦~", Image(data_bytes=pic))
+        group,
+        MessageChain.create("连接成功，请选择下一步哦~\n选择[序号]\n继续\n返回\n退出", Image(data_bytes=pic)),
     )
     func_dict = {
         "选择": page.other_shot,
@@ -118,6 +131,7 @@ async def WaifuLab(group: Group, member: Member, water: RegexResult):
         ],
     )
     async def get_waifu(waiter_member: Member, head: RegexResult, choose: RegexResult):
+        tar = 0
         if member.id == waiter_member.id:
             head = head.result.asDisplay()
             if choose.matched:
@@ -128,28 +142,34 @@ async def WaifuLab(group: Group, member: Member, water: RegexResult):
                 if choose == 0:
                     await safeSendGroupMessage(group, "没有0这个选项哦~")
                     return
-                img = func_dict[head]
+                tar = choose
+            await safeSendGroupMessage(
+                group,
+                "操作成功~请静待结果~",
+            )
+            img = func_dict[head]
+            if tar != 0:
                 img = await img(choose)
-                if not img:
-                    return False  # 当返回为空时，选项为退出
-                elif isinstance(img, tuple):
-                    await safeSendGroupMessage(
-                        group,
-                        MessageChain.create(
-                            "获取成功~",
-                            Image(data_bytes=img[0].getvalue()),
-                            Image(data_bytes=img[1].getvalue()),
-                        ),
-                    )
-                    return True
-                else:
-                    await safeSendGroupMessage(
-                        group,
-                        MessageChain.create(
-                            "头像获取成功~", Image(data_bytes=img.getvalue())
-                        ),
-                    )
-                    return False
+            else:
+                img = await img()
+            if not img:
+                return False  # 当返回为空时，选项为退出
+            elif isinstance(img, tuple):
+                await safeSendGroupMessage(
+                    group,
+                    MessageChain.create(
+                        "获取成功~",
+                        Image(data_bytes=img[0].getvalue()),
+                        Image(data_bytes=img[1].getvalue()),
+                    ),
+                )
+                return True
+            else:
+                await safeSendGroupMessage(
+                    group,
+                    MessageChain.create("头像获取成功~", Image(data_bytes=img.getvalue())),
+                )
+                return False
         return
 
     sign = True

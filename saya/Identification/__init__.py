@@ -31,7 +31,7 @@ channel.name(func)
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage, FriendMessage],
-        inline_dispatchers=[Twilight(["head" @ FullMatch("攻受鉴定")])],
+        inline_dispatchers=[Twilight(["head" @ FullMatch("/攻受鉴定")])],
         decorators=[
             Permission.require(),
             Permission.restricter(func),
