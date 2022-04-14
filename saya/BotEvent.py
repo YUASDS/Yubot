@@ -108,6 +108,7 @@ async def get_BotNewFriend(app: Ariadne, events: NewFriendRequestEvent):
     if sourceGroup:
         groupname = await app.getGroup(sourceGroup)
         groupname = groupname.name if groupname else "未知"
+    await events.accept()
     if yaml_data["Basic"]["Event"]["NewFriend"]:
         qq = yaml_data["Basic"]["Permission"]["Master"]
         await app.sendFriendMessage(
@@ -125,7 +126,10 @@ async def get_BotNewFriend(app: Ariadne, events: NewFriendRequestEvent):
                 ]
             ),
         )
-    await events.accept()
+    await app.sendFriendMessage(
+        events.supplicant,
+        MessageChain("欢迎添加千音，请前往\nhttps://yuasds.gitbook.io/yin_book\n查看使用手册"),
+    )
 
 
 @channel.use(ListenerSchema(listening_events=[BotInvitedJoinGroupRequestEvent]))
@@ -162,13 +166,20 @@ async def accept(app: Ariadne, invite: BotInvitedJoinGroupRequestEvent):
         )
         await invite.accept("")
     else:
+        await invite.accept()
         await app.sendFriendMessage(
             invite.supplicant,
             MessageChain.create(
                 Image(data_bytes=await create_image(Agreement["Agreement"]))
             ),
         )
-        await invite.accept()
+        await app.sendGroupMessage(
+            invite.groupId,
+            MessageChain.create(
+                "欢迎添加千音，请前往\nhttps://yuasds.gitbook.io/yin_book\n查看使用手册"
+            ),
+        )
+
         # await app.sendFriendMessage(
         #     yaml_data["Basic"]["Permission"]["Master"],
         #     MessageChain.create(
