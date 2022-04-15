@@ -69,7 +69,7 @@ func = os.path.dirname(__file__).split("\\")[-1]
             Twilight(
                 [
                     FullMatch("/"),
-                    "prefix" @ RegexMatch(r"^(扔|丢|写)(漂流瓶|瓶子)"),
+                    "prefix" @ RegexMatch(r"(扔|丢|写)(漂流瓶|瓶子)"),
                     "enter" @ FullMatch("\n", optional=True),
                     "arg_pic" @ ArgumentMatch("-P", action="store_true", optional=True),
                     "anythings1" @ WildcardMatch(optional=True),
@@ -202,7 +202,7 @@ async def throw_bottle_handler(
             Twilight(
                 [
                     FullMatch("/", optional=True),
-                    "head" @ RegexMatch(r"^(捡|打?捞)(漂流瓶|瓶子)$"),
+                    "head" @ RegexMatch(r"(捡|打?捞)(漂流瓶|瓶子)$"),
                 ]
             )
         ],
@@ -254,7 +254,7 @@ async def clear_bottle_handler(group: Group):
         listening_events=[GroupMessage],
         inline_dispatchers=[
             Twilight(
-                ["head" @ FullMatch("查漂流瓶"), "bottleid" @ WildcardMatch(optional=True)]
+                ["head" @ FullMatch("/查漂流瓶"), "bottleid" @ WildcardMatch(optional=True)]
             )
         ],
         decorators=[
