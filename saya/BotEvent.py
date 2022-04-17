@@ -1,3 +1,4 @@
+import asyncio
 import time
 
 from loguru import logger
@@ -126,6 +127,7 @@ async def get_BotNewFriend(app: Ariadne, events: NewFriendRequestEvent):
                 ]
             ),
         )
+    await asyncio.sleep(3)
     await app.sendFriendMessage(
         events.supplicant,
         MessageChain("欢迎添加千音，请前往\nhttps://yuasds.gitbook.io/yin_book\n查看使用手册"),
