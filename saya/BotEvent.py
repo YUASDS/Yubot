@@ -1,4 +1,5 @@
 import asyncio
+import contextlib
 import time
 
 from loguru import logger
@@ -139,7 +140,7 @@ async def accept(app: Ariadne, invite: BotInvitedJoinGroupRequestEvent):
     """
     被邀请入群
     """
-    if invite.groupId in group_list["black"]:
+    if invite.sourceGroup in group_list["black"]:
         await app.sendFriendMessage(
             yaml_data["Basic"]["Permission"]["Master"],
             MessageChain.create(
@@ -312,14 +313,10 @@ async def get_BotKickGroup(app: Ariadne, kickgroup: BotLeaveEventKick):
     """
     被踢出群
     """
-    try:
+    with contextlib.suppress(Exception):
         group_list["white"].remove(kickgroup.group.id)
-    except Exception:
-        pass
-    try:
+    with contextlib.suppress(Exception):
         group_list["black"].append(kickgroup.group.id)
-    except Exception:
-        pass
     save_config()
 
     if yaml_data["Basic"]["Event"]["KickGroup"]:
@@ -340,10 +337,8 @@ async def get_BotLeaveEventActive(app: Ariadne, events: BotLeaveEventActive):
     """
     主动退群
     """
-    try:
+    with contextlib.suppress(Exception):
         group_list["white"].remove(events.group.id)
-    except Exception:
-        pass
     save_config()
 
     if yaml_data["Basic"]["Event"]["LeaveGroup"]:
@@ -386,18 +381,12 @@ async def get_BotMuteGroup(app: Ariadne, group: Group, mute: BotMuteEvent):
     """
     被禁言
     """
-    try:
+    with contextlib.suppress(Exception):
         group_list["white"].remove(group.id)
-    except Exception:
-        pass
-    try:
+    with contextlib.suppress(Exception):
         group_list["black"].append(group.id)
-    except Exception:
-        pass
-    try:
+    with contextlib.suppress(Exception):
         user_list["black"].append(mute.operator.id)
-    except Exception:
-        pass
     save_config()
 
     if yaml_data["Basic"]["Event"]["Mute"]:

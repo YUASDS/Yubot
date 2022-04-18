@@ -57,29 +57,29 @@ def init_user(qq: str):
 
 
 def Decorator(func):
-    def init(*args, **kwargs):
+    async def init(*args, **kwargs):
         try:
-            return func(*args, **kwargs)
+            return await func(*args, **kwargs)
         except DoesNotExist:
             if args:
                 init_user(args[0])
             if kwargs:
                 init_user(kwargs["qq"])
-            return func(*args, **kwargs)
+            return await func(*args, **kwargs)
 
     return init
 
 
 def Updata_Decorator(func):
-    def init(*args, **kwargs):
+    async def init(*args, **kwargs):
         try:
-            if s := func(*args, **kwargs):
+            if s := await func(*args, **kwargs):
                 return s
             if args:
                 init_user(args[0])
             if kwargs:
                 init_user(kwargs["qq"])
-            return func(*args, **kwargs)
+            return await func(*args, **kwargs)
         except ValueError:
             return 0
 
@@ -124,9 +124,9 @@ async def add_favor(qq: str, num: int, force: bool = False):
     if not force:
         if today >= 5 or user_favor >= 62:
             return
-        if today + num > 5:  # 当天获得好感度超过5
-            total = user_info + 5 - today
-            today = 6
+        if today + num > 5:  # 本次好感度超过了每日上限
+            total = 5 - today + user_favor
+            today = 5
         else:
             today = today + num
         total = min(total, 62)
