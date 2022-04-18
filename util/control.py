@@ -57,7 +57,8 @@ class Rest:
         global SLEEP
         SLEEP = set
 
-    def rest_control(zzzz: bool = True):
+    @classmethod
+    def rest_control(cls, zzzz: bool = True):
         async def sleep(event: MessageEvent):
             if (
                 SLEEP

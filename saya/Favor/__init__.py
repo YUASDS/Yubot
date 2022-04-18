@@ -5,7 +5,7 @@ from typing import DefaultDict, Tuple
 from collections import defaultdict
 from graia.saya import Saya, Channel
 from graia.ariadne.event.message import MessageEvent, FriendMessage, GroupMessage
-from graia.ariadne.message.chain import MessageChain, Source
+from graia.ariadne.message.chain import Source
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import (
     Twilight,
@@ -54,10 +54,7 @@ async def main(head: RegexResult, event: MessageEvent, Source_msg: Source):
         plain = head.result.asDisplay()
         match = re.compile(re_key_word)
         order = match.findall(plain)
-        if order:
-            order = order[0][1]
-        else:
-            order = None
+        order = order[0][1] if order else None
     else:
         order = None
     source = event.sender
