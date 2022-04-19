@@ -147,21 +147,21 @@ async def accept(app: Ariadne, invite: BotInvitedJoinGroupRequestEvent):
                 [
                     Plain("收到邀请入群事件"),
                     Plain(f"\n邀请者：{invite.supplicant} | {invite.nickname}"),
-                    Plain(f"\n群号：{invite.groupId}"),
+                    Plain(f"\n群号：{invite.sourceGroup}"),
                     Plain(f"\n群名：{invite.groupName}"),
                     Plain("\n该群为黑名单群，已拒绝加入"),
                 ]
             ),
         )
         await invite.reject("该群已被拉黑")
-    elif invite.groupId in group_list["white"]:
+    elif invite.sourceGroup in group_list["white"]:
         await app.sendFriendMessage(
             yaml_data["Basic"]["Permission"]["Master"],
             MessageChain.create(
                 [
                     Plain("收到邀请入群事件"),
                     Plain(f"\n邀请者：{invite.supplicant} | {invite.nickname}"),
-                    Plain(f"\n群号：{invite.groupId}"),
+                    Plain(f"\n群号：{invite.sourceGroup}"),
                     Plain(f"\n群名：{invite.groupName}"),
                     Plain("\n该群为白名单群，已同意加入"),
                 ]
