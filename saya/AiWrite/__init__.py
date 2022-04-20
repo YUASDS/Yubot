@@ -174,7 +174,13 @@ async def APIKEY(group: Group, member: Member, text: RegexResult):
             MessageChain.create(
                 [
                     At(member.id),
-                    "要设置apikey请在此命令后加上key！\n\napikey获取教程：\n1、前往 http://if.caiyunai.com/dream 注册彩云小梦用户；\n2、注册完成后，在 chrome 浏览器地址栏输入(或者按下F12在控制台输入) javascript:alert(localStorage.cy_dream_user)，（前缀javascript需单独复制），弹出窗口中的uid即为apikey\n\n或查看https://yuasds.gitbook.io/yin_book/functions/graia/xu-xie",
+                    "要设置apikey请在此命令后加上key！\n\napikey获取教程：\n"
+                    "1、前往 http://if.caiyunai.com/dream "
+                    "注册彩云小梦用户；\n"
+                    "2、注册完成后，在 chrome 浏览器地址栏输入(或者按下F12在控制台输入) "
+                    "javascript:alert(localStorage.cy_dream_user)，（前缀javascript需单独复制），"
+                    "弹出窗口中的uid即为apikey\n\n"
+                    "或查看https://yuasds.gitbook.io/yin_book/functions/graia/xu-xie",
                 ]
             ),
         )
