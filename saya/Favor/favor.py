@@ -16,8 +16,10 @@ re_key_word = f'([\\s\\S])*({"|".join(list(favor_data))})([\\s\\S])*'
 
 async def get_reply(order: str, qq: int):
     if order is None:
-        return True, ["千音在哦~"]
-    if order not in favor_data:  # 如果有这条好感度回复
+        if random.random() > 0.5:
+            return None, None
+        return True, random.choice(favor_data.get("回复"))
+    if order not in favor_data:  # 如果没有这条好感度回复
         return None, None
     pun = 0
     bon = 0
