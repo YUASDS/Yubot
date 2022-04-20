@@ -1,5 +1,7 @@
 import os
 import random
+from typing import Optional
+from loguru import logger
 
 import ujson
 from pathlib import Path
@@ -14,11 +16,11 @@ favor_data: dict = ujson.loads(FAVOR_PATH.read_text(encoding="utf-8"))
 re_key_word = f'([\\s\\S])*({"|".join(list(favor_data))})([\\s\\S])*'
 
 
-async def get_reply(order: str, qq: int):
+async def get_reply(order: str, qq: int) -> tuple[bool, list[str]]:
     if order is None:
         if random.random() > 0.5:
             return None, None
-        return True, random.choice(favor_data.get("回复"))
+        return True, [random.choice(favor_data["回复"])]
     if order not in favor_data:  # 如果没有这条好感度回复
         return None, None
     pun = 0
