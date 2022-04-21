@@ -70,6 +70,22 @@ def Decorator(func):
     return init
 
 
+def add_Decorator(func):
+    def init(*args, **kwargs):
+        try:
+            if s := func(*args, **kwargs):
+                return s
+            if args:
+                init_user(args[0])
+            if kwargs:
+                init_user(kwargs["qq"])
+            return func(*args, **kwargs)
+        except ValueError:
+            return 0
+
+    return init
+
+
 def Updata_Decorator(func):
     async def init(*args, **kwargs):
         try:
@@ -103,16 +119,14 @@ async def get_info(qq: str):
     return user
 
 
-@Updata_Decorator
+@add_Decorator
 def add_gold(qq: str, num: int):
-    p = User.update(gold=User.gold + num).where(User.qq == qq)
-    p.execute()
-    return True
+    logger.info(f"{qq}的乌帕增加了{num}")
+    return User.update(gold=User.gold + num).where(User.qq == qq).execute()
 
 
 async def reset_favor_data():
-    User.update(favor_data=0).where(User.favor_data > 0).execute()
-    return
+    return User.update(favor_data=0).where(User.favor_data > 0).execute()
 
 
 @Decorator
@@ -158,9 +172,7 @@ async def reduce_gold(qq: str, num: int, force: bool = False):
         p = User.update(gold=0).where(User.qq == qq)
     else:
         p = User.update(gold=User.gold - num).where(User.qq == qq)
-
-    p.execute()
-    return True
+    return p.execute()
 
 
 async def trans_all_gold(from_qq: str, to_qq: str) -> int:
@@ -174,8 +186,7 @@ async def trans_all_gold(from_qq: str, to_qq: str) -> int:
 
 async def add_talk(qq: str):
     init_user(qq)
-    User.update(talk_num=User.talk_num + 1).where(User.qq == qq).execute()
-    return
+    return User.update(talk_num=User.talk_num + 1).where(User.qq == qq).execute()
 
 
 async def reset_sign():

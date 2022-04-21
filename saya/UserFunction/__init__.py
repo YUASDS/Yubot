@@ -72,7 +72,7 @@ async def bot_Launched():
 async def get_user_info(event: MessageEvent):
     user_info = await get_info(str(event.sender.id))
     # user_favor=favor(favors)
-    await safeSendGroupMessage(
+    await autoSendMessage(
         event.sender,
         MessageChain.create(
             [
