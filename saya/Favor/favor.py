@@ -1,28 +1,34 @@
-import os
 import random
-from typing import Optional
-from loguru import logger
+from pathlib import Path
 
 import ujson
-from pathlib import Path
 
 from database.db import favor, get_info, add_favor, reduce_favor
 
-
-func = os.path.dirname(__file__).split("\\")[-1]
 FAVOR_PATH = Path(__file__).parent.joinpath("favor_chat_data.json")
 COUNT_PATH = Path(__file__).parent.joinpath("count.txt")
 favor_data: dict = ujson.loads(FAVOR_PATH.read_text(encoding="utf-8"))
-re_key_word = f'([\\s\\S])*({"|".join(list(favor_data))})([\\s\\S])*'
 
 
-async def get_reply(order: str, qq: int) -> tuple[bool, list[str]]:
-    if order is None:
-        if random.random() > 0.5:
-            return None, None
-        return True, [random.choice(favor_data["回复"])]
-    if order not in favor_data:  # 如果没有这条好感度回复
-        return None, None
+def get_level(favors: int) -> int:  # 当前等级
+    level = 1
+    while 2**level < favors or 2**level == favors:
+        favors -= 2**level
+        level += 1
+    return level
+
+
+def get_favor_full(level: int) -> int:
+    return sum(2**i for i in range(level + 1))
+
+
+def get_affinity():
+    with open(file=COUNT_PATH, mode="r", encoding="utf-8") as c:
+        count: int = int(c.read())
+    return f"唔.....千音的当前亲和度有{count}这么多~"
+
+
+async def normal_favor(order: str, qq: int) -> tuple[bool, list[str]]:
     pun = 0
     bon = 0
     with open(file=COUNT_PATH, mode="r", encoding="utf-8") as c:
@@ -74,16 +80,4 @@ async def get_reply(order: str, qq: int) -> tuple[bool, list[str]]:
             await add_favor(str(qq), num=bon, force=True)
     elif pun > 0:
         await reduce_favor(str(qq), num=pun)
-    return count, reply
-
-
-def get_level(favors: int) -> int:  # 当前等级
-    level = 1
-    while 2**level < favors or 2**level == favors:
-        favors -= 2**level
-        level += 1
-    return level
-
-
-def get_favor_full(level: int) -> int:
-    return sum(2**i for i in range(level + 1))
+    return True, reply

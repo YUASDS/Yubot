@@ -16,7 +16,7 @@ from graia.ariadne.message.parser.twilight import (
 
 from util.sendMessage import autoSendMessage
 from util.control import Permission, Rest
-from .favor import re_key_word, get_reply
+from .reply import get_reply
 
 func = os.path.dirname(__file__).split("\\")[-1]
 
@@ -51,14 +51,11 @@ last_exec_favor: DefaultDict[str, Tuple[int, float]] = defaultdict(lambda: (1, 0
 )
 async def main(head: RegexResult, event: MessageEvent, Source_msg: Source):
     if head.matched:
-        plain = head.result.asDisplay()
-        match = re.compile(re_key_word)
-        order = match.findall(plain)
-        order = order[0][1] if order else None
+        msg = head.result.asDisplay()
     else:
-        order = None
+        msg = ""
     source = event.sender
-    flags, result = await get_reply(order=order, qq=source.id)
+    flags, result = await get_reply(msg=msg, qq=source.id)
     if not flags:
         return
     for reply in result:
