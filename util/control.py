@@ -28,20 +28,22 @@ from config import (
     change_config,
 )
 from database.db import all_sign_num, reset_sign, reset_favor_data
-from database.funcdb import add_count
+from database.funcdb import add_count, limit_today, limit_add_count, clear_limit
 from .sendMessage import autoSendMessage
 
 channel = Channel.current()
+
 
 SLEEP = 0
 
 
 @channel.use(SchedulerSchema(crontabify("0 4 * * *")))
 async def rest_scheduled(app: Ariadne):
-    Rest.set_sleep(1)
+    # Rest.set_sleep(1)
     sign = await all_sign_num()
     await reset_favor_data()
     await reset_sign()
+    clear_limit()
     await app.sendFriendMessage(
         yaml_data["Basic"]["Permission"]["Master"],
         MessageChain.create([Plain(f"已完成签到重置，签到统计{sign[0]}/{sign[1]}")]),
@@ -129,7 +131,7 @@ class Permission:
         """
 
         def perm_check(event: MessageEvent):
-            member_level = cls.get(event.sender)
+            member_level = cls.get(event.sender.id)
             if member_level == cls.MASTER:
                 pass
             elif member_level < level:
@@ -169,7 +171,7 @@ class Permission:
 
         def res(event: MessageEvent):
             create_task(add_count(func))
-            member_level = cls.get(event.sender)
+            member_level = cls.get(event.sender.id)
             if member_level == cls.MASTER:  # master直接通过,
                 return
 
@@ -184,16 +186,16 @@ class Permission:
             if group.id == yaml_data["Basic"]["Permission"]["DebugGroup"]:
                 return
 
-            # if group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]:  # 本处用于测试
+            # if group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]:# 本处用于测试
             #     raise ExecutionStop()
             if func not in yaml_data["Saya"]:
                 yaml_data["Saya"][func] = {"Disabled": False}
                 change_config(yaml_data)
             if (
                 str(group.id) in group_black_list  # 黑名单群聊
-                or func in group_data[str(group.id)]["DisabledFunc"]  # 群组禁用
+                or func in group_data[str(group.id)]["DisabledFunc"]
                 or yaml_data["Saya"][func]["Disabled"]
-            ):  # 全局禁用
+            ):  # 群组禁用
                 raise ExecutionStop()
 
         return Depend(res)
@@ -211,7 +213,7 @@ class Interval:
     @classmethod
     def require(
         cls,
-        suspend_time: float = 5,
+        suspend_time: float = 3,
         max_exec: int = 1,
         override_level: int = Permission.MASTER,
         silent: bool = False,
@@ -282,3 +284,33 @@ class Interval:
             if member not in cls.sent_alert:
                 cls.sent_alert.add(member)
             raise ExecutionStop()
+
+
+class DaylyLimit:
+    limit_dict: dict[str, dict[str, int]] = {}
+
+    @classmethod
+    async def day_check(cls, func: str, qq: str, dat_limit: int = 3):
+        if qq not in cls.limit_dict:
+            cls.limit_dict[qq] = limit_today(qq)
+        func_limit = cls.limit_dict[qq].get(func, 0)
+        if func_limit >= dat_limit:
+            return False
+        else:
+            cls.limit_dict[qq][func] = func_limit + 1
+            limit_add_count(qq, func)
+            return True
+
+    @classmethod
+    async def DayCheck(cls, func: str, dat_limit: int = 3):
+        async def check(event: MessageEvent):
+            if await cls.day_check(func, str(event.sender.id), dat_limit):
+                return
+            await autoSendMessage(
+                event.sender,
+                " 今天已经到了上限次数了，前辈可不能贪心哦~",
+                event.messageChain.getFirst(Source).id,
+            )
+            raise ExecutionStop()
+
+        return Depend(check)
