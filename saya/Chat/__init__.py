@@ -16,7 +16,7 @@ from graia.ariadne.message.parser.twilight import (
 
 
 from util.sendMessage import autoSendMessage
-from util.control import Permission, Rest
+from util.control import Permission
 
 path = Path(__file__).parent.joinpath("chat.json")
 data: dict = json.loads(path.read_text(encoding="utf-8"))
@@ -26,11 +26,8 @@ data: dict = json.loads(path.read_text(encoding="utf-8"))
 func = os.path.dirname(__file__).split("\\")[-1]
 
 
-saya = Saya.current()
 channel = Channel.current()
 channel.name(func)
-bcc = saya.broadcast
-inc = InterruptControl(bcc)
 
 
 @channel.use(
@@ -47,7 +44,6 @@ inc = InterruptControl(bcc)
         decorators=[
             Permission.require(),
             Permission.restricter(func),
-            Rest.rest_control(),
         ],
     )
 )

@@ -13,7 +13,7 @@ from graia.ariadne.message.parser.twilight import (
     RegexResult,
 )
 
-from util.control import Permission, Interval, Rest
+from util.control import Permission, Interval
 from util.sendMessage import autoSendMessage
 from config import COIN_NAME
 from database.db import reduce_gold, add_gold
@@ -49,7 +49,6 @@ inc = InterruptControl(bcc)
         decorators=[
             Permission.restricter(func),
             Permission.require(),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )
@@ -85,7 +84,6 @@ async def main(event: MessageEvent, number: RegexResult, source: Source):
         decorators=[
             Permission.restricter(func),
             Permission.require(),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )
@@ -125,7 +123,6 @@ async def luck_draw(event: MessageEvent, source: Source):
         decorators=[
             Permission.restricter(func),
             Permission.require(),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )

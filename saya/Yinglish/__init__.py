@@ -16,7 +16,7 @@ from graia.ariadne.message.parser.twilight import (
 )
 
 from util.sendMessage import autoSendMessage
-from util.control import Permission, Interval, Rest
+from util.control import Permission, Interval
 from database.db import favor, get_info, reduce_favor
 
 jieba.setLogLevel(20)
@@ -61,7 +61,6 @@ def chs2yin(s, 淫乱度=0.6):
         decorators=[
             Permission.require(),
             Permission.restricter(func),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )

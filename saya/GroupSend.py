@@ -12,7 +12,7 @@ from graia.ariadne.message.parser.twilight import (
 
 from config import group_key
 from util.sendMessage import safeSendGroupMessage
-from util.control import Permission, Interval, Rest
+from util.control import Permission, Interval
 
 func = "GroupSend"
 
@@ -30,7 +30,7 @@ channel.name(func)
                 ["keys" @ RegexMatch("/【[\\s\\S]+?】"), "anythings" @ WildcardMatch()]
             )
         ],
-        decorators=[Permission.require(), Rest.rest_control(), Interval.require()],
+        decorators=[Permission.require(), Interval.require()],
     )
 )
 async def main(group: Group, anythings: RegexResult, keys: RegexResult):

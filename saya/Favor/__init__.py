@@ -15,7 +15,7 @@ from graia.ariadne.message.parser.twilight import (
 )
 
 from util.sendMessage import autoSendMessage
-from util.control import Permission, Rest
+from util.control import Permission
 from .reply import get_reply
 
 func = os.path.dirname(__file__).split("\\")[-1]
@@ -45,7 +45,6 @@ last_exec_favor: DefaultDict[str, Tuple[int, float]] = defaultdict(lambda: (1, 0
         decorators=[
             Permission.require(),
             Permission.restricter(func),
-            Rest.rest_control(),
         ],
     )
 )

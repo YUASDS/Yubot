@@ -22,7 +22,7 @@ from graia.ariadne.message.parser.twilight import (
 
 
 from util.sendMessage import autoSendMessage
-from util.control import Permission, Interval, Rest
+from util.control import Permission, Interval
 
 func = os.path.dirname(__file__).split("\\")[-1]
 
@@ -220,7 +220,6 @@ class SayaManager:
         decorators=[
             Permission.require(Permission.MASTER),
             Permission.restricter(func),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )
@@ -246,7 +245,6 @@ async def Saya_Manager(
         decorators=[
             Permission.require(Permission.MASTER),
             Permission.restricter(func),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )
@@ -293,7 +291,6 @@ async def Saya_List(head: RegexResult, event: MessageEvent):
         decorators=[
             Permission.require(Permission.MASTER),
             Permission.restricter(func),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )

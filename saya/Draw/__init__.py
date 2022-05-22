@@ -12,7 +12,7 @@ from graia.ariadne.message.parser.twilight import (
 )
 
 from util.sendMessage import autoSendMessage
-from util.control import Permission, Interval, Rest
+from util.control import Permission, Interval
 from .Arknights import get_img
 
 """[qq][date][conten]
@@ -40,7 +40,6 @@ channel.name(func)
         decorators=[
             Permission.require(),
             Permission.restricter(func),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )

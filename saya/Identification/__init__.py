@@ -15,7 +15,7 @@ from graia.ariadne.message.parser.twilight import (
 )
 
 from util.sendMessage import autoSendMessage
-from util.control import Permission, Interval, Rest
+from util.control import Permission, Interval
 
 path = Path(__file__).parent.joinpath("check.json")
 data: dict = json.loads(path.read_text(encoding="utf-8"))
@@ -35,7 +35,6 @@ channel.name(func)
         decorators=[
             Permission.require(),
             Permission.restricter(func),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )

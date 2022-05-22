@@ -10,7 +10,7 @@ from graia.ariadne.message.parser.twilight import Twilight, RegexMatch
 
 from util.sendMessage import autoSendMessage
 from util.text2image import font_file
-from util.control import Permission, Interval, Rest
+from util.control import Permission, Interval
 from database.db import favor, get_info, add_favor, add_gold, is_sign
 from .util import Reward
 from .sign import get_signin_img
@@ -32,7 +32,6 @@ channel.name(func)
         decorators=[
             Permission.require(),
             Permission.restricter(func),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )

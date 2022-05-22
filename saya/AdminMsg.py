@@ -22,7 +22,7 @@ from graia.ariadne.message.parser.twilight import (
 
 from .AdminConfig import Agreement
 from util.text2image import create_image
-from util.control import Rest, Permission
+from util.control import Permission
 from database.db import add_gold, give_all_gold
 from util.sendMessage import safeSendGroupMessage
 from config import (
@@ -67,7 +67,10 @@ async def get_botQueue(app: Ariadne, message: MessageChain, source: Source):
         listening_events=[FriendMessage],
         inline_dispatchers=[
             Twilight(
-                ["head" @ FullMatch("全员充值"), "anything" @ WildcardMatch(optional=True)]
+                [
+                    "head" @ FullMatch("全员充值"),
+                    "anything" @ WildcardMatch(optional=True),
+                ],
             )
         ],
     )
@@ -89,7 +92,10 @@ async def all_recharge(app: Ariadne, friend: Friend, anything: RegexResult):
         listening_events=[FriendMessage],
         inline_dispatchers=[
             Twilight(
-                ["head" << FullMatch("充值"), "anything" << WildcardMatch(optional=True)]
+                [
+                    "head" << FullMatch("充值"),
+                    "anything" << WildcardMatch(optional=True),
+                ]
             )
         ],
     )
@@ -115,7 +121,10 @@ async def echarge(app: Ariadne, friend: Friend, anything: RegexResult):
         listening_events=[FriendMessage],
         inline_dispatchers=[
             Twilight(
-                ["head" << FullMatch("公告"), "anything" << WildcardMatch(optional=True)]
+                [
+                    "head" << FullMatch("公告"),
+                    "anything" << WildcardMatch(optional=True),
+                ]
             )
         ],
     )
@@ -425,54 +434,6 @@ async def gremove_block_user(group: Group, at: ElementResult):
             )
     else:
         await safeSendGroupMessage(group, MessageChain.create("请at要操作的用户"))
-
-
-@channel.use(
-    ListenerSchema(
-        listening_events=[FriendMessage],
-        inline_dispatchers=[Twilight([FullMatch("休息")])],
-    )
-)
-async def fset_work(app: Ariadne, friend: Friend):
-    Permission.manual(friend, Permission.MASTER)
-    Rest.set_sleep(1)
-    await app.sendFriendMessage(friend, MessageChain.create([Plain("已进入休息")]))
-
-
-@channel.use(
-    ListenerSchema(
-        listening_events=[FriendMessage],
-        inline_dispatchers=[Twilight([FullMatch("工作")])],
-    )
-)
-async def fset_rest(app: Ariadne, friend: Friend):
-    Permission.manual(friend, Permission.MASTER)
-    Rest.set_sleep(0)
-    await app.sendFriendMessage(friend, MessageChain.create([Plain("已开始工作")]))
-
-
-@channel.use(
-    ListenerSchema(
-        listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight([FullMatch("休息")])],
-        decorators=[Permission.require(Permission.MASTER)],
-    )
-)
-async def gset_work(group: Group):
-    Rest.set_sleep(1)
-    await safeSendGroupMessage(group, MessageChain.create([Plain("已进入休息")]))
-
-
-@channel.use(
-    ListenerSchema(
-        listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight([FullMatch("工作")])],
-        decorators=[Permission.require(Permission.MASTER)],
-    )
-)
-async def gset_rest(group: Group):
-    Rest.set_sleep(0)
-    await safeSendGroupMessage(group, MessageChain.create([Plain("已开始工作")]))
 
 
 @channel.use(

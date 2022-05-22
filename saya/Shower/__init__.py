@@ -22,7 +22,7 @@ from graia.ariadne.message.parser.twilight import (
 
 
 from util.sendMessage import safeSendGroupMessage
-from util.control import Permission, Interval, Rest
+from util.control import Permission, Interval
 from .reply import ShowerGroup, User, save_data
 
 """[qq][date][conten]
@@ -76,7 +76,6 @@ async def shower_scheduled():
         decorators=[
             Permission.require(),
             Permission.restricter(func),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )

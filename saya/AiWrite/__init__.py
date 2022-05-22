@@ -15,7 +15,7 @@ from graia.ariadne.message.parser.twilight import (
     RegexResult,
 )
 
-from util.control import Permission, Interval, Rest
+from util.control import Permission, Interval
 from util.sendMessage import safeSendGroupMessage
 from config import COIN_NAME
 from database.db import reduce_gold
@@ -72,7 +72,6 @@ templete = {"iter": 3, "model": "小梦0号", "token": ""}
         decorators=[
             Permission.restricter(func),
             Permission.require(),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )
@@ -139,7 +138,6 @@ async def main(group: Group, member: Member, text: RegexResult):
         decorators=[
             Permission.restricter(func),
             Permission.require(),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )
@@ -193,7 +191,6 @@ async def APIKEY(group: Group, member: Member, text: RegexResult):
         decorators=[
             Permission.restricter(func),
             Permission.require(Permission.GROUP_ADMIN),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )
@@ -243,7 +240,6 @@ async def novel_iteration(group: Group, member: Member, text: RegexResult):
         decorators=[
             Permission.restricter(func),
             Permission.require(Permission.GROUP_ADMIN),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )

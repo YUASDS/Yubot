@@ -15,7 +15,7 @@ from graia.ariadne.message.parser.twilight import (
     RegexResult,
 )
 
-from util.control import Permission, Interval, Rest
+from util.control import Permission, Interval
 from util.sendMessage import safeSendGroupMessage
 from config import COIN_NAME
 from database.db import reduce_gold
@@ -40,7 +40,6 @@ inc = InterruptControl(bcc)
         decorators=[
             Permission.restricter(func),
             Permission.require(),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )
@@ -82,7 +81,6 @@ async def main(group: Group, member: Member, mod: RegexResult):
         decorators=[
             Permission.restricter(func),
             Permission.require(),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )
@@ -124,7 +122,6 @@ async def CnmodsSearch(group: Group, member: Member, mod: RegexResult):
         decorators=[
             Permission.restricter(func),
             Permission.require(),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )
@@ -151,7 +148,6 @@ async def GroupRandomSearch(group: Group, member: Member):
         decorators=[
             Permission.restricter(func),
             Permission.require(),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )

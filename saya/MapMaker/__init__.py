@@ -18,7 +18,7 @@ from graia.ariadne.message.parser.twilight import (
 )
 
 from util.sendMessage import safeSendGroupMessage
-from util.control import Permission, Interval, Rest
+from util.control import Permission, Interval
 from .LineMaker import line_maker, get_pet
 
 func = os.path.dirname(__file__).split("\\")[-1]
@@ -116,7 +116,6 @@ async def join_map(x: int, y: int, gid: str, mid: str, npc_url=False):
         decorators=[
             Permission.require(),
             Permission.restricter(func),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )
@@ -145,7 +144,6 @@ async def main(group: Group):
         decorators=[
             Permission.require(),
             Permission.restricter(func),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )
@@ -194,7 +192,6 @@ async def make(group: Group, anythings: RegexResult, size: RegexResult):
         decorators=[
             Permission.require(),
             Permission.restricter(func),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )
@@ -236,7 +233,6 @@ async def refresh(group: Group, anythings: RegexResult):
         decorators=[
             Permission.require(),
             Permission.restricter(func),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )
@@ -275,7 +271,6 @@ async def join(group: Group, x: RegexResult, y: RegexResult, member: Member):
         decorators=[
             Permission.require(),
             Permission.restricter(func),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )

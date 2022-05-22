@@ -22,7 +22,6 @@ from graia.ariadne.event.mirai import (
     BotInvitedJoinGroupRequestEvent,
 )
 
-from util.control import Rest
 from database.db import init_user
 from util.text2image import create_image
 from util.sendMessage import safeSendGroupMessage
@@ -76,22 +75,15 @@ async def groupDataInit(app: Ariadne):
             else yaml_data["Basic"]["Permission"]["Debug"]
         )
         master = await app.getFriend(yaml_data["Basic"]["Permission"]["Master"])
-        msg.append(
-            Plain(
-                f"，当前为 Debug 模式，将仅接受 {debug_msg} 群以及 {master.nickname}（{master.id}） 的消息"
+        if master:
+            msg.append(
+                Plain(
+                    f"，当前为 Debug 模式，将仅接受 {debug_msg} 群以及 {master.nickname}（{master.id}） 的消息"
+                )
             )
-        )
     await app.sendFriendMessage(
         yaml_data["Basic"]["Permission"]["Master"], MessageChain.create(msg)
     )
-
-    now_localtime = time.strftime("%H:%M:%S", time.localtime())
-    if "00:00:00" < now_localtime < "07:30:00":
-        Rest.set_sleep(1)
-        await app.sendFriendMessage(
-            yaml_data["Basic"]["Permission"]["Master"],
-            MessageChain.create([Plain("当前为休息时间，已进入休息状态")]),
-        )
 
 
 @channel.use(ListenerSchema(listening_events=[ApplicationShutdowned]))

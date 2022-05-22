@@ -15,7 +15,7 @@ from graia.saya.builtins.broadcast.schema import ListenerSchema
 from graia.ariadne.message.parser.twilight import Twilight, RegexMatch, RegexResult
 
 from util.sendMessage import safeSendGroupMessage
-from util.control import Permission, Interval, Rest
+from util.control import Permission, Interval
 from .WaifuLab import waifu
 
 func = os.path.dirname(__file__).split("\\")[-1]
@@ -55,7 +55,6 @@ async def get_pic(pic_id: str):
         decorators=[
             Permission.require(),
             Permission.restricter(func),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )
@@ -83,7 +82,6 @@ async def main(group: Group):
         decorators=[
             Permission.require(),
             Permission.restricter(func),
-            Rest.rest_control(),
             Interval.require(),
         ],
     )
