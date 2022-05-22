@@ -34,7 +34,6 @@ Basic:
     MasterName: xxxx
     DebugGroup: xxxxx
     Debug: false
-    Rest: false               # 是否开启睡眠休息模式
     DefaultAcceptInvite: true # 是否默认接受邀请
 Saya:
   AiWaifu:

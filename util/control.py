@@ -4,7 +4,6 @@ Xenon 管理 https://github.com/McZoo/Xenon/blob/master/lib/control.py
 """
 
 import time
-import random
 
 from asyncio import Lock, create_task
 from graia.saya import Channel
@@ -34,12 +33,13 @@ from .sendMessage import autoSendMessage
 channel = Channel.current()
 
 
-SLEEP = 0
+DebugGroup = yaml_data["Basic"]["Permission"]["DebugGroup"]
+Master = yaml_data["Basic"]["Permission"]["Master"]
+Admin = yaml_data["Basic"]["Permission"]["Admin"]
 
 
 @channel.use(SchedulerSchema(crontabify("0 4 * * *")))
 async def rest_scheduled(app: Ariadne):
-    # Rest.set_sleep(1)
     sign = await all_sign_num()
     await reset_favor_data()
     await reset_sign()
@@ -50,35 +50,19 @@ async def rest_scheduled(app: Ariadne):
     )
 
 
-class Rest:
+def check_sender(event: MessageEvent):
     """
-    用于控制睡眠的类，不应被实例化
+    如果不是群成员或者好友，则不执行
+    Args:
+        event (MessageEvent):
+
+    Raises:
+        ExecutionStop: _description_
     """
-
-    def set_sleep(set):
-        global SLEEP
-        SLEEP = set
-
-    @classmethod
-    def rest_control(cls, zzzz: bool = True):
-        async def sleep(event: MessageEvent):
-            if (
-                SLEEP
-                and yaml_data["Basic"]["Permission"]["Rest"]
-                and event.sender.group.id
-                != yaml_data["Basic"]["Permission"]["DebugGroup"]
-            ):
-                if zzzz:
-                    await autoSendMessage(
-                        event.sender,
-                        MessageChain.create(
-                            f"Z{'z'*random.randint(3,8)}{'.'*random.randint(2,6)}"
-                        ),
-                        quote=event.messageChain.getFirst(Source).id,
-                    )
-                raise ExecutionStop()
-
-        return Depend(sleep)
+    if not isinstance(event.sender, (Member, Friend)):
+        raise ExecutionStop()
+    else:
+        return event.sender
 
 
 class Permission:
@@ -97,23 +81,18 @@ class Permission:
         """
         获取用户的权限
 
-        :param user: 用户实例或QQ号
+        :param user: 用户群成员或QQ号
         :return: 等级，整数
         """
 
         if isinstance(member, Member):
             user = member.id
             user_permission = member.permission
-        elif isinstance(member, int):
-            user = member
-            user_permission = cls.DEFAULT
-        elif isinstance(member, Friend):
-            user = member.id
-            user_permission = cls.DEFAULT
         else:
-            raise ExecutionStop()
+            user = member.id if isinstance(member, Friend) else member
+            user_permission = cls.DEFAULT
 
-        if user in yaml_data["Basic"]["Permission"]["Admin"]:
+        if user in Admin:
             return cls.MASTER
         elif user in user_black_list:
             return cls.BANNED
@@ -130,40 +109,27 @@ class Permission:
         :param level: 限制等级
         """
 
-        def perm_check(event: MessageEvent):
-            member_level = cls.get(event.sender.id)
+        async def perm_check(event: MessageEvent):
+            sender = check_sender(event)
+            member_level = cls.get(sender)
             if member_level == cls.MASTER:
-                pass
+                return
             elif member_level < level:
+                if isinstance(sender, Member) and (sender.group.id == DebugGroup):
+                    return
                 raise ExecutionStop()
-            elif yaml_data["Basic"]["Permission"]["Debug"]:
-                if isinstance(event.sender, Member) and (
-                    event.sender.group.id
-                    != yaml_data["Basic"]["Permission"]["DebugGroup"]
-                ):
-                    raise ExecutionStop()
 
         return Depend(perm_check)
 
     @classmethod
-    def manual(cls, member: Union[Member, Friend, int], level: int = DEFAULT) -> Depend:
-
-        if isinstance(member, Member):
-            member_id = member.id
-        if isinstance(member, Friend):
-            member_id = member.id
-        if isinstance(member, int):
-            member_id = member
-
-        member_level = cls.get(member_id)
-
+    def manual(cls, sender: Union[Friend, Member], level: int = DEFAULT):
+        member_level = cls.get(sender)
         if member_level == cls.MASTER:
             pass
         elif member_level < level:
+            if isinstance(sender, Member) and (sender.group.id == DebugGroup):
+                return
             raise ExecutionStop()
-        elif yaml_data["Basic"]["Permission"]["Debug"]:
-            if member.group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]:
-                raise ExecutionStop()
 
     @classmethod
     def restricter(cls, func: str) -> Depend:
@@ -171,31 +137,34 @@ class Permission:
 
         def res(event: MessageEvent):
             create_task(add_count(func))
-            member_level = cls.get(event.sender.id)
+            if not isinstance(event.sender, (Member, Friend)):
+                raise ExecutionStop()
+            member_level = cls.get(event.sender)
             if member_level == cls.MASTER:  # master直接通过,
                 return
-
-            if isinstance(event.sender, Member):
-                # 允许私聊触发的功能除全局禁用外不做限制，但是仅限于好友
-                group = event.sender.group
-            elif isinstance(event.sender, Friend):
+            if isinstance(event.sender, Friend):
                 if yaml_data["Saya"][func]["Disabled"]:
                     raise ExecutionStop()
                 return
+            elif isinstance(event.sender, Member):
+                # 允许私聊触发的功能除全局禁用外不做限制，但是仅限于好友
+                group = event.sender.group
                 # 正常的群聊限制
-            if group.id == yaml_data["Basic"]["Permission"]["DebugGroup"]:
-                return
+                if group.id == DebugGroup:
+                    return
 
-            # if group.id != yaml_data["Basic"]["Permission"]["DebugGroup"]:# 本处用于测试
-            #     raise ExecutionStop()
-            if func not in yaml_data["Saya"]:
-                yaml_data["Saya"][func] = {"Disabled": False}
-                change_config(yaml_data)
-            if (
-                str(group.id) in group_black_list  # 黑名单群聊
-                or func in group_data[str(group.id)]["DisabledFunc"]
-                or yaml_data["Saya"][func]["Disabled"]
-            ):  # 群组禁用
+                # if group.id != DebugGroup:# 本处用于测试
+                #     raise ExecutionStop()
+                if func not in yaml_data["Saya"]:
+                    yaml_data["Saya"][func] = {"Disabled": False}
+                    change_config(yaml_data)
+                if (
+                    str(group.id) in group_black_list  # 黑名单群聊
+                    or func in group_data[str(group.id)]["DisabledFunc"]
+                    or yaml_data["Saya"][func]["Disabled"]
+                ):  # 群组禁用
+                    raise ExecutionStop()
+            else:
                 raise ExecutionStop()
 
         return Depend(res)
@@ -269,20 +238,21 @@ class Interval:
         if Permission.get(member) >= override_level:
             return
         current = time.time()
+        member_str = str(member.id) if isinstance(member, Member) else str(member)
         async with cls.lock:
-            last = cls.last_exec[member]
-            if current - cls.last_exec[member][1] >= suspend_time:
-                cls.last_exec[member] = (1, current)
+            last = cls.last_exec[member_str]
+            if current - cls.last_exec[member_str][1] >= suspend_time:
+                cls.last_exec[member_str] = (1, current)
                 if member in cls.sent_alert:
                     cls.sent_alert.remove(member)
                 return
             elif last[0] < max_exec:
-                cls.last_exec[member] = (last[0] + 1, current)
+                cls.last_exec[member_str] = (last[0] + 1, current)
                 if member in cls.sent_alert:
                     cls.sent_alert.remove(member)
                 return
             if member not in cls.sent_alert:
-                cls.sent_alert.add(member)
+                cls.sent_alert.add(member_str)
             raise ExecutionStop()
 
 
@@ -296,10 +266,9 @@ class DaylyLimit:
         func_limit = cls.limit_dict[qq].get(func, 0)
         if func_limit >= dat_limit:
             return False
-        else:
-            cls.limit_dict[qq][func] = func_limit + 1
-            limit_add_count(qq, func)
-            return True
+        cls.limit_dict[qq][func] = func_limit + 1
+        limit_add_count(qq, func)
+        return True
 
     @classmethod
     async def DayCheck(cls, func: str, dat_limit: int = 3):
@@ -314,3 +283,9 @@ class DaylyLimit:
             raise ExecutionStop()
 
         return Depend(check)
+
+
+@channel.use(SchedulerSchema(crontabify("0 4 * * *")))
+async def rest_limit():
+    # Rest .set_sleep(1)
+    DaylyLimit.limit_dict = {}
