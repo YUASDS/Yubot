@@ -63,7 +63,7 @@ app = Ariadne(
 saya = Saya(bcc)
 saya.install_behaviours(BroadcastBehaviour(bcc))
 saya.install_behaviours(GraiaSchedulerBehaviour(scheduler))
-saya.install_behaviours(InterruptControl(bcc))
+saya.install_behaviours(InterruptControl(bcc))  # type: ignore
 with saya.module_context():
     for module in os.listdir("saya"):
         if module in ignore:
