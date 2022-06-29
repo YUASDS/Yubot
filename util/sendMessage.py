@@ -16,6 +16,8 @@ from graia.ariadne.message.element import (
     Forward,
 )
 
+# from loguru import logger
+
 
 async def safeSendGroupMessage(
     target: Union[Group, int],
@@ -72,7 +74,7 @@ async def autoForwMessage(
         str,
         int,
     ],
-    message: Union[Iterable[Element], Element, str],
+    message: Union[Iterable[Element], Element, str, list],
     name: str,
 ):
     """_summary_
@@ -88,26 +90,29 @@ async def autoForwMessage(
     if isinstance(target, Group):
         target = randint(999999, 2147483647)
     if isinstance(message, (str, Element, MessageChain)):
-        message = [message]  # type: ignore
-    if len(message) > 0:  # type: ignore
-        fwd_nodeList = [
-            ForwardNode(
-                target=target,
-                time=datetime.now(),
-                message=i,
-                name=name,
-            )
-            if isinstance(i, MessageChain)
-            else ForwardNode(
-                target=target,
-                time=datetime.now(),
-                message=MessageChain.create(i),
-                name=name,
-            )
-            for i in message
-        ]
-        message = MessageChain.create(Forward(nodeList=fwd_nodeList))
-    return await autoSendMessage(target, message)
+        message = [
+            message,
+        ]  # type: ignore
+
+    fwd_nodeList = [
+        ForwardNode(
+            target=target,
+            time=datetime.now(),
+            message=i,
+            name=name,
+        )
+        if isinstance(i, MessageChain)
+        else ForwardNode(
+            target=target,
+            time=datetime.now(),
+            message=MessageChain.create(i),
+            name=name,
+        )
+        for i in message
+    ]
+    # logger.debug(fwd_nodeList)
+    finish_message = MessageChain.create(Forward(nodeList=fwd_nodeList))
+    return await autoSendMessage(target, finish_message)
 
 
 def get_name(taget: Union[Member, Friend, Group]) -> str:
