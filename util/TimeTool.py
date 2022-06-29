@@ -25,8 +25,7 @@ def time_now():
     """
     "%H时%M分%S秒
     """
-    now_time = time.localtime()
-    return time.strftime("%H时%M分%S秒", now_time)
+    return time.strftime("%H时%M分%S秒", time.localtime())
 
 
 def time_hour():
