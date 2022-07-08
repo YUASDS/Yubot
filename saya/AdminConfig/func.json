@@ -62,31 +62,31 @@
         {
             "name": "地图制作",
             "key": "MapMaker",
-            "can_disabled": false,
+            "can_disabled": true,
             "default_disabled": false
         },
         {
             "name": "AI续写",
             "key": "AiWriter",
-            "can_disabled": false,
+            "can_disabled": true,
             "default_disabled": false
         },
         {
             "name": "模组搜索/随机模组",
             "key": "ModSearch",
-            "can_disabled": false,
+            "can_disabled": true,
             "default_disabled": false
         },
         {
             "name": "抽乌帕",
             "key": "Luck",
-            "can_disabled": false,
+            "can_disabled": true,
             "default_disabled": false
         },
         {
             "name": "好感度",
             "key": "Favor",
-            "can_disabled": false,
+            "can_disabled": true,
             "default_disabled": false
         }
     ],

@@ -132,7 +132,7 @@ async def main(
         if not response.get("succ"):
             return await autoSendMessage(event.sender, response["err_msg"])
         if not (data_get := response["data"]):
-            return await autoSendMessage(event.sender, "没有找到相关信息")
+            return await autoSendMessage(event.sender, "唔，千音没有找到相关信息。。。")
         msg_list = await get_data_list(response["data"])
         return await autoForwMessage(event.sender, msg_list, sender_name)  # type: ignore
     data["kp_qq"] = event.sender.id
@@ -140,13 +140,13 @@ async def main(
         data["kp_name"] = sender_name  # type: ignore
         response = await change(mode, data)
         if response.get("succ"):
-            return await autoSendMessage(event.sender, "鸽笼添加成功~")
+            return await autoSendMessage(event.sender, "前辈需要的鸽笼信息已经添加成功了哦~")
         return await autoSendMessage(event.sender, response["err_msg"])
     elif mode == "delete":
         new_data = {"id": data["id"], "qq": event.sender.id}
         response = await change(mode, new_data)
         if response.get("succ"):
-            return await autoSendMessage(event.sender, "鸽笼删除成功~")
+            return await autoSendMessage(event.sender, "前辈已经把鸽笼成功删除了哦~")
         return await autoSendMessage(event.sender, response["err_msg"])
     elif mode == "update":
         data["kp_name"] = sender_name  # type: ignore
@@ -154,6 +154,6 @@ async def main(
         if not response.get("succ"):
             return await autoSendMessage(event.sender, response["err_msg"])
         data_get = response["data"]
-        new_list = ["修改前团本信息", data_get[0], "修改后团本信息", data_get[1]]
+        new_list = ["前辈修改前团本信息", data_get[0], "前辈修改后团本信息", data_get[1]]
         msg_list = await get_data_list(new_list)
         return await autoForwMessage(event.sender, msg_list, sender_name)  # type: ignore

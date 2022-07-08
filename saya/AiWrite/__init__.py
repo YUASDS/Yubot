@@ -87,7 +87,10 @@ async def main(group: Group, member: Member, text: RegexResult):
             return await safeSendGroupMessage(
                 group,
                 MessageChain.create(
-                    [At(member.id), Plain("本群续写apikey未设置！请使用‘设置续写apikey’指令设置本群apikey！")]
+                    [
+                        At(member.id),
+                        Plain("群里还没有设置apikey哦，请使用‘设置续写apikey’指令来设置本群apikey开启续写~"),
+                    ]
                 ),
             )
 
@@ -158,13 +161,13 @@ async def APIKEY(group: Group, member: Member, text: RegexResult):
         except Exception:
             return await safeSendGroupMessage(
                 group,
-                MessageChain.create([At(member.id), Plain("\napikey格式有误!")]),
+                MessageChain.create([At(member.id), Plain("\napikey错了哦，这样可没法设置哦")]),
             )
         config[gid]["token"] = str(text)
         save_config(config, config_path)
         await safeSendGroupMessage(
             group,
-            MessageChain.create([At(member.id), "\n本群apikey已设置！"]),
+            MessageChain.create([At(member.id), "\n好的！千音已经知道apikey了！"]),
         )
     else:
         await safeSendGroupMessage(
@@ -205,28 +208,28 @@ async def novel_iteration(group: Group, member: Member, text: RegexResult):
         if text.isdigit():
             if int(text) > 5:
                 await safeSendGroupMessage(
-                    group, MessageChain.create([At(member.id), "\n最高只能迭代5次~"])
+                    group, MessageChain.create([At(member.id), "\n最高只能迭代5次哦~"])
                 )
                 text = 5
             if int(text) < 1:
                 await safeSendGroupMessage(
-                    group, MessageChain.create([At(member.id), "\n最少迭代1次~"])
+                    group, MessageChain.create([At(member.id), "\n最少迭代1次哦~"])
                 )
                 text = 1
             config[gid]["iter"] = int(text)
             save_config(config, config_path)
             await safeSendGroupMessage(
-                group, MessageChain.create([At(member.id), f"\n本群默认续写迭代次数已修改为{text}次！"])
+                group, MessageChain.create([At(member.id), f"\n本群默认续写迭代次数已修改为{text}次~"])
             )
         else:
             await safeSendGroupMessage(
-                group, MessageChain.create([At(member.id), "\n迭代次数仅接受纯数字，请重新输入！"])
+                group, MessageChain.create([At(member.id), "\n迭代次数仅接受纯数字哦，请重新输入~"])
             )
     else:
         await safeSendGroupMessage(
             group,
             MessageChain.create(
-                [At(member.id), f'\n请输入默认续写迭代次数！当前默认迭代次数：{config[gid]["iter"]}']
+                [At(member.id), f'\n请输入默认续写迭代次数~当前默认迭代次数：{config[gid]["iter"]}']
             ),
         )
 
@@ -257,7 +260,7 @@ async def on_prefix(group: Group, member: Member, text: RegexResult):
             config[gid]["model"] = text
             save_config(config, config_path)
             await safeSendGroupMessage(
-                group, MessageChain.create([At(member.id), f"\n本群默认续写模型已修改为{text}！"])
+                group, MessageChain.create([At(member.id), f"\n本群默认续写模型已修改为{text}~"])
             )
         else:
             await safeSendGroupMessage(
@@ -265,7 +268,7 @@ async def on_prefix(group: Group, member: Member, text: RegexResult):
                 MessageChain.create(
                     [
                         At(member.id),
-                        f"\n未找到该模型，请重新输入！\n 可用模型：{','.join(model_list.keys())}",
+                        f"\n未找到该模型，请重新输入~\n 可用模型：{','.join(model_list.keys())}",
                     ]
                 ),
             )
@@ -276,7 +279,7 @@ async def on_prefix(group: Group, member: Member, text: RegexResult):
             MessageChain.create(
                 [
                     At(member.id),
-                    f"\n请选择默认续写模型！当前模型：{mods}\n 可用模型：{','.join(model_list.keys())}",
+                    f"\n请选择默认续写模型~当前模型：{mods}\n 可用模型：{','.join(model_list.keys())}",
                 ]
             ),
         )

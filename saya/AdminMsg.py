@@ -50,7 +50,7 @@ channel.name(func)
 @channel.use(
     ListenerSchema(
         listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight([FullMatch("1")])],
+        inline_dispatchers=[Twilight([FullMatch("/1")])],
         decorators=[Permission.require(Permission.MASTER)],
     )
 )
