@@ -84,7 +84,7 @@ class line_maker:
         imgByteArr = imgByteArr.getvalue()
         return imgByteArr
 
-    def post_char(self, img: np.array, x: int, y: int, optional=False) -> bytes:
+    def post_char(self, img, x: int, y: int, optional=False) -> bytes:
         file = self.file
         cell_size = self.cell_size
         back = Image.fromarray(file).convert("RGBA")
