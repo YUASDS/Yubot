@@ -38,18 +38,6 @@ Master = yaml_data["Basic"]["Permission"]["Master"]
 Admin = yaml_data["Basic"]["Permission"]["Admin"]
 
 
-@channel.use(SchedulerSchema(crontabify("0 4 * * *")))
-async def rest_scheduled(app: Ariadne):
-    sign = await all_sign_num()
-    await reset_favor_data()
-    await reset_sign()
-    clear_limit()
-    await app.sendFriendMessage(
-        yaml_data["Basic"]["Permission"]["Master"],
-        MessageChain.create([Plain(f"已完成签到重置，签到统计{sign[0]}/{sign[1]}")]),
-    )
-
-
 def check_sender(event: MessageEvent):
     """
     如果不是群成员或者好友，则不执行
@@ -271,7 +259,7 @@ class DaylyLimit:
         return True
 
     @classmethod
-    async def DayCheck(cls, func: str, dat_limit: int = 3):
+    def DayCheck(cls, func: str, dat_limit: int = 3):
         async def check(event: MessageEvent):
             if await cls.day_check(func, str(event.sender.id), dat_limit):
                 return
@@ -286,6 +274,13 @@ class DaylyLimit:
 
 
 @channel.use(SchedulerSchema(crontabify("0 4 * * *")))
-async def rest_limit():
-    # Rest .set_sleep(1)
+async def rest_scheduled(app: Ariadne):
+    sign = await all_sign_num()
+    await reset_favor_data()
+    await reset_sign()
+    clear_limit()
+    await app.sendFriendMessage(
+        yaml_data["Basic"]["Permission"]["Master"],
+        MessageChain.create([Plain(f"已完成签到重置，签到统计{sign[0]}/{sign[1]}")]),
+    )
     DaylyLimit.limit_dict = {}
