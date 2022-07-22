@@ -77,18 +77,20 @@ async def main(event: MessageEvent):
             return
         return int(choose.result.asDisplay())
 
+    i = 0
     try:
-        for i in range(3):
+        while i < 3:
             res = await asyncio.wait_for(inc.wait(reply_ling), 30)
             card = tarot.choose(res)
             if not card:
+                await autoSendMessage(event.sender, "唔。。前辈!这张卡已经抽过了！")
                 continue
             img = await asyncio.to_thread(draw_tarot, tarot.list_tarot)
             await autoSendMessage(
                 event.sender, f"唔。。前辈这次抽到的是【{card[0]}】呢，这代表着\n————————\n{card[1]}"
             )
-            if i != 2:
-                if "逆位" in card[1]:
+            if i < 2:
+                if "逆位" in card[0]:
                     await autoSendMessage(
                         event.sender, "唔。。看起来前辈似乎不太好运的样子呢，不过不要担心，这并不是结局哦，所以前辈，再来一次吧！"
                     )
@@ -99,7 +101,7 @@ async def main(event: MessageEvent):
                     event.sender,
                     "前辈抽出了第三张塔罗牌了，看来这次占卜已经结束了呢，不过不管好运还是坏运，千音都会陪着前辈的！",
                 )
-
+            i += 1
             await autoSendMessage(event.sender, Image(data_bytes=get_bytes(img)))
     except asyncio.TimeoutError:
         return await autoSendMessage(
