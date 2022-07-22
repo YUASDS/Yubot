@@ -15,6 +15,7 @@ DATA: dict = ujson.loads(
 CARD_LIST = [
     "愚者",
     "魔术师",
+    "女祭司",
     "女皇",
     "皇帝",
     "教皇",
@@ -114,19 +115,22 @@ def last_draw(list_tarot: list[str]):
 
 
 class Tarot:
-    
-
-    def __init__(self, qq:str):
+    def __init__(self, qq: str):
         self.list_tarot = ["背面" for _ in range(22)]
         self.qq = qq
-        self.tarot_data: list[dict[str, int]] = [{key: random.randint(0, 1)} for key in CARD_LIST]
+        self.tarot_data: list[dict[str, int]] = [
+            {key: random.randint(0, 1)} for key in CARD_LIST
+        ]
         print(self.tarot_data)
 
     def choose(self, num: int):
-        key = list(self.tarot_data[num])[0]
-        Ty = self.tarot_data[num][key]
+        key = list(self.tarot_data[num - 1])[0]
+        Ty = self.tarot_data[num - 1][key]
         Key_result = f"{key}逆位" if Ty else f"{key}正位"
-        self.list_tarot[num - 1] = Key_result
+        if Key_result not in self.list_tarot:
+            self.list_tarot[num - 1] = Key_result
+        else:
+            return
         return Key_result, DATA[Key_result]
 
 

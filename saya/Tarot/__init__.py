@@ -3,7 +3,7 @@ import asyncio
 
 from loguru import logger
 from graia.saya import Saya, Channel
-from graia.ariadne.message.element import Image
+from graia.ariadne.message.element import Image, Source
 from graia.broadcast.interrupt.waiter import Waiter
 from graia.broadcast.interrupt import InterruptControl
 from graia.ariadne.event.message import GroupMessage, MessageEvent, FriendMessage
@@ -47,7 +47,9 @@ inc = InterruptControl(bcc)
 )
 async def main(event: MessageEvent):
     tarot = Tarot(str(event.sender.id))
-    await autoSendMessage(event.sender, "就这样你走入了占卜店种，少女面带着微笑说着：“前辈既然来了，不如抽几张塔罗牌看看运势呢~”")
+    await autoSendMessage(
+        event.sender, "就这样你走入了占卜店种，少女面带着微笑说着：“前辈既然来了，不如抽几张塔罗牌看看运势呢~”(输入/选择[数字]，如/选择1)"
+    )
     draw_bytes = get_bytes(await asyncio.to_thread(draw_tarot, tarot.list_tarot))
     await autoSendMessage(event.sender, Image(data_bytes=draw_bytes))
 
@@ -63,9 +65,15 @@ async def main(event: MessageEvent):
             )
         ],
     )
-    async def reply_ling(choose: RegexResult, wait_event: MessageEvent):
+    async def reply_ling(
+        choose: RegexResult, wait_event: MessageEvent, waite_source: Source
+    ):
         logger.info(f"==> {choose}{wait_event.sender.id}{event.sender.id}")
         if wait_event.sender.id != event.sender.id:
+            return
+        res = int(choose.result.asDisplay())
+        if res > 22 or res < 1:
+            await autoSendMessage(wait_event.sender, "前辈！没有这张塔罗牌的！", waite_source)
             return
         return int(choose.result.asDisplay())
 
@@ -73,6 +81,8 @@ async def main(event: MessageEvent):
         for i in range(3):
             res = await asyncio.wait_for(inc.wait(reply_ling), 30)
             card = tarot.choose(res)
+            if not card:
+                continue
             img = await asyncio.to_thread(draw_tarot, tarot.list_tarot)
             await autoSendMessage(
                 event.sender, f"唔。。前辈这次抽到的是【{card[0]}】呢，这代表着\n————————\n{card[1]}"
