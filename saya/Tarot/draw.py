@@ -75,9 +75,9 @@ def draw_tarot(list_tarot: list[str]):
             color="#3F4C60",
         )
     for i in range(8):
-        sr = changeCountL(a)
         card = TAROT_DATA[list_tarot[a]]
         a += 1
+        sr = changeCountL(a)
         canvas.paste(card, (40 + i * 180, 680))
         start = 50 if len(sr) > 2 else 65
         draw.text(
