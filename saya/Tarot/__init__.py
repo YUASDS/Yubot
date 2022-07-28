@@ -48,7 +48,7 @@ inc = InterruptControl(bcc)
 async def main(event: MessageEvent):
     tarot = Tarot(str(event.sender.id))
     await autoSendMessage(
-        event.sender, "就这样你走入了占卜店种，少女面带着微笑说着：“前辈既然来了，不如抽几张塔罗牌看看运势呢~”(输入/选择[数字]，如/选择1)"
+        event.sender, "就这样你走入了占卜店中，少女面带着微笑说着：“前辈既然来了，不如抽几张塔罗牌看看运势呢~”(输入/选择[数字]，如/选择1)"
     )
     draw_bytes = get_bytes(await asyncio.to_thread(draw_tarot, tarot.list_tarot))
     await autoSendMessage(event.sender, Image(data_bytes=draw_bytes))
@@ -87,10 +87,16 @@ async def main(event: MessageEvent):
                 continue
             img = await asyncio.to_thread(draw_tarot, tarot.list_tarot)
             await autoSendMessage(
-                event.sender, f"唔。。前辈这次抽到的是【{card[0]}】呢，这代表着\n————————\n{card[1]}"
+                event.sender,
+                (
+                    f"唔。。前辈这次抽到的是【{card[0]}】呢，这代表着\n————————\n{card[1]}",
+                    Image(data_bytes=get_bytes(img)),
+                ),
             )
             if i < 2:
-                if "逆位" in card[0]:
+                if card[0] in ["恶魔正位", "月亮正位", "塔正位", "塔逆位"] and (
+                    "逆位" in card[0] and "恶魔逆位" not in card[0]
+                ):
                     await autoSendMessage(
                         event.sender, "唔。。看起来前辈似乎不太好运的样子呢，不过不要担心，这并不是结局哦，所以前辈，再来一次吧！"
                     )
@@ -102,7 +108,6 @@ async def main(event: MessageEvent):
                     "前辈抽出了第三张塔罗牌了，看来这次占卜已经结束了呢，不过不管好运还是坏运，千音都会陪着前辈的！",
                 )
             i += 1
-            await autoSendMessage(event.sender, Image(data_bytes=get_bytes(img)))
     except asyncio.TimeoutError:
         return await autoSendMessage(
             event.sender, "“前辈，真是笨蛋！。。”少女看着你一动不动，于是有点嗔怒的收起了塔罗牌。"

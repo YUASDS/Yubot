@@ -51,7 +51,7 @@ async def safeSendGroupMessage(
 
 async def autoSendMessage(
     target: Union[Member, Friend, Group, str, int, Client, Stranger],
-    message: Union[MessageChain, Iterable[Element], Element, str],
+    message: Union[MessageChain, Iterable[Element], Element, str, list, tuple],
     quote: Optional[Union[Source, int]] = None,
 ) -> BotMessage:  # type: ignore
     """根据输入的目标类型自动选取发送好友信息或是群组信息"""
