@@ -48,7 +48,8 @@ inc = InterruptControl(bcc)
 async def main(event: MessageEvent):
     tarot = Tarot(str(event.sender.id))
     await autoSendMessage(
-        event.sender, "就这样你走入了占卜店中，少女面带着微笑说着：“前辈既然来了，不如抽几张塔罗牌看看运势呢~”(输入/选择[数字]，如/选择1)"
+        event.sender,
+        "就这样你走入了占卜店中，少女面带着微笑说着：“前辈既然来了，不如抽三张塔罗牌看看今天的运势哦~”(输入三次/选择[数字]抽取三张塔罗牌，如/选择1)",
     )
     draw_bytes = get_bytes(await asyncio.to_thread(draw_tarot, tarot.list_tarot))
     await autoSendMessage(event.sender, Image(data_bytes=draw_bytes))
@@ -94,7 +95,7 @@ async def main(event: MessageEvent):
                 ),
             )
             if i < 2:
-                if card[0] in ["恶魔正位", "月亮正位", "塔正位", "塔逆位"] and (
+                if card[0] in ["恶魔正位", "月亮正位", "塔正位", "塔逆位"] or (
                     "逆位" in card[0] and "恶魔逆位" not in card[0]
                 ):
                     await autoSendMessage(
