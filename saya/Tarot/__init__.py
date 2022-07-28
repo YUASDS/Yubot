@@ -81,7 +81,7 @@ async def main(event: MessageEvent):
     i = 0
     try:
         while i < 3:
-            res = await asyncio.wait_for(inc.wait(reply_ling), 30)
+            res = await asyncio.wait_for(inc.wait(reply_ling), 60)
             card = tarot.choose(res)
             if not card:
                 await autoSendMessage(event.sender, "唔。。前辈!这张卡已经抽过了！")
