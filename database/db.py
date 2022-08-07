@@ -211,7 +211,7 @@ async def add_answer(qq: str):
 
 
 class favor:
-    def __init__(self, favors) -> None:
+    def __init__(self, favors: int) -> None:
         self.favors = favors
         self.level = self.get_level()[0]
         self.res = self.get_level()[1]

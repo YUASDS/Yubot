@@ -1,12 +1,29 @@
 import contextlib
+from datetime import date, datetime
 import time
 from typing import Union
+from pydantic import BaseModel
+
+
+class Response(BaseModel):
+    id: int
+    title: str
+    kp_qq: str
+    kp_name: str
+    start_time: Union[datetime, date]
+    last_time: str
+    minper: int
+    maxper: int
+    tags: str
+    des: str
+    players: list[int] = []
 
 
 trance_dict = {
     "ID": "id",
     "团名": "title",
     "主持人QQ": "kp_qq",
+    "主持人昵称": "kp_name",
     "开始时间": "start_time",
     "持续时间": "last_time",
     "最少人数": "minper",

@@ -53,6 +53,8 @@ async def main(head: RegexResult, event: MessageEvent, Source_msg: Source):
         msg = head.result.asDisplay()
     else:
         msg = ""
+    if "生日" in msg:
+        return
     source = event.sender
     flags, result = await get_reply(msg=msg, qq=source.id)
     if not flags:

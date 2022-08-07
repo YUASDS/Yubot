@@ -14,8 +14,9 @@ from graia.ariadne.message.parser.twilight import (
 )
 from loguru import logger
 
+
 from .core import search, change
-from .analysis import Analysis
+from .analysis import Analysis, Response
 
 from util.sendMessage import autoSendMessage, autoForwMessage
 from util.control import Permission, Interval
@@ -49,13 +50,17 @@ action_dict = {
 
 async def get_data_list(response_data: list):
     msg_list = []
+    logger.debug(response_data)
     for data in response_data:
         if not isinstance(data, dict):
             msg_list.append(data)
             continue
+        # response_today = Response(**data)
+        # logger.info(response_today)
         data["start_time"] = time.strftime(
-            "%Y年%m月%d日", time.strptime(data["start_time"], "%Y-%m-%d")
+            "%Y年%m月%d日", time.strptime(data["start_time"][:10], "%Y-%m-%d")
         )
+
         msg = f"""ID: {data["id"]}
 团名-{data["title"]}
 主持人昵称-{data["kp_name"]}
@@ -66,7 +71,7 @@ async def get_data_list(response_data: list):
 最大人数-{data["maxper"]}
 标签-{data["tags"]}
 介绍-{data['des']}"""
-        # await autoSendMessage(event.sender, data)
+
         total = len(data["des"])
         if total > 500:
             img = await create_image(msg)
@@ -119,7 +124,14 @@ async def main(
             "关于跑团公示板，请前往\nhttps://yuasds.gitbook.io/yin_book/functions/graia/pao-tuan-gong-shi-ban\n查看详情哦",
         )
     ana = Analysis(mode)
-    data = ana.analyze(text)
+    try:
+        data = ana.analyze(text)
+    except ValueError as e:
+        e = str(e)
+        err_str = e[e.index("'") + 1 : -1]
+        return await autoSendMessage(
+            event.sender, f"解析失败，前辈请检测一下在\n【{err_str}】\n附近的错误哦~"
+        )
     logger.debug(data)
     if mode == "search":
         try:
@@ -140,20 +152,27 @@ async def main(
         data["kp_name"] = sender_name  # type: ignore
         response = await change(mode, data)
         if response.get("succ"):
-            return await autoSendMessage(event.sender, "前辈需要的鸽笼信息已经添加成功了哦~")
+            return await autoSendMessage(
+                event.sender, f"前辈需要的鸽笼信息已经添加成功了哦~\n前辈的鸽笼ID为【{response.get('data')}】"
+            )
         return await autoSendMessage(event.sender, response["err_msg"])
     elif mode == "delete":
-        new_data = {"id": data["id"], "qq": event.sender.id}
+        new_data = {"id": [data["id"]], "qq": event.sender.id}
         response = await change(mode, new_data)
         if response.get("succ"):
-            return await autoSendMessage(event.sender, "前辈已经把鸽笼成功删除了哦~")
+            if response.get("data")[0]:  # type: ignore
+                return await autoSendMessage(event.sender, "前辈已经把鸽笼成功删除了哦~")
+            else:
+                return await autoSendMessage(event.sender, "鸽笼删除失败，前辈检测一下ID是否正确哦~")
+
         return await autoSendMessage(event.sender, response["err_msg"])
     elif mode == "update":
-        data["kp_name"] = sender_name  # type: ignore
+        # data["kp_name"] = sender_name  # type: ignore
+        logger.debug(data)
         response = await change(mode, data)
         if not response.get("succ"):
             return await autoSendMessage(event.sender, response["err_msg"])
         data_get = response["data"]
-        new_list = ["前辈修改前团本信息", data_get[0], "前辈修改后团本信息", data_get[1]]
+        new_list = ["这是前辈修改前团本信息哦~", data_get[0], "这里是前辈修改后团本信息~", data_get[1]]
         msg_list = await get_data_list(new_list)
         return await autoForwMessage(event.sender, msg_list, sender_name)  # type: ignore
