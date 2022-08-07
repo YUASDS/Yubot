@@ -56,7 +56,8 @@ async def main(source: Source, event: MessageEvent):
         await add_favor(qid, 15, True)
 
         await autoSendMessage(
-            event.sender, "“好的~感谢前辈的祝福哦~和去年一样，今年前辈也会陪着千音的，对吧？”少女笑着说道，“”"
+            event.sender,
+            "“好的~感谢前辈的祝福哦~和之前一样，以后前辈也会陪着千音的，对吧？”少女笑着说道，随后拉起你的手“走吧一起去吃蛋糕吧~”",
         )
     else:
         times = DATA[qid].get("birthday")
