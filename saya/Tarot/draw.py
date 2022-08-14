@@ -122,7 +122,7 @@ class Tarot:
             {key: random.randint(0, 1)} for key in CARD_LIST
         ]
         random.shuffle(self.tarot_data)
-        print(self.tarot_data)
+        logger.debug(self.tarot_data)
 
     def choose(self, num: int):
         key = list(self.tarot_data[num - 1])[0]
