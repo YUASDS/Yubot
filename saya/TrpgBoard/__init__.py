@@ -45,6 +45,9 @@ action_dict = {
     "鸽笼删除": "delete",
     "当前鸽笼": "search",
     "我的鸽笼": "search",
+    "申请加入": "join",
+    "邀请玩家": "invite",
+    "退出鸽笼": "quit",
 }
 
 
@@ -88,7 +91,7 @@ async def get_data_list(response_data: list):
             Twilight(
                 [
                     RegexMatch("/"),
-                    "head" @ RegexMatch("鸽笼添加|鸽笼开团|鸽笼修改|鸽笼删除|鸽笼查询|我的鸽笼|当前鸽笼"),
+                    "head" @ RegexMatch("鸽笼添加|鸽笼开团|鸽笼修改|鸽笼删除|鸽笼查询|我的鸽笼|当前鸽笼|申请加入"),
                     "anythings" @ WildcardMatch().flags(re.DOTALL),
                 ]
             )
@@ -176,3 +179,39 @@ async def main(
         new_list = ["这是前辈修改前团本信息哦~", data_get[0], "这里是前辈修改后团本信息~", data_get[1]]
         msg_list = await get_data_list(new_list)
         return await autoForwMessage(event.sender, msg_list, sender_name)  # type: ignore
+    elif mode == "join":
+        new_data = {
+            "id": [data["id"]],
+            "player": {"nick": sender_name, "qq": event.sender.id},
+        }
+        response = await change(mode, new_data)
+        if not response.get("succ"):
+            return await autoSendMessage(event.sender, response["err_msg"])
+        if response.get("data")[0]:  # type: ignore
+            return await autoSendMessage(event.sender, "前辈已经成功申请了哦~")
+        else:
+            return await autoSendMessage(event.sender, "申请失败，可能为id不存在、团已满人、或者重复加入哦~")
+    elif mode == "quit":
+        new_data = {
+            "id": [data["id"]],
+            "player": {"nick": sender_name, "qq": event.sender.id},
+        }
+        response = await change(mode, new_data)
+        if not response.get("succ"):
+            return await autoSendMessage(event.sender, response["err_msg"])
+        if response.get("data")[0]:  # type: ignore
+            return await autoSendMessage(event.sender, "前辈已经成功退出鸽笼了哦~")
+        else:
+            return await autoSendMessage(event.sender, "退出失败，可能没有这个团哦~")
+    elif mode == "invite":
+        new_data = {
+            "id": [data["id"]],
+            "player": {"nick": sender_name, "qq": event.sender.id},
+        }
+        response = await change(mode, new_data)
+        if not response.get("succ"):
+            return await autoSendMessage(event.sender, response["err_msg"])
+        if response.get("data")[0]:  # type: ignore
+            return await autoSendMessage(event.sender, "前辈已经成功退出鸽笼了哦~")
+        else:
+            return await autoSendMessage(event.sender, "退出失败，可能没有这个团哦~")
