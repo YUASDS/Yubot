@@ -113,6 +113,6 @@ async def main(event: MessageEvent):
         return await autoSendMessage(
             event.sender, "“前辈，真是笨蛋！。。”少女看着你一动不动，于是有点嗔怒的收起了塔罗牌。"
         )
-    img = await asyncio.to_thread(last_draw, tarot.list_tarot)
+    img = await asyncio.to_thread(last_draw, tarot.result)
     return await autoSendMessage(event.sender, Image(data_bytes=get_bytes(img)))
     """"""

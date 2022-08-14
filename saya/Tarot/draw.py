@@ -122,17 +122,19 @@ class Tarot:
             {key: random.randint(0, 1)} for key in CARD_LIST
         ]
         random.shuffle(self.tarot_data)
+        self.result: list[str] = []
         logger.debug(self.tarot_data)
 
     def choose(self, num: int):
         key = list(self.tarot_data[num - 1])[0]
         Ty = self.tarot_data[num - 1][key]
-        Key_result = f"{key}逆位" if Ty else f"{key}正位"
-        if Key_result not in self.list_tarot:
-            self.list_tarot[num - 1] = Key_result
+        key_result = f"{key}逆位" if Ty else f"{key}正位"
+        self.result.append(key_result)
+        if key_result not in self.list_tarot:
+            self.list_tarot[num - 1] = key_result
         else:
             return
-        return Key_result, DATA[Key_result]
+        return key_result, DATA[key_result]
 
 
 def get_bytes(canvas):
