@@ -121,6 +121,7 @@ class Tarot:
         self.tarot_data: list[dict[str, int]] = [
             {key: random.randint(0, 1)} for key in CARD_LIST
         ]
+        random.shuffle(self.tarot_data)
         print(self.tarot_data)
 
     def choose(self, num: int):
@@ -150,6 +151,7 @@ def get_bytes(canvas):
 
 if __name__ == "__main__":
     lis = ["魔术师正位", "世界正位", "太阳正位"]
+    Tarot("13")
     try:
         res = last_draw(lis)
         res.show()
