@@ -11,7 +11,6 @@ data: dict = ujson.loads(path.read_text(encoding="utf-8"))
 
 
 api_key = data.get("api_key")
-print(api_key)
 base_url = "http://arclight.space:45445"
 
 
