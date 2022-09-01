@@ -13,7 +13,7 @@ from graia.ariadne.message.parser.twilight import (
     RegexResult,
 )
 
-from util.control import Permission, Interval
+from util.control import Permission, Interval, DaylyLimit
 from util.sendMessage import autoSendMessage
 from config import COIN_NAME
 from database.db import reduce_gold, add_gold
@@ -50,6 +50,7 @@ inc = InterruptControl(bcc)
             Permission.restricter(func),
             Permission.require(),
             Interval.require(),
+            DaylyLimit.DayCheck(func, 10),
         ],
     )
 )
