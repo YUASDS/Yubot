@@ -45,8 +45,8 @@ async def main(event: MessageEvent, text: RegexResult):
             sender, "前辈还没有设置apikey哦~请使用'/设置续写apikey'来设置apikey吧~"
         )
     caiyun = CaiyunAi(ai_apikey)
-
     caiyun.content = text.result.asDisplay()
+    await autoSendMessage(sender, "千音收到了，正在开始续写哦~")
     await caiyun.next()
     caiyun_dict[num] = caiyun
     new_list = [
@@ -97,7 +97,7 @@ async def set_apikey(event: MessageEvent, text: RegexResult, source: Source):
             set_key("group", sender_id, apikey)
         else:
             set_key("friend", sender_id, apikey)
-        await autoSendMessage(sender, "apikey已设置！", source)
+        await autoSendMessage(sender, "apikey设置好了哦~", source)
     else:
         await autoSendMessage(
             sender,
