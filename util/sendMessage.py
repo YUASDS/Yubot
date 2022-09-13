@@ -92,7 +92,7 @@ async def autoForwMessage(
     if isinstance(message, (str, Element, MessageChain)):
         message = [
             message,
-        ]  # type: ignore
+        ]
 
     fwd_nodeList = [
         ForwardNode(
@@ -110,7 +110,6 @@ async def autoForwMessage(
         )
         for i in message
     ]
-    # logger.debug(fwd_nodeList)
     finish_message = MessageChain.create(Forward(nodeList=fwd_nodeList))
     return await autoSendMessage(target, finish_message)
 
