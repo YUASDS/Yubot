@@ -22,7 +22,7 @@ from graia.ariadne.model import Friend, Member, MemberPerm
 from config import (
     user_list,
     yaml_data,
-    group_data,
+    group_list,
     group_data,
     change_config,
 )
@@ -147,7 +147,7 @@ class Permission:
                     yaml_data["Saya"][func] = {"Disabled": False}
                     change_config(yaml_data)
                 if (
-                    str(group.id) in group_data["black"]  # 黑名单群聊
+                    str(group.id) in group_list["black"]  # 黑名单群聊
                     or func in group_data[str(group.id)]["DisabledFunc"]
                     or yaml_data["Saya"][func]["Disabled"]
                 ):  # 群组禁用
