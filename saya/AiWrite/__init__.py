@@ -1,287 +1,133 @@
 import os
-import re
 
 from graia.saya import Saya, Channel
-from graia.ariadne.message.chain import MessageChain
-from graia.ariadne.model import Group, Member
-from graia.broadcast.interrupt import InterruptControl
-from graia.ariadne.message.element import Plain, At
-from graia.saya.builtins.broadcast.schema import ListenerSchema
-from graia.ariadne.event.message import GroupMessage
-from graia.ariadne.message.parser.twilight import (
-    Twilight,
-    FullMatch,
-    WildcardMatch,
-    RegexResult,
-)
+from graia.ariadne.model import Member
+from graia.ariadne.message.element import Source
+from graia.ariadne.event.message import MessageEvent
+from graia.ariadne.message.parser.twilight import RegexResult
 
-from util.control import Permission, Interval
-from util.sendMessage import safeSendGroupMessage
-from config import COIN_NAME
-from database.db import reduce_gold
-from .novel_data import get_cont_continuation, load_config, save_config
+from util.sendMessage import autoForwMessage, autoSendMessage
+from util.SchemaManager import Schema
+from .novel_data import CaiyunAi, model_list
+from .config import get_key, set_key
 
 func = os.path.dirname(__file__).split("\\")[-1]
-
 
 saya = Saya.current()
 channel = Channel.current()
 channel.name(func)
+schema = Schema(channel)
 
-bcc = saya.broadcast
-inc = InterruptControl(bcc)
-
-config_path = os.path.join(os.path.dirname(__file__), "naconfig.json")
-
-if not os.path.exists(config_path):
-    with open(config_path, "w", encoding="utf8") as f:
-        f.write("{}")
-config = load_config(config_path)
-
-sv_help = """
-基于彩云小梦的小说续写功能
-[/续写 标题(可选)|续写内容] 彩云小梦续写小说
-[/默认续写迭代 (迭代次数)] 修改本群默认续写迭代次数，默认为3
-[/默认续写模型 (模型名)] 修改本群默认续写模型，默认为小梦0号
+sv_help = """基于彩云小梦的小说续写功能
+[/续写(续写内容)] 彩云小梦续写小说
+[/剧情选择(数字)] 选择剧情分支
+[/设置续写模型(模型名)] 修改本群默认续写彩云小梦模型，默认为小梦0号
 [/设置续写apikey] 设置本群apikey，具体指南请发送该命令查看
-""".strip()
-
-model_list = {
-    "小梦0号": "60094a2a9661080dc490f75a",
-    "小梦1号": "601ac4c9bd931db756e22da6",
-    "纯爱小梦": "601f92f60c9aaf5f28a6f908",
-    "言情小梦": "601f936f0c9aaf5f28a6f90a",
-    "玄幻小梦": "60211134902769d45689bf75",
-}
-# default_key="602c8c0826a17bcd889faca7"    #already banned
-
+[/结束续写] 结束本次续写"""
 templete = {"iter": 3, "model": "小梦0号", "token": ""}
 
+caiyun_dict: dict[str, CaiyunAi] = {}
 
-@channel.use(
-    ListenerSchema(
-        listening_events=[GroupMessage],
-        inline_dispatchers=[
-            Twilight(
-                [
-                    FullMatch("/续写"),
-                    "text" @ WildcardMatch().flags(re.DOTALL),
-                ]
-            )
-        ],
-        decorators=[
-            Permission.restricter(func),
-            Permission.require(),
-            Interval.require(),
-        ],
-    )
-)
-async def main(group: Group, member: Member, text: RegexResult):
 
-    gid = str(group.id)
-    if gid not in config:
-        config[gid] = templete
-        save_config(config, config_path)
-    if text.matched:
-        if not config[gid]["token"]:
-            return await safeSendGroupMessage(
-                group,
-                MessageChain.create(
-                    [
-                        At(member.id),
-                        Plain("群里还没有设置apikey哦，请使用‘设置续写apikey’指令来设置本群apikey开启续写~"),
-                    ]
-                ),
-            )
-
-        mid = model_list[config[gid]["model"]]
-        iter = config[gid]["iter"]
-        token = config[gid]["token"]
-        text = text.result.asDisplay()
-        title = ""
-        if "|" in text:
-            title = text.split("|")[0]
-            text = text.split("|")[1]
-        if not await reduce_gold(str(member.id), 5):
-            await safeSendGroupMessage(
-                group,
-                MessageChain.create([At(member.id), Plain(f" 前辈似乎没有足够的{COIN_NAME}哦。")]),
-            )
-        else:
-            try:
-                await safeSendGroupMessage(
-                    group,
-                    MessageChain.create([At(member.id), Plain("\n稍等片刻，千音这就开始哦~")]),
-                )
-                res = await get_cont_continuation(
-                    text, token, title=title, iter=iter, mid=mid
-                )
-                await safeSendGroupMessage(
-                    group,
-                    MessageChain.create([At(member.id), Plain("\n" + res)]),
-                )
-            except Exception as e:
-                await safeSendGroupMessage(
-                    group,
-                    MessageChain.create([At(member.id), f"\n发生错误：{e}"]),
-                )
+@schema.use(("/续写", ["text"]))
+async def main(event: MessageEvent, text: RegexResult):
+    sender = event.sender
+    if not text.result:
+        return await autoSendMessage(sender, sv_help)
+    if isinstance(sender, Member):
+        ai_apikey = get_key("group", sender.group.id)
+        num = str(sender.group.id)
     else:
-        await safeSendGroupMessage(
-            group,
-            MessageChain.create([At(member.id), f"\n{sv_help}"]),
+        num = str(sender.id)
+        ai_apikey = get_key("friend", sender.id)
+    if ai_apikey is None:
+        return await autoSendMessage(
+            sender, "前辈还没有设置apikey哦~请使用'/设置续写apikey'来设置apikey吧~"
         )
+    caiyun = CaiyunAi(ai_apikey)
+
+    caiyun.content = text.result.asDisplay()
+    await caiyun.next()
+    caiyun_dict[num] = caiyun
+    new_list = [
+        "当前续写结果：",
+        caiyun.content,
+        "请选择接下来的剧情分支哦~(使用/剧情选择+数字)",
+    ] + caiyun.contents
+    await autoForwMessage(sender, new_list, caiyun.model)  # type:ignore
 
 
-@channel.use(
-    ListenerSchema(
-        listening_events=[GroupMessage],
-        inline_dispatchers=[
-            Twilight([FullMatch("/设置续写apikey"), "text" @ WildcardMatch()])
-        ],
-        decorators=[
-            Permission.restricter(func),
-            Permission.require(),
-            Interval.require(),
-        ],
-    )
-)
-async def APIKEY(group: Group, member: Member, text: RegexResult):
+@schema.use(("/剧情选择", {"choose": "\\d+"}))
+async def choose(event: MessageEvent, choose: RegexResult, source: Source):
+    sender = event.sender
+    text = choose.result.asDisplay()  # type:ignore
+    res = int(text)
+    sender = event.sender
+    sender_id = str(sender.group.id) if isinstance(sender, Member) else str(sender.id)
+    caiyun = caiyun_dict.get(sender_id, None)
+    if caiyun is None:
+        return await autoSendMessage(sender, "请先开始续写哦~", source)
+    if res > len(caiyun.contents):
+        return await autoSendMessage(sender, "选择错误×\n没有这个选项哦~", source)
+    caiyun.select(res - 1)
+    await caiyun.next()
+    new_list = [
+        "当前续写结果：",
+        caiyun.content,
+        "请选择接下来的剧情分支哦~(使用/剧情选择+数字)",
+    ] + caiyun.contents
+    await autoForwMessage(sender, new_list, caiyun.model)  # type:ignore
 
-    if text.matched:
-        gid = str(group.id)
-        if gid not in config:
-            config[gid] = templete
-            save_config(config, config_path)
-        text = text.result.asDisplay()
 
+@schema.use(("/设置续写apikey", ["text"]))
+async def set_apikey(event: MessageEvent, text: RegexResult, source: Source):
+    sender = event.sender
+    if text.result:
+        apikey = text.result.asDisplay()
         try:
-            if len(text) != 24:
+            if len(apikey) != 24:
                 raise
-            int(text, base=16)
+            int(apikey, base=16)
         except Exception:
-            return await safeSendGroupMessage(
-                group,
-                MessageChain.create([At(member.id), Plain("\napikey错了哦，这样可没法设置哦")]),
-            )
-        config[gid]["token"] = str(text)
-        save_config(config, config_path)
-        await safeSendGroupMessage(
-            group,
-            MessageChain.create([At(member.id), "\n好的！千音已经知道apikey了！"]),
+            return await autoSendMessage(sender, "apikey不对哦~", source)
+        sender_id = (
+            str(sender.group.id) if isinstance(sender, Member) else str(sender.id)
         )
-    else:
-        await safeSendGroupMessage(
-            group,
-            MessageChain.create(
-                [
-                    At(member.id),
-                    "要设置apikey请在此命令后加上key！\n\napikey获取教程：\n"
-                    "1、前往 http://if.caiyunai.com/dream "
-                    "注册彩云小梦用户；\n"
-                    "2、注册完成后，在 chrome 浏览器地址栏输入(或者按下F12在控制台输入) "
-                    "javascript:alert(localStorage.cy_dream_user)，（前缀javascript需单独复制），"
-                    "弹出窗口中的uid即为apikey\n\n"
-                    "或查看https://yuasds.gitbook.io/yin_book/functions/graia/xu-xie",
-                ]
-            ),
-        )
-
-
-@channel.use(
-    ListenerSchema(
-        listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight([FullMatch("/默认续写迭代"), "text" @ WildcardMatch()])],
-        decorators=[
-            Permission.restricter(func),
-            Permission.require(Permission.GROUP_ADMIN),
-            Interval.require(),
-        ],
-    )
-)
-async def novel_iteration(group: Group, member: Member, text: RegexResult):
-    gid = str(group.id)
-    if text.matched:
-        if gid not in config:
-            config[gid] = templete
-            save_config(config, config_path)
-        text = text.result.asDisplay().strip()
-        if text.isdigit():
-            if int(text) > 5:
-                await safeSendGroupMessage(
-                    group, MessageChain.create([At(member.id), "\n最高只能迭代5次哦~"])
-                )
-                text = 5
-            if int(text) < 1:
-                await safeSendGroupMessage(
-                    group, MessageChain.create([At(member.id), "\n最少迭代1次哦~"])
-                )
-                text = 1
-            config[gid]["iter"] = int(text)
-            save_config(config, config_path)
-            await safeSendGroupMessage(
-                group, MessageChain.create([At(member.id), f"\n本群默认续写迭代次数已修改为{text}次~"])
-            )
+        if isinstance(sender, Member):
+            set_key("group", sender_id, apikey)
         else:
-            await safeSendGroupMessage(
-                group, MessageChain.create([At(member.id), "\n迭代次数仅接受纯数字哦，请重新输入~"])
-            )
+            set_key("friend", sender_id, apikey)
+        await autoSendMessage(sender, "apikey已设置！", source)
     else:
-        await safeSendGroupMessage(
-            group,
-            MessageChain.create(
-                [At(member.id), f'\n请输入默认续写迭代次数~当前默认迭代次数：{config[gid]["iter"]}']
-            ),
+        await autoSendMessage(
+            sender,
+            "要设置apikey请在此命令后加上key！\n\napikey获取教程：\n1、前往 http://if.caiyunai.com/dream 注册彩云小梦用户；\n2、注册完成后，在 chrome 浏览器地址栏输入(或者按下F12在控制台输入) javascript:alert(localStorage.cy_dream_user)，（前缀javascript也需要复制），弹出窗口中的uid即为apikey",
+            source,
         )
 
-    return
 
-
-@channel.use(
-    ListenerSchema(
-        listening_events=[GroupMessage],
-        inline_dispatchers=[Twilight([FullMatch("/默认续写模型"), "text" @ WildcardMatch()])],
-        decorators=[
-            Permission.restricter(func),
-            Permission.require(Permission.GROUP_ADMIN),
-            Interval.require(),
-        ],
+@schema.use(("/结束续写"))
+async def cancel(event: MessageEvent, source: Source):
+    sender = event.sender
+    sender_id = str(sender.group.id) if isinstance(sender, Member) else str(sender.id)
+    del caiyun_dict[sender_id]
+    await autoSendMessage(
+        sender,
+        "本次续写已经成功结束了哦~",
+        source,
     )
-)
-async def on_prefix(group: Group, member: Member, text: RegexResult):
 
-    gid = str(group.id)
-    if text.matched:
 
-        if gid not in config:
-            config[gid] = templete
-            save_config(config, config_path)
-        text = text.result.asDisplay().strip()
-        if text in model_list:
-            config[gid]["model"] = text
-            save_config(config, config_path)
-            await safeSendGroupMessage(
-                group, MessageChain.create([At(member.id), f"\n本群默认续写模型已修改为{text}~"])
-            )
-        else:
-            await safeSendGroupMessage(
-                group,
-                MessageChain.create(
-                    [
-                        At(member.id),
-                        f"\n未找到该模型，请重新输入~\n 可用模型：{','.join(model_list.keys())}",
-                    ]
-                ),
-            )
-    else:
-        mods = config[gid]["model"]
-        await safeSendGroupMessage(
-            group,
-            MessageChain.create(
-                [
-                    At(member.id),
-                    f"\n请选择默认续写模型~当前模型：{mods}\n 可用模型：{','.join(model_list.keys())}",
-                ]
-            ),
-        )
+@schema.use(("/设置续写模型", ["model"]))
+async def set_model(event: MessageEvent, model: RegexResult, source: Source):
+    sender = event.sender
+    name = model.result.asDisplay()  # type:ignore
+    sender_id = str(sender.group.id) if isinstance(sender, Member) else str(sender.id)
 
-    return
+    caiyun = caiyun_dict.get(sender_id, None)
+    if caiyun is None:
+        return await autoSendMessage(sender, "请先开始续写哦~", source)
+    if model_list.get(name, None) is None:
+        return await autoSendMessage(sender, "模型不存在哦~", source)
+    caiyun.model = name
+    return await autoSendMessage(sender, f"模型已切换为{name}", source)

@@ -1,206 +1,152 @@
-import asyncio
-import random
-import json
-
 import aiohttp
+import asyncio
+
+from loguru import logger
 
 
-def save_config(config: dict, path):
-    try:
-        with open(path, "w", encoding="utf8") as f:
-            json.dump(config, f, ensure_ascii=False, indent=2)
-        return True
-    except Exception as ex:
-        print(ex)
-        return False
-
-
-def load_config(path):
-    try:
-        with open(path, "r", encoding="utf8") as f:
-            return json.load(f)
-    except Exception:
-        return {}
-
-
-HEADER = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:82.0) Gecko/20100101 Firefox/82.0",
-    "Content-Type": "application/json;charset=utf-8",
+model_list = {
+    "小梦0号": {"name": "小梦0号", "id": "60094a2a9661080dc490f75a"},
+    "小梦1号": {"name": "小梦1号", "id": "601ac4c9bd931db756e22da6"},
+    "纯爱": {"name": "纯爱小梦", "id": "601f92f60c9aaf5f28a6f908"},
+    "言情": {"name": "言情小梦", "id": "601f936f0c9aaf5f28a6f90a"},
+    "玄幻": {"name": "玄幻小梦", "id": "60211134902769d45689bf75"},
 }
 
 
-async def get_nid(text: str, token) -> str:
-    """获得文章id"""
-    url = f"https://if.caiyunai.com/v2/novel/{token}/novel_save"
-    data = {"content": text, "title": "", "ostype": ""}
-    async with aiohttp.ClientSession() as session:
-        response = await session.post(url, json=data, headers=HEADER)
-    if response.status != 200:
-        raise Exception(f"HTTP {response.status}")
-    res = await response.json()
-    if res["status"] != 0:
-        if res["status"] == -1:
-            raise Exception("账号不存在，请更换apikey！")
-        if res["status"] == -6:
-            raise Exception("账号已被封禁，请更换apikey！")
-        else:
-            raise Exception(res["msg"])
-    # print(res)
-    return (
-        res["data"]["nid"],
-        res["data"]["novel"]["branchid"],
-        res["data"]["novel"]["firstnode"],
-    )
+class CaiyunError(Exception):
+    pass
 
 
-async def submit_to_ai(
-    text: str,
-    token,
-    novel_id: str,
-    branchid,
-    firstnode,
-    title="",
-    model_id: str = "601f92f60c9aaf5f28a6f908",
-):
-    """将文本提交到指定模型的AI，得到xid"""
-    url = f"https://if.caiyunai.com/v2/novel/{token}/novel_ai"
-    data = {
-        "nid": novel_id,
-        "content": text,
-        "uid": token,
-        "mid": model_id,
-        "title": title,
-        "ostype": "",
-        "status": "http",
-        "lang": "zh",
-        "branchid": branchid,
-        "lastnode": firstnode,
-    }
-    async with aiohttp.ClientSession() as session:
-        response = await session.post(url, json=data, headers=HEADER)
-    rsp_json = await response.json()
-    # print(rsp_json)
-    if rsp_json["status"] != 0:
-        if rsp_json["status"] == -1:
-            raise Exception("账号不存在，请更换apikey！")
-        if rsp_json["status"] == -6:
-            raise Exception("账号已被封禁，请更换apikey！")
-        elif rsp_json["status"] == -5:
-            raise Exception(
-                f"存在不和谐内容，类型：{rsp_json['data']['label']}，剩余血量：{rsp_json['data']['total_count']-rsp_json['data']['shut_count']}"
+class NetworkError(CaiyunError):
+    pass
+
+
+class AccountError(CaiyunError):
+    pass
+
+
+class ContentError(CaiyunError):
+    pass
+
+
+class CaiyunAi:
+    def __init__(self, caiyunai_apikey: str):
+        self.model: str = "小梦0号"
+        self.token: str = caiyunai_apikey
+        self.nid: str = ""
+        self.branchid: str = ""
+        self.nodeid: str = ""
+        self.nodeids: list[str] = []
+        self.last_result: str = ""
+        self.content: str = ""
+        self.contents: list[str] = []
+
+    async def next(self):
+        try:
+            if not self.nid:
+                await self.novel_save()
+            await self.add_node()
+            await self.novel_ai()
+            return ""
+        except CaiyunError as e:
+            logger.exception("error")
+            return str(e)
+        except Exception:
+            logger.exception("error")
+            return "未知错误"
+
+    def select(self, num: int):
+        self.nodeid = self.nodeids[num]
+        self.content = self.content + self.contents[num]
+
+    async def novel_save(self):
+        url = f"https://if.caiyunai.com/v2/novel/{self.token}/novel_save"
+        params = {"content": self.content, "title": "", "ostype": ""}
+        result = await self.post(url, json=params)
+        data = result["data"]
+        self.nid = data["nid"]
+        self.branchid = data["novel"]["branchid"]
+        self.nodeid = data["novel"]["firstnode"]
+        self.nodeids = [self.nodeid]
+
+    async def add_node(self):
+        url = f"https://if.caiyunai.com/v2/novel/{self.token}/add_node"
+        params = {
+            "nodeids": self.nodeids,
+            "choose": self.nodeid,
+            "nid": self.nid,
+            "value": self.content,
+            "ostype": "",
+            "lang": "zh",
+        }
+        await self.post(url, json=params)
+        self.last_result += self.content
+
+    async def novel_ai(self):
+        url = f"https://if.caiyunai.com/v2/novel/{self.token}/novel_ai"
+        params = {
+            "nid": self.nid,
+            "content": self.content,
+            "uid": self.token,
+            "mid": model_list[self.model]["id"],
+            "title": "",
+            "ostype": "",
+            "status": "http",
+            "lang": "zh",
+            "branchid": self.branchid,
+            "lastnode": self.nodeid,
+        }
+        result = await self.post(url, json=params)
+        logger.debug(result)
+        nodes = result["data"]["nodes"]
+        self.nodeids = [node["nodeid"] for node in nodes]
+        self.contents = [node["content"] for node in nodes]
+
+    async def post(self, url: str, **kwargs):
+        resp = None
+        async with aiohttp.ClientSession() as client:
+            for i in range(3):
+                try:
+                    resp = await client.post(url, timeout=60, **kwargs)
+                    if resp:
+
+                        break
+                except Exception:
+                    logger.exception(f"Error in post {url}, retry {i}/3")
+                    continue
+        if not resp or resp.status != 200:
+            raise NetworkError("『ERROR』网络出现错误了...")
+        result = await resp.json()
+        if result["status"] == 0:
+            return result
+        elif result["status"] == -1:
+            raise AccountError("『ERROR』账号不存在，请更换apikey！")
+        elif result["status"] == -6:
+            raise AccountError("『ERROR』账号已被封禁，请更换apikey！")
+        elif result["status"] == -5:
+            raise ContentError(
+                f'『WARNING』存在不和谐内容，类型：{result["data"]["label"]}，剩余血量：{result["data"]["total_count"] - result["data"]["shut_count"]}'
             )
+
         else:
-            raise Exception(rsp_json["msg"])
-    return rsp_json["data"]["nodes"] or submit_to_ai(
-        text, token, novel_id, branchid, firstnode, title, model_id
-    )
+            raise CaiyunError(result["msg"])
 
 
-# async def poll_for_result(nid: str, xid: str, token):
-#     """不断查询，直到服务器返回生成结果"""
-#     url = 'http://if.caiyunai.com/v2/novel/{token}/novel_dream_loop'
-#     data = {
-#         "nid": nid,
-#         "xid": xid,
-#         "ostype": ""
-#     }
-#     max_retry_times = 10
-#     for _ in range(max_retry_times):
-#         response = await aiohttp.post(url, json=data, headers=HEADER)
-#         rsp_json = await response.json()
-#         print(rsp_json)
-#         if rsp_json['status']!=0:
-#             if rsp_json['status']==-6:
-#                 raise Exception('账号被封禁')
-#             else:
-#                 raise Exception(rsp_json['msg'])
-#         if rsp_json['data']['count'] != 0:  # 说明还没有生成好，继续重试
-#             await asyncio.sleep(1.5)
-#             continue
-#         results = rsp_json['data']['rows']
-#         results = [res['content'] for res in results]
-#         return results
-#     raise TimeoutError('服务器响应超时')
+async def test():
+    cy = CaiyunAi("62068fc4e14e20a4cb7e8c68")
+    cy.content = "灵音真可爱"
+    await cy.next()
+    logger.debug(cy.last_result)
 
-# async def get_single_continuation(text: str, token, title="", iter=3, mid='601f92f60c9aaf5f28a6f908'):
-#     try:
-#         result = ''
-#         for i in range(iter): # 默认连续续写三次
-#             if i == 0:
-#                 result = text
-#             else:
-#                 asyncio.sleep(1)
-#             try:
-#                 nid, branchid,firstnode = await get_nid(result, token)
-#                 nodes = await submit_to_ai(result, token, nid, branchid, firstnode, title=title, model_id=mid)
-#                 #continuation = await poll_for_result(nid, xid, token)
-#                 choose=random.choice(nodes)
-#                 result += choose['content']
-#             except Exception as e:
-#                 if i:
-#                     result=f'第{i+1}次迭代中断：{e}\n 当前续写结果：{result}......'
-#                     return result
-#                 else:
-#                     raise Exception(e)
-#         if result:
-#             result="续写结果：\n" + result + '......'
-#         return result
-#     except Exception as e:
-#         raise Exception(e)
+    # for i in cy.result:
+    #     print(i + "\n")
+    cy.select(0)
+    await cy.next()
+    # for i in cy.contents:
+    #     print(i + "\n")
+    logger.debug(cy.last_result)
 
 
-async def add_node(nid, node, nodeids, token):
-    """获得文章id"""
-    url = f"https://if.caiyunai.com/v2/novel/{token}/add_node"
-    data = {
-        "nodeids": nodeids,
-        "choose": node["_id"],
-        "nid": nid,
-        "value": node["content"],
-        "ostype": "",
-        "lang": "zh",
-    }
-    async with aiohttp.ClientSession() as session:
-        response = await session.post(url, json=data, headers=HEADER)
-    if response.status != 200:
-        raise Exception(f"HTTP {response.status}")
-    res = await response.json()
-    if res["status"] != 0:
-        if res["status"] == -1:
-            raise Exception("账号不存在，请更换apikey！")
-        if res["status"] == -6:
-            raise Exception("账号已被封禁，请更换apikey！")
-        else:
-            raise Exception(res["msg"])
-    # print(res)
-    return
-
-
-async def get_cont_continuation(
-    text: str, token, title="", iter=3, mid="601f92f60c9aaf5f28a6f908"
-):
-    try:
-        result = text
-        nid, branchid, lastnode = await get_nid(result, token)
-        for i in range(iter):  # 默认连续续写三次
-            await asyncio.sleep(1)
-            try:
-                nodes = await submit_to_ai(
-                    result, token, nid, branchid, lastnode, title=title, model_id=mid
-                )
-                choose = random.choice(nodes)
-                nodeids = [node["_id"] for node in nodes]
-                result += choose["content"]
-                await add_node(nid, choose, nodeids, token)
-                lastnode = choose["_id"]
-            except Exception as e:
-                if i:
-                    result = f"第{i}次迭代中断：{e}\n 当前续写结果：{result}......"
-                    return result
-                else:
-                    raise Exception(e) from e
-        if result:
-            result = "续写结果：\n" + result + "......"
-        return result
-    except Exception as e:
-        raise Exception(e) from e
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(test())
