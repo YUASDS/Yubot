@@ -1,5 +1,6 @@
 import os
 import asyncio
+import random
 
 from loguru import logger
 from graia.saya import Saya, Channel
@@ -24,7 +25,10 @@ from util.control import Permission, Interval, DaylyLimit
 """
 
 func = os.path.dirname(__file__).split("\\")[-1]
-
+LASTREPLAY = [
+    "前辈抽出了第三张塔罗牌了，看来这次占卜已经结束了呢，不过不管好运还是坏运，千音都会陪着前辈的！",
+    "过去，现在，未来的阵列已显现于此，希望前辈能够做出正确的选择！",
+]
 
 saya = Saya.current()
 channel = Channel.current()
@@ -106,7 +110,7 @@ async def main(event: MessageEvent):
             else:
                 await autoSendMessage(
                     event.sender,
-                    "前辈抽出了第三张塔罗牌了，看来这次占卜已经结束了呢，不过不管好运还是坏运，千音都会陪着前辈的！",
+                    random.choice(LASTREPLAY),
                 )
             i += 1
     except asyncio.TimeoutError:
