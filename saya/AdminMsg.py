@@ -3,13 +3,14 @@ import random
 import asyncio
 import contextlib
 
+from loguru import logger
 from graia.saya import Saya, Channel
 from graia.ariadne.app import Ariadne
 from graia.ariadne.exception import UnknownTarget
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.model import Friend, MemberInfo, Group
 from graia.saya.builtins.broadcast.schema import ListenerSchema
-from graia.ariadne.event.message import GroupMessage, FriendMessage
+from graia.ariadne.event.message import GroupMessage, FriendMessage, MessageEvent
 from graia.ariadne.message.element import Plain, Source, Quote, At, Image
 from graia.ariadne.message.parser.twilight import (
     Twilight,
@@ -23,15 +24,14 @@ from graia.ariadne.message.parser.twilight import (
 from .AdminConfig import Agreement
 from util.text2image import create_image
 from util.control import Permission
+from util.SchemaManager import Schema
 from database.db import add_gold, give_all_gold
-from util.sendMessage import safeSendGroupMessage
+from util.sendMessage import safeSendGroupMessage, autoSendMessage
 from config import (
     COIN_NAME,
     yaml_data,
     group_list,
     save_config,
-    user_black_list,
-    group_black_list,
 )
 
 from .AdminConfig import funcList
@@ -39,12 +39,11 @@ from .AdminConfig import funcList
 bot_qq = yaml_data["Basic"]["MAH"]["BotQQ"]
 
 
-func = "AdminMsg"
-
-
 saya = Saya.current()
 channel = Channel.current()
-channel.name(func)
+channel.name("AdminMsg")
+schema = Schema(channel)
+funcList = funcList
 
 
 @channel.use(
@@ -67,17 +66,14 @@ async def get_botQueue(app: Ariadne, message: MessageChain, source: Source):
         listening_events=[FriendMessage],
         inline_dispatchers=[
             Twilight(
-                [
-                    "head" @ FullMatch("全员充值"),
-                    "anything" @ WildcardMatch(optional=True),
-                ],
+                ["head" @ FullMatch("全员充值"), "anything" @ WildcardMatch(optional=True)]
             )
         ],
+        decorators=[Permission.require(Permission.MASTER)],
     )
 )
 async def all_recharge(app: Ariadne, friend: Friend, anything: RegexResult):
-    Permission.manual(friend, Permission.MASTER)
-    if anything.matched:
+    if anything.result:
         say = anything.result.asDisplay()
         await give_all_gold(int(say))
         await app.sendFriendMessage(
@@ -98,12 +94,12 @@ async def all_recharge(app: Ariadne, friend: Friend, anything: RegexResult):
                 ]
             )
         ],
+        decorators=[Permission.require(Permission.MASTER)],
     )
 )
 async def echarge(app: Ariadne, friend: Friend, anything: RegexResult):
-    Permission.manual(friend, Permission.MASTER)
-    if anything.matched:
-        saying = anything.result.asDisplay().split()
+    if res := anything.result:
+        saying = res.asDisplay().split()
         if len(saying) == 2:
             add_gold(saying[0], int(saying[1]))
             await app.sendFriendMessage(
@@ -121,16 +117,13 @@ async def echarge(app: Ariadne, friend: Friend, anything: RegexResult):
         listening_events=[FriendMessage],
         inline_dispatchers=[
             Twilight(
-                [
-                    "head" << FullMatch("公告"),
-                    "anything" << WildcardMatch(optional=True),
-                ]
+                ["head" << FullMatch("公告"), "anything" << WildcardMatch(optional=True)]
             )
         ],
+        decorators=[Permission.require(Permission.MASTER)],
     )
 )
 async def Announcement(app: Ariadne, friend: Friend, anything: RegexResult):
-    Permission.manual(friend, Permission.MASTER)
     ft = time.time()
     if anything.matched:
         saying = anything.result.asDisplay()
@@ -143,16 +136,24 @@ async def Announcement(app: Ariadne, friend: Friend, anything: RegexResult):
         await app.sendFriendMessage(
             friend,
             MessageChain.create(
-                [Plain(f"正在开始发送公告，共有{len(groupList)}个群"), Image(data_bytes=image)]
+                [
+                    Plain(f"正在开始发送公告，共有{len(groupList)}个群\n{saying}"),
+                    Image(data_bytes=image),
+                ]
             ),
         )
         for group in groupList:
+            if group is None:
+                continue
             if group.id not in [754494359, 871115054]:
                 try:
                     await safeSendGroupMessage(
                         group.id,
                         MessageChain.create(
-                            [Plain(f"公告：{str(group.name)}\n"), Image(data_bytes=image)]
+                            [
+                                Plain(f"公告：{str(group.name)}\n{saying}"),
+                                Image(data_bytes=image),
+                            ]
                         ),
                     )
                 except Exception as err:
@@ -181,10 +182,10 @@ async def Announcement(app: Ariadne, friend: Friend, anything: RegexResult):
                 ],
             )
         ],
+        decorators=[Permission.require(Permission.MASTER)],
     )
 )
 async def add_white_group(app: Ariadne, friend: Friend, groupid: RegexResult):
-    Permission.manual(friend, Permission.MASTER)
     if groupid.matched:
         say = groupid.result.asDisplay()
         if say.isdigit():
@@ -211,10 +212,10 @@ async def add_white_group(app: Ariadne, friend: Friend, groupid: RegexResult):
                 ],
             )
         ],
+        decorators=[Permission.require(Permission.MASTER)],
     )
 )
 async def remove_white_group(app: Ariadne, friend: Friend, groupid: RegexResult):
-    Permission.manual(friend, Permission.MASTER)
     if groupid.matched:
         say = groupid.result.asDisplay()
         if say.isdigit():
@@ -244,44 +245,27 @@ async def remove_white_group(app: Ariadne, friend: Friend, groupid: RegexResult)
         await app.sendFriendMessage(friend, MessageChain.create("未输入群号"))
 
 
-@channel.use(
-    ListenerSchema(
-        listening_events=[FriendMessage],
-        inline_dispatchers=[
-            Twilight(
-                ["head" << FullMatch("拉黑用户"), "userid" << WildcardMatch(optional=True)],
-            )
-        ],
-    )
-)
-async def fadd_black_user(app: Ariadne, friend: Friend, userid: RegexResult):
-    Permission.manual(friend, Permission.MASTER)
+@schema.use(("拉黑用户", ["userid"]), permission=Permission.MASTER)
+async def fadd_black_user(app: Ariadne, event: MessageEvent, userid: RegexResult):
+    sender = event.sender
     if userid.matched:
-        say = userid.result.asDisplay()
+        say = userid.result.asDisplay()  # type: ignore
         if say.isdigit():
-            if int(say) in user_black_list:
-                await app.sendFriendMessage(
-                    friend, MessageChain.create([Plain("该用户已在黑名单中")])
-                )
+            if int(say) in group_list["black"]:
+                await autoSendMessage(sender, "该用户已在黑名单中")
             else:
-                user_black_list.append(int(say))
+                group_list["black"].append(int(say))
                 save_config()
-                await app.sendFriendMessage(
-                    friend, MessageChain.create([Plain("成功将该用户加入黑名单")])
-                )
+                await autoSendMessage(sender, "成功将该用户加入黑名单")
                 try:
                     await app.deleteFriend(int(say))
-                    await app.sendFriendMessage(
-                        friend, MessageChain.create([Plain("已删除该好友")])
-                    )
+                    await autoSendMessage(sender, "已删除该好友")
                 except Exception as e:
-                    await app.sendFriendMessage(
-                        friend, MessageChain.create([Plain(f"删除好友失败 {type(e)}")])
-                    )
+                    await autoSendMessage(sender, f"删除好友失败 {type(e)}")
         else:
-            await app.sendFriendMessage(friend, MessageChain.create("用户号仅可为数字"))
+            await autoSendMessage(sender, "用户号仅可为数字")
     else:
-        await app.sendFriendMessage(friend, MessageChain.create("未输入qq号"))
+        await autoSendMessage(sender, "未输入qq号")
 
 
 @channel.use(
@@ -292,17 +276,18 @@ async def fadd_black_user(app: Ariadne, friend: Friend, userid: RegexResult):
                 ["head" @ FullMatch("取消拉黑用户"), "userid" @ WildcardMatch(optional=True)],
             )
         ],
+        decorators=[Permission.require(Permission.MASTER)],
     )
 )
 async def fremove_block_user(app: Ariadne, friend: Friend, userid: RegexResult):
-    Permission.manual(friend, Permission.MASTER)
+
     if userid.matched:
         say = userid.result.asDisplay()
         if say.isdigit():
-            if int(say) not in user_black_list:
+            if int(say) not in group_list["black"]:
                 await app.sendFriendMessage(friend, MessageChain.create("该用户未在黑名单中"))
             else:
-                user_black_list.remove(int(say))
+                group_list["black"].remove(int(say))
                 save_config()
                 await app.sendFriendMessage(friend, MessageChain.create("成功将该用户移出白名单"))
         else:
@@ -322,17 +307,19 @@ async def fremove_block_user(app: Ariadne, friend: Friend, userid: RegexResult):
                 ]
             )
         ],
+        decorators=[Permission.require(Permission.MASTER)],
     )
 )
 async def fadd_group_black(app: Ariadne, friend: Friend, groupid: RegexResult):
-    Permission.manual(friend, Permission.MASTER)
+
     if groupid.matched:
         say = groupid.result.asDisplay()
         if say.isdigit():
-            if int(say) in group_black_list:
+            if int(say) in group_list["black"]:
                 await app.sendFriendMessage(friend, MessageChain.create("该群已在黑名单中"))
             else:
-                group_black_list.append(int(say))
+                group_list["black"].append(int(say))
+                logger.info(group_list["black"])
                 save_config()
                 await app.sendFriendMessage(friend, MessageChain.create("成功将该群加入黑名单"))
                 try:
@@ -340,7 +327,7 @@ async def fadd_group_black(app: Ariadne, friend: Friend, groupid: RegexResult):
                     await app.sendFriendMessage(friend, MessageChain.create("已退出该群"))
                 except Exception as e:
                     await app.sendFriendMessage(
-                        friend, MessageChain.create(f"退出群失败 {type(e)}")
+                        friend, MessageChain.create(f"退出群失败 {str(e)}")
                     )
         else:
             await app.sendFriendMessage(friend, MessageChain.create("群号仅可为数字"))
@@ -356,17 +343,18 @@ async def fadd_group_black(app: Ariadne, friend: Friend, groupid: RegexResult):
                 ["head" @ FullMatch("取消拉黑群"), "groupid" @ WildcardMatch(optional=True)]
             )
         ],
+        decorators=[Permission.require(Permission.MASTER)],
     )
 )
 async def fremove_group_black(app: Ariadne, friend: Friend, groupid: RegexResult):
-    Permission.manual(friend, Permission.MASTER)
+
     if groupid.matched:
         say = groupid.result.asDisplay()
         if say.isdigit():
-            if int(say) not in group_black_list:
+            if int(say) not in group_list["black"]:
                 await app.sendFriendMessage(friend, MessageChain.create("该群未在黑名单中"))
             else:
-                group_black_list.remove(int(say))
+                group_list["black"].remove(int(say))
                 save_config()
                 await app.sendFriendMessage(friend, MessageChain.create("成功将该群移出黑名单"))
         else:
@@ -388,13 +376,14 @@ async def fremove_group_black(app: Ariadne, friend: Friend, groupid: RegexResult
 )
 async def gadd_black_user(app: Ariadne, group: Group, at: ElementResult):
     if at.matched:
-        user = at.result.target
-        if user in user_black_list:
+        at_now: At = at.result  # type: ignore
+        user = at_now.target
+        if user in group_list["black"]:
             await safeSendGroupMessage(
                 group, MessageChain.create([At(user), Plain(" 已在黑名单中")])
             )
         else:
-            user_black_list.append(user)
+            group_list["black"].append(user)
             save_config()
             await safeSendGroupMessage(
                 group, MessageChain.create([Plain("成功将 "), At(user), Plain(" 加入黑名单")])
@@ -423,11 +412,12 @@ async def gadd_black_user(app: Ariadne, group: Group, at: ElementResult):
 )
 async def gremove_block_user(group: Group, at: ElementResult):
     if at.matched:
-        user = at.result.target
-        if user not in user_black_list:
+        at_now: At = at.result  # type: ignore
+        user = at_now.target
+        if user not in group_list["black"]:
             await safeSendGroupMessage(group, MessageChain.create(f"{user} 未在黑名单中"))
         else:
-            user_black_list.remove(user)
+            group_list["black"].remove(user)
             save_config()
             await safeSendGroupMessage(
                 group, MessageChain.create([Plain("成功将 "), At(user), Plain(" 移出黑名单")])
@@ -440,10 +430,10 @@ async def gremove_block_user(group: Group, at: ElementResult):
     ListenerSchema(
         listening_events=[FriendMessage],
         inline_dispatchers=[Twilight([FullMatch("群名片修正")])],
+        decorators=[Permission.require(Permission.MASTER)],
     )
 )
 async def group_card_fix(app: Ariadne, friend: Friend):
-    Permission.manual(friend, Permission.MASTER)
     grouplits = await app.getGroupList()
     i = 0
     for group in grouplits:
@@ -565,10 +555,11 @@ async def gset_open(group: Group, func: RegexResult):
     ListenerSchema(
         listening_events=[FriendMessage],
         inline_dispatchers=[Twilight([FullMatch("发送协议")])],
+        decorators=[Permission.require(Permission.MASTER)],
     )
 )
 async def user_agreement(app: Ariadne, friend: Friend):
-    Permission.manual(friend, Permission.MASTER)
+
     image = await create_image(Agreement["Agreement"])
     groupList = (
         [await app.getGroup(yaml_data["Basic"]["Permission"]["DebugGroup"])]
@@ -602,10 +593,11 @@ async def user_agreement(app: Ariadne, friend: Friend):
     ListenerSchema(
         listening_events=[FriendMessage],
         inline_dispatchers=[Twilight([FullMatch("清理小群")])],
+        decorators=[Permission.require(Permission.MASTER)],
     )
 )
 async def clean_group(app: Ariadne, friend: Friend):
-    Permission.manual(friend, Permission.MASTER)
+
     group_list = await app.getGroupList()
     i = 0
     for group in group_list:

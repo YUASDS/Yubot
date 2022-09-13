@@ -20,10 +20,10 @@ from graia.ariadne.message.element import Plain, Source
 from graia.ariadne.model import Friend, Member, MemberPerm
 
 from config import (
-    user_black_list,
+    user_list,
     yaml_data,
     group_data,
-    group_black_list,
+    group_data,
     change_config,
 )
 from database.db import all_sign_num, reset_sign, reset_favor_data
@@ -82,7 +82,7 @@ class Permission:
 
         if user in Admin:
             return cls.MASTER
-        elif user in user_black_list:
+        elif user in user_list["black"]:
             return cls.BANNED
         elif user_permission in [MemberPerm.Administrator, MemberPerm.Owner]:
             return cls.GROUP_ADMIN
@@ -147,7 +147,7 @@ class Permission:
                     yaml_data["Saya"][func] = {"Disabled": False}
                     change_config(yaml_data)
                 if (
-                    str(group.id) in group_black_list  # 黑名单群聊
+                    str(group.id) in group_data["black"]  # 黑名单群聊
                     or func in group_data[str(group.id)]["DisabledFunc"]
                     or yaml_data["Saya"][func]["Disabled"]
                 ):  # 群组禁用
