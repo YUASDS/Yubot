@@ -78,7 +78,7 @@ async def get_user_info(event: MessageEvent):
             [
                 Plain(f"UID：{user_info.id}"),
                 Plain(f"\n你已累计签到 {user_info.sign_num} 天"),
-                Plain(f"当前好感度为{user_info.favor}"),
+                Plain(f"\n当前好感度为{user_info.favor}"),
                 Plain(f"\n当前共有 {user_info.gold} 个{COIN_NAME}"),
                 Plain(f"\n从有记录以来你共有 {user_info.talk_num} 次发言"),
             ]
