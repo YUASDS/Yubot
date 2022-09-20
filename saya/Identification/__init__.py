@@ -42,6 +42,6 @@ async def add(data: RegexResult, event: MessageEvent):
     if data.result:
         res = data.result.asDisplay()
         DATA.append(res)
-        with open(path, "w") as f:
+        with open(path, "w", encoding="utf-8") as f:
             json.dump(DATA, f, ensure_ascii=False, indent=2)
         return await autoSendMessage(event.sender, f"添加成功！\n{res}")
