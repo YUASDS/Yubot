@@ -4,7 +4,7 @@ import aiohttp
 
 async def dicecho_search(mod):
     # 获取数据
-    url = f"https://www.dicecho.com/api/mod/?keyword={mod}"
+    url = f"https://api.dicecho.com/api/mod/?keyword={mod}"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as r:
             ret = await r.json(content_type="json", encoding="utf-8-sig")

@@ -4,7 +4,7 @@ import aiohttp
 
 async def RandomSearch():
     # 获取数据
-    api = "https://www.dicecho.com/api/mod/random?"
+    api = "https://api.dicecho.com/api/mod/random?"
     PageSet = "pageSize=12&sort%5BlastRateAt%5D=-1&tagsMode=all"
     dicecho_url = api + PageSet
     async with aiohttp.ClientSession() as session:
@@ -14,7 +14,7 @@ async def RandomSearch():
 
 
 async def random_tag_search(tag="贴贴", times=1):
-    api = "https://www.dicecho.com/api/mod/random?"
+    api = "https://api.dicecho.com/api/mod/random?"
     page = "pageSize=12&sort%5BlastRateAt%5D=-1"
     rule = "&filter%5BmoduleRule%5D=克苏鲁的呼唤"
     tags = f"&tags%5B0%5D={tag}&tagsMode=in"
