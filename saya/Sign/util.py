@@ -7,15 +7,25 @@ from pathlib import Path
 from typing import Optional, Union
 
 import httpx
+import ujson
 from PIL import Image, ImageDraw
 from PIL.ImageFont import FreeTypeFont
 from pydantic import BaseModel
+
 Ink = Union[str, int, tuple[int, int, int], tuple[int, int, int, int]]
 
-path=Path(__file__).parent.joinpath("teller.txt")
-with open(path,mode="r",encoding="utf-8") as s:
-    teller = [line.replace("\\n","\n") for line in s]
-    
+path = Path(__file__).parent.joinpath("teller.txt")
+# 读取json文件
+
+
+addition_path = ujson.load(
+    Path(__file__).parent.joinpath("刀.json").open(encoding="utf-8")
+)["刀"]
+
+with open(path, mode="r", encoding="utf-8") as s:
+    teller = [line.replace("\\n", "\n") for line in s] + addition_path
+
+
 async def get_qlogo(id: int) -> bytes:
     """获取QQ头像
     Args:
@@ -68,14 +78,14 @@ def cut_text(
             continue
         j = 0
         for ind, elem in enumerate(i):
-            if i[j:ind + 1] == i[j:]:
-                target += i[j:ind + 1] + "\n"
+            if i[j : ind + 1] == i[j:]:
+                target += i[j : ind + 1] + "\n"
                 continue
-            elif font.getlength(i[j:ind + 1]) <= line_width:
+            elif font.getlength(i[j : ind + 1]) <= line_width:
                 continue
             elif ind - j > 3:
                 if i[ind] in end_symbol and i[ind - 1] != i[ind]:
-                    target += i[j:ind + 1] + "\n"
+                    target += i[j : ind + 1] + "\n"
                     j = ind + 1
                     continue
                 elif i[ind] in start_symbol and i[ind - 1] != i[ind]:
@@ -86,11 +96,9 @@ def cut_text(
     return target.rstrip()
 
 
-def exp_bar(w: int,
-            h: int,
-            rato: float,
-            bg: Ink = "black",
-            fg: Ink = "white") -> Image.Image:
+def exp_bar(
+    w: int, h: int, rato: float, bg: Ink = "black", fg: Ink = "white"
+) -> Image.Image:
     """获取一个经验条的图片对象
     Args:
         w (int): 宽度
@@ -116,9 +124,9 @@ def exp_bar(w: int,
 
 
 def exp_bar_draw(bar_draw, h, fill, arg3):
-    '''
+    """
     draw exp
-    '''
+    """
     bar_draw.ellipse((0, 0, h, h), fill=fill)
     bar_draw.ellipse((arg3 - h, 0, arg3, h), fill=fill)
     bar_draw.rectangle((h // 2, 0, arg3 - h // 2, h), fill=fill)
@@ -135,6 +143,3 @@ class Reward(BaseModel):
 
     ico: Optional[Union[str, Path]]
     """奖励图标"""
-
-
-

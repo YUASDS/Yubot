@@ -14,7 +14,7 @@ PATH = Path(__file__).parent.joinpath(f"day/{date_today()}.json")
 if not PATH.exists():
     PATH.touch()
     PATH.write_text("{}", encoding="utf-8")
-DATA: dict = ujson.loads(PATH.read_text(encoding="utf-8"))
+DATA: dict[str, dict[str, str]] = ujson.loads(PATH.read_text(encoding="utf-8"))
 logger.info(f"{date_today()}初始化完成")
 
 
@@ -28,6 +28,12 @@ def add_data(qq: Union[int, str], key: str, value):
         DATA[qq] = {key: value}
     else:
         DATA[qq][key] = value
+
+
+def get_data(qq: Union[int, str], key: str):
+    if isinstance(qq, int):
+        qq = str(qq)
+    return DATA[qq].get(key, None)
 
 
 @channel.use(SchedulerSchema(crontabify("* 0 * * *")))
