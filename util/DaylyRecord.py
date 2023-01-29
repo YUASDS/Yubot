@@ -46,7 +46,7 @@ async def write_json():
 @channel.use(SchedulerSchema(crontabify("0 0 * * *")))
 async def refresh():
     global DATA, PATH
-    PATH = Path(__file__).parent.joinpath(f"{date_today()}.json")
+    PATH = Path(__file__).parent.joinpath(f"day/{date_today()}.json")
     if not PATH.exists():
         PATH.touch()
         PATH.write_text("{}", encoding="utf-8")
