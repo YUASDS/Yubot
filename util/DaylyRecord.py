@@ -33,6 +33,8 @@ def add_data(qq: Union[int, str], key: str, value):
 def get_data(qq: Union[int, str], key: str):
     if isinstance(qq, int):
         qq = str(qq)
+    if qq not in DATA:
+        DATA[qq] = {}
     return DATA[qq].get(key, None)
 
 
