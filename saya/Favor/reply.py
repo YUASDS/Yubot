@@ -25,6 +25,6 @@ async def get_reply(msg: str, qq: int) -> tuple[bool, list[str]]:
             return False, [""]
         return True, [random.choice(other_data["回复"])]
     if not favor_data.get(order):
-        return await greet(order, qq)  # 如果这条回复不是贴贴的
+        pass
     else:
         return await normal_favor(order, qq)
