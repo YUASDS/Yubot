@@ -9,9 +9,17 @@ from util.strings import changeCountL
 BASEPATH = Path(__file__).parent
 USER_PATH = BASEPATH.joinpath("user_data.json")
 GROUP_PATH = BASEPATH.joinpath("group_data.json")
+if not USER_PATH.exists():
+    with open(USER_PATH, "w", encoding="utf-8") as f:
+        f.write("{}")
+if not GROUP_PATH.exists():
+    with open(GROUP_PATH, "w", encoding="utf-8") as f:
+        f.write("{}")
 SHOWER_DATA: dict = ujson.loads(
     BASEPATH.joinpath("shower.json").read_text(encoding="utf-8")
 )
+
+
 GROUP_DATA: dict = ujson.loads(GROUP_PATH.read_text(encoding="utf-8"))
 USER_DATA: dict = ujson.loads(USER_PATH.read_text(encoding="utf-8"))
 
@@ -25,7 +33,7 @@ class Bath:
         return random.choice(SHOWER_DATA[bashName]["结束回复"])
 
     @staticmethod
-    def get_gift(bashName) -> str:
+    def get_gift(bashName):
         total = sum(SHOWER_DATA[bashName]["礼物"][i] for i in SHOWER_DATA[bashName]["礼物"])
         res = random.randint(1, total)
         for i in SHOWER_DATA[bashName]["礼物"]:
@@ -110,8 +118,8 @@ class ShowerGroup:
 class User:
     def __init__(self, qq: int):
         if isinstance(qq, int):
-            qq = str(qq)
-        self.qq = qq
+            qq_str = str(qq)
+        self.qq = qq_str
 
     @staticmethod
     def reset() -> None:

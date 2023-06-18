@@ -9,6 +9,9 @@ from pathlib import Path
 
 
 SETTING_PATH = Path(__file__).parent.joinpath("settings.json")
+if not SETTING_PATH.exists():
+    with open(SETTING_PATH, "w", encoding="utf-8") as f:
+        f.write('{"api_key": ""}')
 SETTING_DATA: dict = ujson.loads(SETTING_PATH.read_text(encoding="utf-8"))
 
 

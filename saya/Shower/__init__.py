@@ -87,7 +87,6 @@ async def main(
     source: Source,
     at: ElementResult,
 ):
-
     head = head.result.asDisplay()
     shower = User(member.id)
     gid = member.group.id
