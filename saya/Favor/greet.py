@@ -1,52 +1,55 @@
 import time
 import random
 from pathlib import Path
-
+from .favor import normal_favor
 import ujson
 
 from util.TimeTool import time_now
 
 
-# path = Path(__file__).parent.joinpath("ArcNight.json")
-# data: dict = json.loads(path.read_text(encoding="utf-8"))
+path = Path(__file__).parent.joinpath("other.json")
+greet_data: dict = ujson.loads(path.read_text(encoding="utf-8"))
+greet_order = ["早上好", "中午好", "晚上好", "晚安"]
 """[qq][date][conten]
 """
 
 
 def check_time() -> int:
     now_time = time.localtime().tm_hour
-    if now_time < 3:
-        return -1
-    elif now_time < 6:
-        return 0
-    elif now_time < 12:
-        return 1
-    elif now_time < 18:
-        return 2
-    else:
-        return 3
+    return now_time // 3
 
 
-def morning():
+def morning(qq: int):
     now = check_time()
-    if now < 0:
-        return
+    if now < 1:
+        return ""
     """"""
 
 
-def noon():
+def noon(qq: int):
     """"""
+    return ""
 
 
-def night():
+def night(qq: int):
     """"""
+    return ""
 
 
-func_dict = {"早上好": morning, "中午好": noon, "晚上好": night}
-
-
-async def greet(func_name: str, qq: int) -> tuple[bool, list[str]]:
+async def good_night(qq: int) -> list[str]:
     """"""
-    res = func_dict[func_name]()
-    return True, ["晚上好哦"]
-    """"""
+    now = check_time()
+    if now == 7:
+        flag, reply = await normal_favor("晚安", qq)
+        return reply
+    else:
+        reply = random.choice(greet_data["greet"]["good_night"][str(now)])
+        return [reply]
+
+
+func_dict = {"早上好": morning, "中午好": noon, "晚上好": night, "晚安": good_night}
+
+
+async def greet(func_name: str, qq: int) -> list[str]:
+    res = await func_dict[func_name](qq)
+    return res

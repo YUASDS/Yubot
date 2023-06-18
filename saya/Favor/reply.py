@@ -3,7 +3,7 @@ import random
 import re
 from typing import Union
 from pathlib import Path
-from .greet import greet
+from .greet import greet, greet_order
 from .favor import normal_favor, get_affinity
 
 FAVOR_PATH = Path(__file__).parent.joinpath("favor_chat_data.json")
@@ -25,6 +25,8 @@ async def get_reply(msg: str, qq: int) -> tuple[bool, list[str]]:
             return False, [""]
         return True, [random.choice(other_data["回复"])]
     if not favor_data.get(order):
-        pass
-    else:
-        return await normal_favor(order, qq)
+        return False, [""]
+    if order in greet_order:
+        replay = await greet(order, qq)
+        return (True, replay)
+    return await normal_favor(order, qq)

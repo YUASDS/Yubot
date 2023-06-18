@@ -7,6 +7,9 @@ from database.db import favor, get_info, add_favor, reduce_favor
 
 FAVOR_PATH = Path(__file__).parent.joinpath("favor_chat_data.json")
 COUNT_PATH = Path(__file__).parent.joinpath("count.txt")
+if not COUNT_PATH.exists():
+    with open(COUNT_PATH, "w", encoding="utf-8") as f:
+        f.write("0")
 favor_data: dict = ujson.loads(FAVOR_PATH.read_text(encoding="utf-8"))
 
 
@@ -38,7 +41,7 @@ async def normal_favor(order: str, qq: int) -> tuple[bool, list[str]]:
     level_min = favor_data[order]["min"]
     level_max = favor_data[order]["max"]
     reply = []
-    if info_favor.level > level_min:  # 如果满足最低好感度回复
+    if info_favor.level >= level_min:  # 如果满足最低好感度回复
         succ_rate = favor_data[order]["成功率"]
         rate_get = random.randint(1, 100)
         if rate_get < succ_rate:
