@@ -52,7 +52,9 @@ async def groupDataInit(app: Ariadne):
         MessageChain.create(
             [
                 Plain("YuBot-Graia成功启动，正在初始化，请稍后。"),
-                Plain(f"\n当前 {yaml_data['Basic']['BotName']} 共加入了 {groupNum} 个群"),
+                Plain(
+                    f"\n当前 {yaml_data['Basic']['BotName']} 共加入了 {groupNum} 个群"
+                ),
             ]
         ),
     )
@@ -89,7 +91,8 @@ async def groupDataInit(app: Ariadne):
 @channel.use(ListenerSchema(listening_events=[ApplicationShutdowned]))
 async def stopEvents(app: Ariadne):
     await app.sendFriendMessage(
-        yaml_data["Basic"]["Permission"]["Master"], MessageChain.create([Plain("正在关闭")])
+        yaml_data["Basic"]["Permission"]["Master"],
+        MessageChain.create([Plain("正在关闭")]),
     )
 
 
@@ -112,9 +115,11 @@ async def get_BotNewFriend(app: Ariadne, events: NewFriendRequestEvent):
                     Plain("收到添加好友事件"),
                     Plain(f"\nQQ：{events.supplicant}"),
                     Plain(f"\n昵称：{events.nickname}"),
-                    Plain(f"\n来自群：{groupname}({sourceGroup})")
-                    if sourceGroup
-                    else Plain("\n来自好友搜索"),
+                    (
+                        Plain(f"\n来自群：{groupname}({sourceGroup})")
+                        if sourceGroup
+                        else Plain("\n来自好友搜索")
+                    ),
                     Plain("\n状态：已通过申请\n"),
                     Plain(events.message) if events.message else Plain("无附加信息"),
                 ]
@@ -123,7 +128,9 @@ async def get_BotNewFriend(app: Ariadne, events: NewFriendRequestEvent):
     await asyncio.sleep(3)
     await app.sendFriendMessage(
         events.supplicant,
-        MessageChain("欢迎添加千音，请前往\nhttps://yuasds.gitbook.io/yin_book\n查看使用手册"),
+        MessageChain(
+            "欢迎添加千音，请前往\nhttps://yuasds.gitbook.io/yin_book\n查看使用手册"
+        ),
     )
 
 
@@ -132,172 +139,173 @@ async def accept(app: Ariadne, invite: BotInvitedJoinGroupRequestEvent):
     """
     被邀请入群
     """
-    if invite.sourceGroup in group_list["black"]:
-        await app.sendFriendMessage(
-            yaml_data["Basic"]["Permission"]["Master"],
-            MessageChain.create(
-                [
-                    Plain("收到邀请入群事件"),
-                    Plain(f"\n邀请者：{invite.supplicant} | {invite.nickname}"),
-                    Plain(f"\n群号：{invite.sourceGroup}"),
-                    Plain(f"\n群名：{invite.groupName}"),
-                    Plain("\n该群为黑名单群，已拒绝加入"),
-                ]
-            ),
-        )
-        await invite.reject("该群已被拉黑")
-    elif invite.sourceGroup in group_list["white"]:
-        await app.sendFriendMessage(
-            yaml_data["Basic"]["Permission"]["Master"],
-            MessageChain.create(
-                [
-                    Plain("收到邀请入群事件"),
-                    Plain(f"\n邀请者：{invite.supplicant} | {invite.nickname}"),
-                    Plain(f"\n群号：{invite.sourceGroup}"),
-                    Plain(f"\n群名：{invite.groupName}"),
-                    Plain("\n该群为白名单群，已同意加入"),
-                ]
-            ),
-        )
-        await invite.accept("")
-    else:
-        await invite.accept()
-        await app.sendFriendMessage(
-            invite.supplicant,
-            MessageChain.create(
-                Image(data_bytes=await create_image(Agreement["Agreement"]))
-            ),
-        )
-        await app.sendFriendMessage(
-            invite.supplicant,
-            MessageChain.create(
-                "欢迎添加千音，请前往\nhttps://yuasds.gitbook.io/yin_book\n查看使用手册"
-            ),
-        )
+    # if invite.sourceGroup in group_list["black"]:
+    #     await app.sendFriendMessage(
+    #         yaml_data["Basic"]["Permission"]["Master"],
+    #         MessageChain.create(
+    #             [
+    #                 Plain("收到邀请入群事件"),
+    #                 Plain(f"\n邀请者：{invite.supplicant} | {invite.nickname}"),
+    #                 Plain(f"\n群号：{invite.sourceGroup}"),
+    #                 Plain(f"\n群名：{invite.groupName}"),
+    #                 Plain("\n该群为黑名单群，已拒绝加入"),
+    #             ]
+    #         ),
+    #     )
+    #     await invite.reject("该群已被拉黑")
+    # elif invite.sourceGroup in group_list["white"]:
+    #     await app.sendFriendMessage(
+    #         yaml_data["Basic"]["Permission"]["Master"],
+    #         MessageChain.create(
+    #             [
+    #                 Plain("收到邀请入群事件"),
+    #                 Plain(f"\n邀请者：{invite.supplicant} | {invite.nickname}"),
+    #                 Plain(f"\n群号：{invite.sourceGroup}"),
+    #                 Plain(f"\n群名：{invite.groupName}"),
+    #                 Plain("\n该群为白名单群，已同意加入"),
+    #             ]
+    #         ),
+    #     )
+    #     await invite.accept("")
+    # else:
+    #     await invite.accept()
+    #     await app.sendFriendMessage(
+    #         invite.supplicant,
+    #         MessageChain.create(
+    #             Image(data_bytes=await create_image(Agreement["Agreement"]))
+    #         ),
+    #     )
+    await app.sendFriendMessage(
+        invite.supplicant,
+        MessageChain.create(
+            "欢迎添加千音，请前往\nhttps://yuasds.gitbook.io/yin_book\n查看使用手册"
+        ),
+    )
 
-        # await app.sendFriendMessage(
-        #     yaml_data["Basic"]["Permission"]["Master"],
-        #     MessageChain.create(
-        #         [
-        #             Plain("收到邀请入群事件"),
-        #             Plain(f"\n邀请者：{invite.supplicant} | {invite.nickname}"),
-        #             Plain(f"\n群号：{invite.groupId}"),
-        #             Plain(f"\n群名：{invite.groupName}"),
-        #             Plain("\n\n已自动同意")
-        #         ]
-        #     ),
-        # )
-
-        # @Waiter.create_using_function([FriendMessage])
-        # async def waiter(waiter_friend: Friend, waiter_message: MessageChain):
-        #     if waiter_friend.id == yaml_data["Basic"]["Permission"]["Master"]:
-        #         saying = waiter_message.asDisplay()
-        #         if saying == "同意":
-        #             return True
-        #         elif saying == "拒绝":
-        #             return False
-        #         else:
-        #             await app.sendFriendMessage(
-        #                 yaml_data["Basic"]["Permission"]["Master"],
-        #                 MessageChain.create([Plain("请发送同意或拒绝")]),
-        #             )
-
-        # try:
-        #     if await asyncio.wait_for(inc.wait(waiter), timeout=300):
-        #         if invite.groupId not in group_list["white"]:
-        #             group_list["white"].append(invite.groupId)
-        #             save_config()
-        #         await invite.accept()
-        #         await app.sendFriendMessage(
-        #             yaml_data["Basic"]["Permission"]["Master"],
-        #             MessageChain.create([Plain("已同意申请并加入白名单")]),
-        #         )
-        #     else:
-        #         await invite.reject("主人拒绝加入该群")
-        #         await app.sendFriendMessage(
-        #             yaml_data["Basic"]["Permission"]["Master"],
-        #             MessageChain.create([Plain("已拒绝申请")]),
-        #         )
-
-        # except asyncio.TimeoutError:
-        #     if yaml_data["Basic"]["Permission"]["DefaultAcceptInvite"]:
-        #         if invite.groupId not in group_list["white"]:
-        #             group_list["white"].append(invite.groupId)
-        #             save_config()
-        #         await invite.accept()
-        #         await app.sendFriendMessage(
-        #             yaml_data["Basic"]["Permission"]["Master"],
-        #             MessageChain.create([Plain("已同意申请并加入白名单")]),
-        #         )
-        #     else:
-        #         await invite.reject("由于主人长时间未审核，已自动拒绝")
-        #         await app.sendFriendMessage(
-        #             yaml_data["Basic"]["Permission"]["Master"],
-        #             MessageChain.create([Plain("申请超时已自动拒绝")]),
-        #         )
+    # await app.sendFriendMessage(
+    #     yaml_data["Basic"]["Permission"]["Master"],
+    #     MessageChain.create(
+    #         [
+    #             Plain("收到邀请入群事件"),
+    #             Plain(f"\n邀请者：{invite.supplicant} | {invite.nickname}"),
+    #             Plain(f"\n群号：{invite.groupId}"),
+    #             Plain(f"\n群名：{invite.groupName}"),
+    #             Plain("\n\n已自动同意")
+    #         ]
+    #     ),
+    # )
 
 
-@channel.use(ListenerSchema(listening_events=[BotJoinGroupEvent]))
-async def get_BotJoinGroup(app: Ariadne, joingroup: BotJoinGroupEvent):
-    """
-    收到入群事件
-    """
-    if joingroup.group.id in group_list["black"]:
-        await safeSendGroupMessage(
-            joingroup.group.id,
-            MessageChain.create("该群已被拉黑，正在退出"),
-        )
-        await app.sendFriendMessage(
-            yaml_data["Basic"]["Permission"]["Master"],
-            MessageChain.create("该群已被拉黑，正在退出"),
-        )
-        return await app.quitGroup(joingroup.group.id)
+#         # @Waiter.create_using_function([FriendMessage])
+#         # async def waiter(waiter_friend: Friend, waiter_message: MessageChain):
+#         #     if waiter_friend.id == yaml_data["Basic"]["Permission"]["Master"]:
+#         #         saying = waiter_message.asDisplay()
+#         #         if saying == "同意":
+#         #             return True
+#         #         elif saying == "拒绝":
+#         #             return False
+#         #         else:
+#         #             await app.sendFriendMessage(
+#         #                 yaml_data["Basic"]["Permission"]["Master"],
+#         #                 MessageChain.create([Plain("请发送同意或拒绝")]),
+#         #             )
 
-    if yaml_data["Basic"]["Event"]["JoinGroup"]:
-        membernum = len(await app.getMemberList(joingroup.group))
-        await app.sendFriendMessage(
-            yaml_data["Basic"]["Permission"]["Master"],
-            MessageChain.create(
-                [
-                    Plain("收到加入群聊事件"),
-                    Plain(f"\n群号：{joingroup.group.id}"),
-                    Plain(f"\n群名：{joingroup.group.name}"),
-                    Plain(f"\n群人数：{membernum}"),
-                ]
-            ),
-        )
+#         # try:
+#         #     if await asyncio.wait_for(inc.wait(waiter), timeout=300):
+#         #         if invite.groupId not in group_list["white"]:
+#         #             group_list["white"].append(invite.groupId)
+#         #             save_config()
+#         #         await invite.accept()
+#         #         await app.sendFriendMessage(
+#         #             yaml_data["Basic"]["Permission"]["Master"],
+#         #             MessageChain.create([Plain("已同意申请并加入白名单")]),
+#         #         )
+#         #     else:
+#         #         await invite.reject("主人拒绝加入该群")
+#         #         await app.sendFriendMessage(
+#         #             yaml_data["Basic"]["Permission"]["Master"],
+#         #             MessageChain.create([Plain("已拒绝申请")]),
+#         #         )
 
-        if (
-            joingroup.group.id not in group_list["white"]
-            and not yaml_data["Basic"]["Permission"]["DefaultAcceptInvite"]
-        ):
-            await safeSendGroupMessage(
-                joingroup.group.id,
-                MessageChain.create(
-                    f"该群未在白名单中，正在退出，如有需要请联系 {yaml_data['Basic']['Permission']['Master']} 申请白名单"
-                ),
-            )
-            await app.sendFriendMessage(
-                yaml_data["Basic"]["Permission"]["Master"],
-                MessageChain.create("该群未在白名单中，正在退出"),
-            )
-            return await app.quitGroup(joingroup.group.id)
-        if joingroup.group.id not in group_data:
-            group_data[str(joingroup.group.id)] = groupInitData
-            logger.info("已为该群初始化配置文件")
-            save_config()
-            await safeSendGroupMessage(
-                joingroup.group.id,
-                MessageChain.create(
-                    "欢迎添加千音，关于详细功能请前往\nhttps://yuasds.gitbook.io/yin_book\n查看使用手册"
-                ),
-            )
-            await safeSendGroupMessage(
-                joingroup.group.id,
-                MessageChain.create(
-                    Image(data_bytes=await create_image(Agreement["Agreement"]))
-                ),
-            )
+#         # except asyncio.TimeoutError:
+#         #     if yaml_data["Basic"]["Permission"]["DefaultAcceptInvite"]:
+#         #         if invite.groupId not in group_list["white"]:
+#         #             group_list["white"].append(invite.groupId)
+#         #             save_config()
+#         #         await invite.accept()
+#         #         await app.sendFriendMessage(
+#         #             yaml_data["Basic"]["Permission"]["Master"],
+#         #             MessageChain.create([Plain("已同意申请并加入白名单")]),
+#         #         )
+#         #     else:
+#         #         await invite.reject("由于主人长时间未审核，已自动拒绝")
+#         #         await app.sendFriendMessage(
+#         #             yaml_data["Basic"]["Permission"]["Master"],
+#         #             MessageChain.create([Plain("申请超时已自动拒绝")]),
+#         #         )
+
+
+# @channel.use(ListenerSchema(listening_events=[BotJoinGroupEvent]))
+# async def get_BotJoinGroup(app: Ariadne, joingroup: BotJoinGroupEvent):
+#     """
+#     收到入群事件
+#     """
+#     if joingroup.group.id in group_list["black"]:
+#         await safeSendGroupMessage(
+#             joingroup.group.id,
+#             MessageChain.create("该群已被拉黑，正在退出"),
+#         )
+#         await app.sendFriendMessage(
+#             yaml_data["Basic"]["Permission"]["Master"],
+#             MessageChain.create("该群已被拉黑，正在退出"),
+#         )
+#         return await app.quitGroup(joingroup.group.id)
+
+#     if yaml_data["Basic"]["Event"]["JoinGroup"]:
+#         membernum = len(await app.getMemberList(joingroup.group))
+#         await app.sendFriendMessage(
+#             yaml_data["Basic"]["Permission"]["Master"],
+#             MessageChain.create(
+#                 [
+#                     Plain("收到加入群聊事件"),
+#                     Plain(f"\n群号：{joingroup.group.id}"),
+#                     Plain(f"\n群名：{joingroup.group.name}"),
+#                     Plain(f"\n群人数：{membernum}"),
+#                 ]
+#             ),
+#         )
+
+#         if (
+#             joingroup.group.id not in group_list["white"]
+#             and not yaml_data["Basic"]["Permission"]["DefaultAcceptInvite"]
+#         ):
+#             await safeSendGroupMessage(
+#                 joingroup.group.id,
+#                 MessageChain.create(
+#                     f"该群未在白名单中，正在退出，如有需要请联系 {yaml_data['Basic']['Permission']['Master']} 申请白名单"
+#                 ),
+#             )
+#             await app.sendFriendMessage(
+#                 yaml_data["Basic"]["Permission"]["Master"],
+#                 MessageChain.create("该群未在白名单中，正在退出"),
+#             )
+#             return await app.quitGroup(joingroup.group.id)
+#         if joingroup.group.id not in group_data:
+#             group_data[str(joingroup.group.id)] = groupInitData
+#             logger.info("已为该群初始化配置文件")
+#             save_config()
+#             await safeSendGroupMessage(
+#                 joingroup.group.id,
+#                 MessageChain.create(
+#                     "欢迎添加千音，关于详细功能请前往\nhttps://yuasds.gitbook.io/yin_book\n查看使用手册"
+#                 ),
+#             )
+#             await safeSendGroupMessage(
+#                 joingroup.group.id,
+#                 MessageChain.create(
+#                     Image(data_bytes=await create_image(Agreement["Agreement"]))
+#                 ),
+#             )
 
 
 @channel.use(ListenerSchema(listening_events=[BotLeaveEventKick]))
