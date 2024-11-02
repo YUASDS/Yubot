@@ -20,10 +20,12 @@ async def get_reply(msg: str, qq: int) -> tuple[bool, list[str]]:
     match = re.compile(re_key_word)
     matched = match.findall(msg)
     order = matched[0][1] if matched else None
-    if order is None:  # 如果这条回复不是指令
+    if not msg:
         if random.random() > 0.5:
             return False, [""]
         return True, [random.choice(other_data["回复"])]
+    if order is None:  # 如果这条回复不是指令
+        return False, [""]
     if not favor_data.get(order):
         return False, [""]
     if order in greet_order:
