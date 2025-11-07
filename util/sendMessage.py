@@ -5,6 +5,7 @@ from graia.ariadne import Ariadne
 from typing import Optional, Union, Iterable
 from graia.ariadne import get_running
 from graia.ariadne.exception import UnknownTarget
+from graia.ariadne.event.message import MessageEvent
 from graia.ariadne.model import BotMessage, Group, Member, Friend, Client, Stranger
 from graia.ariadne.message.chain import MessageChain
 from graia.ariadne.message.element import (
@@ -93,20 +94,22 @@ async def autoForwMessage(
         message = [
             message,
         ]
-
+    message = [i for i in message if i]
     fwd_nodeList = [
-        ForwardNode(
-            target=target,
-            time=datetime.now(),
-            message=i,
-            name=name,
-        )
-        if isinstance(i, MessageChain)
-        else ForwardNode(
-            target=target,
-            time=datetime.now(),
-            message=MessageChain.create(i),
-            name=name,
+        (
+            ForwardNode(
+                target=target,
+                time=datetime.now(),
+                message=i,
+                name=name,
+            )
+            if isinstance(i, MessageChain)
+            else ForwardNode(
+                target=target,
+                time=datetime.now(),
+                message=MessageChain.create(i),
+                name=name,
+            )
         )
         for i in message
     ]
@@ -116,3 +119,16 @@ async def autoForwMessage(
 
 def get_name(taget: Union[Member, Friend, Group]) -> str:
     return taget.nickname if isinstance(taget, Friend) else taget.name
+
+
+async def get_friend_by_id(id: int) -> Optional[Friend]:
+    app: Ariadne = get_running()
+    return await app.getFriend(id)
+
+
+def get_group_user_id(event: MessageEvent) -> str:
+    return (
+        str(event.sender.group.id)
+        if isinstance(event.sender, Member)
+        else str(event.sender.id)
+    )
