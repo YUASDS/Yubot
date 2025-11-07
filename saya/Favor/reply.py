@@ -13,6 +13,8 @@ other_data: dict = ujson.loads(
 )
 re_key_word = f'([\\s\\S])*({"|".join(list(favor_data))})([\\s\\S])*'
 
+black_word = ["觉得", "怎么样"]
+
 
 async def get_reply(msg: str, qq: int) -> tuple[bool, list[str]]:
     if msg == "亲和":
@@ -20,6 +22,9 @@ async def get_reply(msg: str, qq: int) -> tuple[bool, list[str]]:
     match = re.compile(re_key_word)
     matched = match.findall(msg)
     order = matched[0][1] if matched else None
+    for word in black_word:
+        if word in msg:
+            return False, [""]
     if not msg:
         if random.random() > 0.5:
             return False, [""]
